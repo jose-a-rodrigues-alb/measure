@@ -68,6 +68,8 @@ import sh.measure.android.storage.FileStorage
 import sh.measure.android.storage.FileStorageImpl
 import sh.measure.android.storage.PrefsStorage
 import sh.measure.android.storage.PrefsStorageImpl
+import sh.measure.android.tracing.MsrTracer
+import sh.measure.android.tracing.Tracer
 import sh.measure.android.utils.AndroidSystemClock
 import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.DebugProvider
@@ -355,6 +357,11 @@ internal class MeasureInitializerImpl(
         sessionManager = sessionManager,
         configProvider = configProvider,
     ),
+    override val tracer: Tracer = MsrTracer(
+        logger = logger,
+        idProvider = idProvider,
+        timeProvider = timeProvider,
+    ),
 ) : MeasureInitializer
 
 internal interface MeasureInitializer {
@@ -384,4 +391,5 @@ internal interface MeasureInitializer {
     val screenshotCollector: ScreenshotCollector
     val dataCleanupService: DataCleanupService
     val processInfoProvider: ProcessInfoProvider
+    val tracer: Tracer
 }
