@@ -34,8 +34,8 @@ internal class MsrSpan(
             timestamp: Long? = null,
         ): Span {
             val startTime = timestamp ?: timeProvider.now()
-            val spanId: String = idProvider.createId()
-            val traceId = parentSpan?.traceId ?: idProvider.createId()
+            val spanId: String = idProvider.spanId()
+            val traceId = parentSpan?.traceId ?: idProvider.traceId()
             return MsrSpan(
                 logger = logger,
                 timeProvider = timeProvider,

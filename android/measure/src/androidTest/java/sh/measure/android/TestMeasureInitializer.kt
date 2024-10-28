@@ -71,6 +71,7 @@ import sh.measure.android.utils.DebugProvider
 import sh.measure.android.utils.DefaultDebugProvider
 import sh.measure.android.utils.DefaultRuntimeProvider
 import sh.measure.android.utils.IdProvider
+import sh.measure.android.utils.IdProviderImpl
 import sh.measure.android.utils.LocaleProvider
 import sh.measure.android.utils.LocaleProviderImpl
 import sh.measure.android.utils.LowMemoryCheck
@@ -89,7 +90,6 @@ import sh.measure.android.utils.RuntimeProvider
 import sh.measure.android.utils.SystemServiceProvider
 import sh.measure.android.utils.SystemServiceProviderImpl
 import sh.measure.android.utils.TimeProvider
-import sh.measure.android.utils.UUIDProvider
 
 internal class TestMeasureInitializer(
     private val application: Application,
@@ -122,7 +122,7 @@ internal class TestMeasureInitializer(
         logger = logger,
         fileStorage = fileStorage,
     ),
-    private val idProvider: IdProvider = UUIDProvider(),
+    private val idProvider: IdProvider = IdProviderImpl(),
     override val processInfoProvider: ProcessInfoProvider = ProcessInfoProviderImpl(),
     private val prefsStorage: PrefsStorage = PrefsStorageImpl(
         context = application,

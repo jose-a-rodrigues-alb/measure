@@ -66,7 +66,7 @@ internal class BatchCreatorImpl(
                 return null
             }
 
-            val batchId = idProvider.createId()
+            val batchId = idProvider.uuid()
             val batchInsertionResult = database.insertBatch(
                 BatchEntity(
                     batchId = batchId,

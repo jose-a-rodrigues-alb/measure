@@ -4,11 +4,12 @@ import org.junit.Assert
 import org.junit.Test
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.utils.AndroidTimeProvider
+import sh.measure.android.utils.IdProviderImpl
+import sh.measure.android.utils.RandomizerImpl
 import sh.measure.android.utils.TestClock
-import sh.measure.android.utils.UUIDProvider
 
 class SpanStorageTest {
-    private val idProvider = UUIDProvider()
+    private val idProvider = IdProviderImpl(RandomizerImpl())
     private val testClock = TestClock.create()
     private val timeProvider = AndroidTimeProvider(testClock)
     private val logger = NoopLogger()

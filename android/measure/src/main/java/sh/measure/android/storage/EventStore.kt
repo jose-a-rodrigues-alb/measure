@@ -163,7 +163,7 @@ internal class EventStoreImpl(
             return null
         }
         val attachmentEntities = attachments.mapNotNull { attachment ->
-            val id = idProvider.createId()
+            val id = idProvider.uuid()
             when {
                 attachment.path != null -> {
                     AttachmentEntity(

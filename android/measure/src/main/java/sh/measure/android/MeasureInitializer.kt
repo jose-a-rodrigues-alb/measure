@@ -76,6 +76,7 @@ import sh.measure.android.utils.DebugProvider
 import sh.measure.android.utils.DefaultDebugProvider
 import sh.measure.android.utils.DefaultRuntimeProvider
 import sh.measure.android.utils.IdProvider
+import sh.measure.android.utils.IdProviderImpl
 import sh.measure.android.utils.LocaleProvider
 import sh.measure.android.utils.LocaleProviderImpl
 import sh.measure.android.utils.LowMemoryCheck
@@ -88,13 +89,14 @@ import sh.measure.android.utils.ProcProvider
 import sh.measure.android.utils.ProcProviderImpl
 import sh.measure.android.utils.ProcessInfoProvider
 import sh.measure.android.utils.ProcessInfoProviderImpl
+import sh.measure.android.utils.Randomizer
+import sh.measure.android.utils.RandomizerImpl
 import sh.measure.android.utils.ResumedActivityProvider
 import sh.measure.android.utils.ResumedActivityProviderImpl
 import sh.measure.android.utils.RuntimeProvider
 import sh.measure.android.utils.SystemServiceProvider
 import sh.measure.android.utils.SystemServiceProviderImpl
 import sh.measure.android.utils.TimeProvider
-import sh.measure.android.utils.UUIDProvider
 
 internal class MeasureInitializerImpl(
     private val application: Application,
@@ -121,13 +123,14 @@ internal class MeasureInitializerImpl(
         rootDir = application.filesDir.path,
         logger = logger,
     ),
+    private val randomizer: Randomizer = RandomizerImpl(),
     private val database: Database = DatabaseImpl(context = application, logger = logger),
     override val manifestReader: ManifestReaderImpl = ManifestReaderImpl(application, logger),
     override val networkClient: NetworkClient = NetworkClientImpl(
         logger = logger,
         fileStorage = fileStorage,
     ),
-    private val idProvider: IdProvider = UUIDProvider(),
+    private val idProvider: IdProvider = IdProviderImpl(randomizer),
     override val processInfoProvider: ProcessInfoProvider = ProcessInfoProviderImpl(),
     private val prefsStorage: PrefsStorage = PrefsStorageImpl(
         logger = logger,
@@ -144,6 +147,7 @@ internal class MeasureInitializerImpl(
         processInfo = processInfoProvider,
         configProvider = configProvider,
         packageInfoProvider = packageInfoProvider,
+        randomizer = randomizer,
     ),
     private val procProvider: ProcProvider = ProcProviderImpl(),
     private val debugProvider: DebugProvider = DefaultDebugProvider(),

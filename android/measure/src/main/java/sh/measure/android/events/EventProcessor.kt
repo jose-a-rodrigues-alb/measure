@@ -233,7 +233,7 @@ internal class EventProcessorImpl(
         userTriggered: Boolean,
         sessionId: String? = null,
     ): Event<T> {
-        val id = idProvider.createId()
+        val id = idProvider.uuid()
         val resolvedSessionId = sessionId ?: sessionManager.getSessionId()
         return Event(
             id = id,
