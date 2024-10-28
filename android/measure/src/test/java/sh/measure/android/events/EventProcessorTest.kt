@@ -474,4 +474,14 @@ internal class EventProcessorTest {
         // Then
         assertTrue(sessionManager.onEventTracked)
     }
+
+    @Test
+    fun `trackSpan stores span`() {
+        // When
+        val spanData = TestData.getSpanData()
+        eventProcessor.trackSpan(spanData)
+
+        // Then
+        assertTrue(eventStore.trackedSpans.contains(spanData))
+    }
 }

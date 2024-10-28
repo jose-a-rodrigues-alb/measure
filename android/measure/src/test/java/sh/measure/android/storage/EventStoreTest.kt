@@ -74,6 +74,15 @@ internal class EventStoreTest {
     }
 
     @Test
+    fun `stores span`() {
+        val spanData = TestData.getSpanData()
+        val sessionId = "session-id"
+        eventStore.store(spanData, sessionId)
+
+        verify(database).insertSpan(sessionId, spanData)
+    }
+
+    @Test
     fun `given http event contains request body, stores it in file storage and stores the path in database`() {
         // given
         val httpData =

@@ -8,6 +8,7 @@ internal object DbConstants {
 internal object DbVersion {
     const val V1 = 1
     const val V2 = 2
+    const val V3 = 3
 }
 
 internal object EventTable {
@@ -62,6 +63,19 @@ internal object AppExitTable {
     const val COL_SESSION_ID = "session_id"
     const val COL_PID = "pid"
     const val COL_CREATED_AT = "created_at"
+}
+
+internal object SpansTable {
+    const val TABLE_NAME = "spans"
+    const val COL_NAME = "name"
+    const val COL_SESSION_ID = "session_id"
+    const val COL_SPAN_ID = "span_id"
+    const val COL_TRACE_ID = "trace_id"
+    const val COL_PARENT_ID = "parent_id"
+    const val COL_START_TIME = "start_time"
+    const val COL_END_TIME = "end_time"
+    const val COL_DURATION = "duration"
+    const val COL_STATUS = "status"
 }
 
 internal object UserDefinedAttributesTable {
@@ -141,6 +155,20 @@ internal object Sql {
             ${AppExitTable.COL_PID} INTEGER NOT NULL,
             ${AppExitTable.COL_CREATED_AT} INTEGER NOT NULL,
             PRIMARY KEY (${AppExitTable.COL_SESSION_ID}, ${AppExitTable.COL_PID})
+        )
+    """
+
+    const val CREATE_SPANS_TABLE = """
+        CREATE TABLE IF NOT EXISTS ${SpansTable.TABLE_NAME} (
+            ${SpansTable.COL_SPAN_ID} TEXT NOT NULL PRIMARY KEY,
+            ${SpansTable.COL_NAME} TEXT NOT NULL,
+            ${SpansTable.COL_SESSION_ID} TEXT NOT NULL,
+            ${SpansTable.COL_TRACE_ID} TEXT NOT NULL,
+            ${SpansTable.COL_PARENT_ID} TEXT,
+            ${SpansTable.COL_START_TIME} INTEGER NOT NULL,
+            ${SpansTable.COL_END_TIME} INTEGER NOT NULL,
+            ${SpansTable.COL_DURATION} INTEGER NOT NULL,
+            ${SpansTable.COL_STATUS} TEXT NOT NULL
         )
     """
 

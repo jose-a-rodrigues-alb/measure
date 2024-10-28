@@ -68,7 +68,9 @@ import sh.measure.android.storage.FileStorage
 import sh.measure.android.storage.FileStorageImpl
 import sh.measure.android.storage.PrefsStorage
 import sh.measure.android.storage.PrefsStorageImpl
+import sh.measure.android.tracing.MsrSpanProcessor
 import sh.measure.android.tracing.MsrTracer
+import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.Tracer
 import sh.measure.android.utils.AndroidSystemClock
 import sh.measure.android.utils.AndroidTimeProvider
@@ -361,10 +363,13 @@ internal class MeasureInitializerImpl(
         sessionManager = sessionManager,
         configProvider = configProvider,
     ),
+    private val spanProcessor: SpanProcessor = MsrSpanProcessor(eventProcessor),
     override val tracer: Tracer = MsrTracer(
         logger = logger,
         idProvider = idProvider,
         timeProvider = timeProvider,
+        spanProcessor = spanProcessor,
+        sessionManager = sessionManager,
     ),
 ) : MeasureInitializer
 

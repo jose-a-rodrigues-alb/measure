@@ -59,6 +59,8 @@ class DatabaseTest {
             )
             it.moveToNext()
             assertEquals(AppExitTable.TABLE_NAME, it.getString(it.getColumnIndex("name")))
+            it.moveToNext()
+            assertEquals(SpansTable.TABLE_NAME, it.getString(it.getColumnIndex("name")))
         }
     }
 
@@ -879,6 +881,15 @@ class DatabaseTest {
     fun `getEventsCount returns 0 if no events in events table`() {
         val count = database.getEventsCount()
         assertEquals(0, count)
+    }
+
+    @Test
+    fun `insertSpan inserts span and returns success`() {
+        val result = database.insertSpan(
+            "session-id",
+            TestData.getSpanData(),
+        )
+        assertTrue(result)
     }
 
     private fun queryAllEvents(db: SQLiteDatabase): Cursor {

@@ -26,6 +26,11 @@ interface Span {
     val parentId: String?
 
     /**
+     * The session this span is a part of.
+     */
+    val sessionId: String
+
+    /**
      * The time since epoch when the span started.
      */
     val startTime: Long
@@ -76,7 +81,7 @@ interface Span {
     fun <T> withScope(block: () -> T): T
 
     /**
-     * The duration of the span once it ends. If the span has not ended, returns 0.
+     * The duration of the span in milliseconds once it ends. If the span has not ended, returns 0.
      */
     fun getDuration(): Long
 

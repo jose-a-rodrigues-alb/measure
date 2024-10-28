@@ -1,6 +1,6 @@
 package sh.measure.android.tracing
 
-import android.util.Log
+import sh.measure.android.SessionManager
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
 import sh.measure.android.utils.IdProvider
@@ -12,23 +12,26 @@ import sh.measure.android.utils.TimeProvider
 internal class MsrSpan(
     private val logger: Logger,
     private val timeProvider: TimeProvider,
+    private val spanProcessor: SpanProcessor,
     override val name: String,
     override val spanId: String,
     override val traceId: String,
     override val parentId: String?,
+    override val sessionId: String,
     override val startTime: Long,
-) : Span {
+) : Span, ReadableSpan {
     private val lock = Any()
     private var status = SpanStatus.Unset
     private var endTime = 0L
     private var hasEnded: EndState = EndState.NotEnded
-    private var duration: Long = 0
 
     companion object {
         fun startSpan(
             name: String,
             logger: Logger,
             timeProvider: TimeProvider,
+            spanProcessor: SpanProcessor,
+            sessionManager: SessionManager,
             idProvider: IdProvider,
             parentSpan: Span?,
             timestamp: Long? = null,
@@ -36,15 +39,20 @@ internal class MsrSpan(
             val startTime = timestamp ?: timeProvider.now()
             val spanId: String = idProvider.spanId()
             val traceId = parentSpan?.traceId ?: idProvider.traceId()
-            return MsrSpan(
+            val sessionId = sessionManager.getSessionId()
+            val span = MsrSpan(
                 logger = logger,
                 timeProvider = timeProvider,
+                spanProcessor = spanProcessor,
                 name = name,
                 spanId = spanId,
                 traceId = traceId,
                 parentId = parentSpan?.spanId,
+                sessionId = sessionId,
                 startTime = startTime,
             )
+            spanProcessor.onStart(span)
+            return span
         }
     }
 
@@ -84,14 +92,11 @@ internal class MsrSpan(
             endTime = timestamp
             hasEnded = EndState.Ending
         }
-
-        // trigger onEnding
+        spanProcessor.onEnding(this)
         synchronized(lock) {
             hasEnded = EndState.Ended
         }
-
-        // trigger onEnded
-        Log.i("MsrSpan", "${this.toSpanData()}")
+        spanProcessor.onEnded(this)
     }
 
     override fun makeCurrent(): Scope {
@@ -103,28 +108,43 @@ internal class MsrSpan(
     }
 
     override fun getDuration(): Long {
-        return duration
-    }
-
-    private enum class EndState {
-        NotEnded,
-        Ending,
-        Ended,
-    }
-
-    private fun toSpanData(): SpanData {
         synchronized(lock) {
-            this.duration = (endTime - startTime).coerceAtLeast(0)
+            if (hasEnded != EndState.Ended) {
+                logger.log(
+                    LogLevel.Warning,
+                    "Attempt to duration of a span($name) that has not ended",
+                )
+                return 0
+            } else {
+                return calculateDuration()
+            }
+        }
+    }
+
+    override fun toSpanData(): SpanData {
+        synchronized(lock) {
             return SpanData(
                 spanId = spanId,
+                traceId = traceId,
                 name = name,
                 startTime = startTime,
                 endTime = endTime,
                 status = status,
                 hasEnded = hasEnded == EndState.Ended,
                 parentId = parentId,
-                duration = duration,
+                sessionId = sessionId,
+                duration = calculateDuration(),
             )
         }
+    }
+
+    private fun calculateDuration(): Long {
+        return (endTime - startTime).coerceAtLeast(0)
+    }
+
+    private enum class EndState {
+        NotEnded,
+        Ending,
+        Ended,
     }
 }

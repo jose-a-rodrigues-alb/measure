@@ -2,6 +2,11 @@ package sh.measure.android.tracing
 
 import org.junit.Assert
 import org.junit.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.verify
+import sh.measure.android.fakes.FakeSessionManager
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.IdProviderImpl
@@ -14,22 +19,28 @@ class MsrSpanTest {
     private val testClock = TestClock.create()
     private val timeProvider = AndroidTimeProvider(testClock)
     private val idProvider = IdProviderImpl(randomizer = RandomizerImpl())
+    private val spanProcessor = mock<SpanProcessor>()
+    private val sessionManager = FakeSessionManager()
 
     @Test
     fun `startSpan sets parent span if provided`() {
         val parentSpan = MsrSpan(
-            logger,
-            timeProvider,
-            "parent-span",
-            "span-id",
-            "trace-id",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            name = "parent-span",
+            spanId = "span-id",
+            traceId = "trace-id",
             parentId = null,
+            sessionId = sessionManager.getSessionId(),
             startTime = 1000,
         )
         val span = MsrSpan.startSpan(
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = parentSpan,
             timestamp = null,
@@ -45,6 +56,8 @@ class MsrSpanTest {
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
             timestamp = null,
@@ -59,6 +72,8 @@ class MsrSpanTest {
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
             timestamp = timestamp,
@@ -67,11 +82,28 @@ class MsrSpanTest {
     }
 
     @Test
+    fun `startSpan triggers span processor onStart`() {
+        val span = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            idProvider = idProvider,
+            parentSpan = null,
+        )
+
+        verify(spanProcessor, times(1)).onStart(span as MsrSpan)
+    }
+
+    @Test
     fun `default span status is unset`() {
         val span = MsrSpan.startSpan(
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -84,6 +116,8 @@ class MsrSpanTest {
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
         ).setStatus(SpanStatus.Ok)
@@ -96,6 +130,8 @@ class MsrSpanTest {
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -108,6 +144,8 @@ class MsrSpanTest {
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
         ).end()
@@ -120,6 +158,8 @@ class MsrSpanTest {
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -130,11 +170,31 @@ class MsrSpanTest {
     }
 
     @Test
+    fun `end triggers span processor onEnding and onEnded`() {
+        val span = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            idProvider = idProvider,
+            parentSpan = null,
+        ).end() as MsrSpan
+
+        spanProcessor.inOrder {
+            verify().onEnding(span)
+            verify().onEnded(span)
+        }
+    }
+
+    @Test
     fun `duration is 0 for active span`() {
         val span = MsrSpan.startSpan(
             "span-name",
             logger = logger,
             timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
         )

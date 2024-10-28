@@ -9,11 +9,13 @@ import sh.measure.android.events.EventType
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
 import sh.measure.android.okhttp.HttpData
+import sh.measure.android.tracing.SpanData
 import sh.measure.android.utils.IdProvider
 import java.io.File
 
 internal interface EventStore {
     fun <T> store(event: Event<T>)
+    fun store(spanData: SpanData, sessionId: String)
 }
 
 /**
@@ -30,6 +32,13 @@ internal class EventStoreImpl(
     private val database: Database,
     private val idProvider: IdProvider,
 ) : EventStore {
+
+    override fun store(spanData: SpanData, sessionId: String) {
+        val result = database.insertSpan(sessionId, spanData)
+        if (!result) {
+            logger.log(LogLevel.Error, "Unable to store span(${spanData.name}) to database")
+        }
+    }
 
     override fun <T> store(event: Event<T>) {
         val serializedAttributes = event.serializeAttributes()

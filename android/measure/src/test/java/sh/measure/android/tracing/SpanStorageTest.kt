@@ -2,7 +2,9 @@ package sh.measure.android.tracing
 
 import org.junit.Assert
 import org.junit.Test
+import sh.measure.android.fakes.FakeSessionManager
 import sh.measure.android.fakes.NoopLogger
+import sh.measure.android.fakes.NoopSpanProcessor
 import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.IdProviderImpl
 import sh.measure.android.utils.RandomizerImpl
@@ -13,6 +15,8 @@ class SpanStorageTest {
     private val testClock = TestClock.create()
     private val timeProvider = AndroidTimeProvider(testClock)
     private val logger = NoopLogger()
+    private val spanProcessor = NoopSpanProcessor()
+    private val sessionManager = FakeSessionManager()
 
     @Test
     fun `current returns null by default`() {
@@ -21,7 +25,7 @@ class SpanStorageTest {
 
     @Test
     fun `makeCurrent sets span as current`() {
-        val span = MsrSpanBuilder("span-name", idProvider, timeProvider, logger).startSpan()
+        val span = MsrSpanBuilder("span-name", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
         val scope = span.makeCurrent()
         Assert.assertEquals(span, SpanStorage.instance.current())
         scope.close()
@@ -29,8 +33,8 @@ class SpanStorageTest {
 
     @Test
     fun `closing the scope resets the current span`() {
-        val spanA = MsrSpanBuilder("span-A", idProvider, timeProvider, logger).startSpan()
-        val spanB = MsrSpanBuilder("span-B", idProvider, timeProvider, logger).startSpan()
+        val spanA = MsrSpanBuilder("span-A", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
+        val spanB = MsrSpanBuilder("span-B", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
         val spanAScope = spanA.makeCurrent()
         val spanBScope = spanB.makeCurrent()
         Assert.assertEquals(spanB, SpanStorage.instance.current())

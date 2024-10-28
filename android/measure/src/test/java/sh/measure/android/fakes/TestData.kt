@@ -19,6 +19,7 @@ import sh.measure.android.lifecycle.AppLifecycleType
 import sh.measure.android.lifecycle.ApplicationLifecycleData
 import sh.measure.android.lifecycle.FragmentLifecycleData
 import sh.measure.android.lifecycle.FragmentLifecycleType
+import sh.measure.android.logger.Logger
 import sh.measure.android.navigation.NavigationData
 import sh.measure.android.navigation.ScreenViewData
 import sh.measure.android.networkchange.NetworkChangeData
@@ -31,6 +32,11 @@ import sh.measure.android.storage.AttachmentEntity
 import sh.measure.android.storage.BatchEntity
 import sh.measure.android.storage.EventEntity
 import sh.measure.android.storage.SessionEntity
+import sh.measure.android.tracing.MsrSpan
+import sh.measure.android.tracing.SpanData
+import sh.measure.android.tracing.SpanProcessor
+import sh.measure.android.tracing.SpanStatus
+import sh.measure.android.utils.TimeProvider
 
 internal object TestData {
 
@@ -442,5 +448,44 @@ internal object TestData {
 
     fun getScreenViewData(): ScreenViewData {
         return ScreenViewData(name = "screen-name")
+    }
+
+    fun getSpanData(): SpanData {
+        return SpanData(
+            name = "span-name",
+            traceId = "trace-id",
+            spanId = "span-id",
+            parentId = "parent-id",
+            sessionId = "session-id",
+            startTime = 1000L,
+            endTime = 2000L,
+            duration = 1000L,
+            status = SpanStatus.Ok,
+            hasEnded = true,
+        )
+    }
+
+    fun getSpan(
+        logger: Logger,
+        timeProvider: TimeProvider,
+        spanProcessor: SpanProcessor,
+        name: String = "span-name",
+        spanId: String = "span-id",
+        traceId: String = "trace-id",
+        parentId: String? = null,
+        sessionId: String = "session-id",
+        startTime: Long = 987654321L,
+    ): MsrSpan {
+        return MsrSpan(
+            logger,
+            timeProvider,
+            spanProcessor,
+            name,
+            spanId,
+            traceId,
+            parentId,
+            sessionId,
+            startTime,
+        )
     }
 }

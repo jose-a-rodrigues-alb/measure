@@ -14,6 +14,7 @@ import sh.measure.android.logger.Logger
 import sh.measure.android.screenshot.ScreenshotCollector
 import sh.measure.android.storage.EventStore
 import sh.measure.android.tracing.InternalTrace
+import sh.measure.android.tracing.SpanData
 import sh.measure.android.utils.IdProvider
 import sh.measure.android.utils.iso8601Timestamp
 import java.util.concurrent.RejectedExecutionException
@@ -87,6 +88,8 @@ internal interface EventProcessor {
         attributes: MutableMap<String, Any?> = mutableMapOf(),
         attachments: MutableList<Attachment> = mutableListOf(),
     )
+
+    fun trackSpan(spanData: SpanData)
 }
 
 internal class EventProcessorImpl(
@@ -164,6 +167,13 @@ internal class EventProcessorImpl(
             exceptionExporter.export(event.sessionId)
             logger.log(LogLevel.Debug, "Event processed: $type, ${event.sessionId}")
         } ?: logger.log(LogLevel.Debug, "Event dropped: $type")
+    }
+
+    override fun trackSpan(spanData: SpanData) {
+        ioExecutor.submit {
+            eventStore.store(spanData, sessionManager.getSessionId())
+            logger.log(LogLevel.Info, "Span processed: ${spanData.name}")
+        }
     }
 
     private fun <T> track(

@@ -6,6 +6,9 @@ internal class InvalidSpan : Span {
     override val name: String = "invalid"
 
     override val parentId: String? = null
+
+    override val sessionId: String = ""
+
     override val startTime: Long = 0
 
     override fun getStatus(): SpanStatus {

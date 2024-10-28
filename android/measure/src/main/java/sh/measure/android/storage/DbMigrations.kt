@@ -13,6 +13,7 @@ internal object DbMigrations {
                 for (version in oldVersion + 1..newVersion) {
                     when (version) {
                         DbVersion.V2 -> migrateToV2(db)
+                        DbVersion.V3 -> migrateToV3(db)
                         else -> logger.log(
                             LogLevel.Warning,
                             "No migration found for version $version",
@@ -39,5 +40,9 @@ internal object DbMigrations {
             WHERE ${SessionsTable.COL_APP_EXIT_TRACKED} = 0;
             """.trimIndent(),
         )
+    }
+
+    private fun migrateToV3(db: SQLiteDatabase) {
+        db.execSQL(Sql.CREATE_SPANS_TABLE)
     }
 }

@@ -11,6 +11,7 @@ import sh.measure.android.exporter.AttachmentPacket
 import sh.measure.android.exporter.EventPacket
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
+import sh.measure.android.tracing.SpanData
 import java.io.Closeable
 
 internal interface Database : Closeable {
@@ -196,6 +197,11 @@ internal interface Database : Closeable {
      * Clears app exit for sessions which happened before the given [timestamp].
      */
     fun clearAppExitSessionsBefore(timestamp: Long)
+
+    /**
+     * Inserts a span into span table.
+     */
+    fun insertSpan(sessionId: String, spanData: SpanData): Boolean
 }
 
 /**
@@ -215,6 +221,7 @@ internal class DatabaseImpl(
             db.execSQL(Sql.CREATE_EVENTS_BATCH_TABLE)
             db.execSQL(Sql.CREATE_USER_DEFINED_ATTRIBUTES_TABLE)
             db.execSQL(Sql.CREATE_APP_EXIT_TABLE)
+            db.execSQL(Sql.CREATE_SPANS_TABLE)
             db.execSQL(Sql.CREATE_EVENTS_TIMESTAMP_INDEX)
             db.execSQL(Sql.CREATE_EVENTS_SESSION_ID_INDEX)
             db.execSQL(Sql.CREATE_EVENTS_BATCH_EVENT_ID_INDEX)
@@ -829,6 +836,26 @@ internal class DatabaseImpl(
             arrayOf(timestamp.toString()),
         )
         logger.log(LogLevel.Debug, "Cleared $result app_exit rows")
+    }
+
+    override fun insertSpan(sessionId: String, spanData: SpanData): Boolean {
+        val values = ContentValues().apply {
+            put(SpansTable.COL_NAME, spanData.name)
+            put(SpansTable.COL_SESSION_ID, sessionId)
+            put(SpansTable.COL_SPAN_ID, spanData.spanId)
+            put(SpansTable.COL_TRACE_ID, spanData.traceId)
+            put(SpansTable.COL_PARENT_ID, spanData.parentId)
+            put(SpansTable.COL_START_TIME, spanData.startTime)
+            put(SpansTable.COL_END_TIME, spanData.endTime)
+            put(SpansTable.COL_DURATION, spanData.duration)
+            put(SpansTable.COL_STATUS, spanData.status.name)
+        }
+        val result = writableDatabase.insert(
+            SpansTable.TABLE_NAME,
+            null,
+            values,
+        )
+        return result != -1L
     }
 
     override fun getAttachmentsForEvents(events: List<String>): List<String> {
