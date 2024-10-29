@@ -19,6 +19,10 @@ internal class InvalidSpan : Span {
         return this
     }
 
+    override fun setParent(parentSpan: Span): Span {
+        return this
+    }
+
     override fun end(): Span {
         return this
     }

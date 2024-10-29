@@ -16,7 +16,7 @@ internal class MsrSpan(
     override val name: String,
     override val spanId: String,
     override val traceId: String,
-    override val parentId: String?,
+    override var parentId: String?,
     override val sessionId: String,
     override val startTime: Long,
 ) : Span, ReadableSpan {
@@ -62,7 +62,22 @@ internal class MsrSpan(
 
     override fun setStatus(status: SpanStatus): Span {
         synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
             this.status = status
+        }
+        return this
+    }
+
+    override fun setParent(parentSpan: Span): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.parentId = parentSpan.spanId
         }
         return this
     }

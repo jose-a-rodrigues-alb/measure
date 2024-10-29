@@ -46,6 +46,11 @@ interface Span {
     fun setStatus(status: SpanStatus): Span
 
     /**
+     * Updates the parent span to [parentSpan].
+     */
+    fun setParent(parentSpan: Span): Span
+
+    /**
      * Ends the span.
      *
      * A span can only be ended once. Attempt to end an already ended span is no-op.
