@@ -25,7 +25,9 @@ class SpanStorageTest {
 
     @Test
     fun `makeCurrent sets span as current`() {
-        val span = MsrSpanBuilder("span-name", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
+        val span = MsrSpanBuilder(
+            "span-name", idProvider, timeProvider, spanProcessor, sessionManager, logger
+        ).startSpan()
         val scope = span.makeCurrent()
         Assert.assertEquals(span, SpanStorage.instance.current())
         scope.close()
@@ -33,8 +35,12 @@ class SpanStorageTest {
 
     @Test
     fun `closing the scope resets the current span`() {
-        val spanA = MsrSpanBuilder("span-A", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
-        val spanB = MsrSpanBuilder("span-B", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
+        val spanA = MsrSpanBuilder(
+            "span-A", idProvider, timeProvider, spanProcessor, sessionManager, logger
+        ).startSpan()
+        val spanB = MsrSpanBuilder(
+            "span-B", idProvider, timeProvider, spanProcessor, sessionManager, logger
+        ).startSpan()
         val spanAScope = spanA.makeCurrent()
         val spanBScope = spanB.makeCurrent()
         Assert.assertEquals(spanB, SpanStorage.instance.current())
@@ -42,5 +48,54 @@ class SpanStorageTest {
         Assert.assertEquals(spanA, SpanStorage.instance.current())
         spanAScope.close()
         Assert.assertEquals(null, SpanStorage.instance.current())
+    }
+
+    @Test
+    fun `closing scope out of order ignores the request`() {
+        val spanA = MsrSpanBuilder(
+            "span-A", idProvider, timeProvider, spanProcessor, sessionManager, logger
+        ).startSpan()
+        val spanB = MsrSpanBuilder(
+            "span-B", idProvider, timeProvider, spanProcessor, sessionManager, logger
+        ).startSpan()
+        val spanC = MsrSpanBuilder(
+            "span-C", idProvider, timeProvider, spanProcessor, sessionManager, logger
+        ).startSpan()
+
+        val scopeA = spanA.makeCurrent()
+        val scopeB = spanB.makeCurrent()
+        val scopeC = spanC.makeCurrent()
+
+        Assert.assertEquals(spanC, SpanStorage.instance.current())
+
+        // closing scopeB will be ignored as it's not the current span.
+        scopeB.close()
+        Assert.assertEquals(spanC, SpanStorage.instance.current())
+
+        // closing scopeC will work as expected, making spanB the current span.
+        scopeC.close()
+        Assert.assertEquals(spanB, SpanStorage.instance.current())
+
+        // closing scopeB will work as expected, making spanA the current span.
+        scopeB.close()
+        Assert.assertEquals(spanA, SpanStorage.instance.current())
+
+        // closing scopeB will work as expected, making spanA the current span.
+        scopeA.close()
+        Assert.assertNull(SpanStorage.instance.current())
+    }
+
+    @Test
+    fun `making same span current multiple times creates new scopes`() {
+        val span = MsrSpanBuilder("span-name", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
+        val scope1 = span.makeCurrent()
+        val scope2 = span.makeCurrent()
+
+        Assert.assertEquals(span, SpanStorage.instance.current())
+        scope2.close()
+        // Still current because of scope1
+        Assert.assertEquals(span, SpanStorage.instance.current())
+        scope1.close()
+        Assert.assertNull(SpanStorage.instance.current())
     }
 }
