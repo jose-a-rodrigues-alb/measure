@@ -49,9 +49,7 @@ internal class LifecycleTracker(
         val type: Type,
     ) {
         enum class Type {
-            Click,
-            LongClick,
-            Scroll,
+            Click, LongClick, Scroll,
         }
     }
 
@@ -139,7 +137,12 @@ internal class LifecycleTracker(
             launchInProgress = false
             launchType = computeLaunchType(activityInfo)
         }
+        registerFirstFrameDrawn(activity, identityHash, launchType)
+    }
 
+    private fun registerFirstFrameDrawn(
+        activity: Activity, identityHash: String, launchType: String?
+    ) {
         activity.window.onNextDraw {
             mainHandler.postAtFrontOfQueueAsync {
                 val firstFrameDrawnTime = timeProvider.now()
@@ -158,7 +161,8 @@ internal class LifecycleTracker(
                                 internalTracer.startSpan(
                                     "cold_launch.ttid",
                                     startTime = convertToEpochTime(startTime),
-                                ).setParent(startupSpan).end()
+                                ).setParent(startupSpan).setAttribute("launchType", launchType)
+                                    .end()
                             }
                         }
                     }
@@ -173,7 +177,8 @@ internal class LifecycleTracker(
                         getAppStartTime()?.let { startTime ->
                             appStartupSpan?.let { startupSpan ->
                                 internalTracer.startSpan("warm_launch.ttid", startTime = startTime)
-                                    .setParent(startupSpan).end()
+                                    .setAttribute("launchType", launchType).setParent(startupSpan)
+                                    .end()
                             }
                         }
                     }
@@ -190,7 +195,7 @@ internal class LifecycleTracker(
                                 "warm_launch.ttid",
                                 startTime = it,
                                 setNoParent = true,
-                            ).end()
+                            ).setAttribute("launchType", launchType).end()
                         }
                     }
 
@@ -207,7 +212,7 @@ internal class LifecycleTracker(
                                 startTime = it,
                                 setNoParent = true,
                             )
-                        }?.end()
+                        }?.setAttribute("launchType", launchType)?.end()
                     }
 
                     else -> {
