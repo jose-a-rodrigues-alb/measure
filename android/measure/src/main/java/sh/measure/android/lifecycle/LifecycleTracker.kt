@@ -37,9 +37,9 @@ internal class LifecycleTracker(
         val firstInteraction: Interaction? = null,
         val sameMessage: Boolean,
         val hasSavedState: Boolean,
-        val spanScope: Scope? = null,
+        val currentActivitySpanScope: Scope? = null,
         val launchType: String? = null,
-        val span: Span? = null,
+        val currentActivitySpan: Span? = null,
     )
 
     private data class Interaction(
@@ -115,8 +115,8 @@ internal class LifecycleTracker(
         startedActivities += identityHash
 
         createdActivities[identityHash]?.copy(
-            spanScope = currentActivityScope,
-            span = currentActivitySpan,
+            currentActivitySpanScope = currentActivityScope,
+            currentActivitySpan = currentActivitySpan,
         )?.let {
             createdActivities[identityHash] = it
         }
@@ -234,8 +234,8 @@ internal class LifecycleTracker(
     override fun onActivityPaused(activity: Activity) {
         val identityHash = Integer.toHexString(System.identityHashCode(activity))
         resumedActivities.remove(identityHash)
-        createdActivities[identityHash]?.span?.end()
-        createdActivities[identityHash]?.spanScope?.close()
+        createdActivities[identityHash]?.currentActivitySpan?.end()
+        createdActivities[identityHash]?.currentActivitySpanScope?.close()
     }
 
     override fun onActivityStopped(activity: Activity) {
