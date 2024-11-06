@@ -11,7 +11,6 @@ import sh.measure.android.exporter.AttachmentPacket
 import sh.measure.android.exporter.EventPacket
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
-import sh.measure.android.tracing.SpanData
 import java.io.Closeable
 
 internal interface Database : Closeable {
@@ -201,7 +200,7 @@ internal interface Database : Closeable {
     /**
      * Inserts a span into span table.
      */
-    fun insertSpan(sessionId: String, spanData: SpanData): Boolean
+    fun insertSpan(spanEntity: SpanEntity): Boolean
 }
 
 /**
@@ -838,17 +837,20 @@ internal class DatabaseImpl(
         logger.log(LogLevel.Debug, "Cleared $result app_exit rows")
     }
 
-    override fun insertSpan(sessionId: String, spanData: SpanData): Boolean {
+    override fun insertSpan(spanEntity: SpanEntity): Boolean {
         val values = ContentValues().apply {
-            put(SpansTable.COL_NAME, spanData.name)
-            put(SpansTable.COL_SESSION_ID, sessionId)
-            put(SpansTable.COL_SPAN_ID, spanData.spanId)
-            put(SpansTable.COL_TRACE_ID, spanData.traceId)
-            put(SpansTable.COL_PARENT_ID, spanData.parentId)
-            put(SpansTable.COL_START_TIME, spanData.startTime)
-            put(SpansTable.COL_END_TIME, spanData.endTime)
-            put(SpansTable.COL_DURATION, spanData.duration)
-            put(SpansTable.COL_STATUS, spanData.status.name)
+            put(SpansTable.COL_NAME, spanEntity.name)
+            put(SpansTable.COL_SESSION_ID, spanEntity.sessionId)
+            put(SpansTable.COL_SPAN_ID, spanEntity.spanId)
+            put(SpansTable.COL_TRACE_ID, spanEntity.traceId)
+            put(SpansTable.COL_PARENT_ID, spanEntity.parentId)
+            put(SpansTable.COL_START_TIME, spanEntity.startTime)
+            put(SpansTable.COL_END_TIME, spanEntity.endTime)
+            put(SpansTable.COL_DURATION, spanEntity.duration)
+            put(SpansTable.COL_SERIALIZED_ATTRS, spanEntity.serializedAttributes)
+            put(SpansTable.COL_SERIALIZED_EVENTS, spanEntity.serializedEvents)
+            put(SpansTable.COL_STATUS, spanEntity.status.name)
+            put(SpansTable.COL_HAS_ENDED, spanEntity.hasEnded)
         }
         val result = writableDatabase.insert(
             SpansTable.TABLE_NAME,

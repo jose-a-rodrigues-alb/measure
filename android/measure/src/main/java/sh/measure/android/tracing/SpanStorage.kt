@@ -2,7 +2,6 @@ package sh.measure.android.tracing
 
 import android.util.Log
 
-
 /**
  * Stores current span as a thread local variable.
  */
@@ -33,7 +32,7 @@ internal class SpanStorage private constructor() {
             } else {
                 Log.i(
                     "MsrSpan",
-                    "Trying to close scope which does not represent current context. Ignoring the call."
+                    "Trying to close scope which does not represent current context. Ignoring the call.",
                 )
             }
         }

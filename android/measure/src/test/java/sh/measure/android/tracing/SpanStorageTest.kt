@@ -26,7 +26,12 @@ class SpanStorageTest {
     @Test
     fun `makeCurrent sets span as current`() {
         val span = MsrSpanBuilder(
-            "span-name", idProvider, timeProvider, spanProcessor, sessionManager, logger
+            "span-name",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger,
         ).startSpan()
         val scope = span.makeCurrent()
         Assert.assertEquals(span, SpanStorage.instance.current())
@@ -36,10 +41,20 @@ class SpanStorageTest {
     @Test
     fun `closing the scope resets the current span`() {
         val spanA = MsrSpanBuilder(
-            "span-A", idProvider, timeProvider, spanProcessor, sessionManager, logger
+            "span-A",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger,
         ).startSpan()
         val spanB = MsrSpanBuilder(
-            "span-B", idProvider, timeProvider, spanProcessor, sessionManager, logger
+            "span-B",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger,
         ).startSpan()
         val spanAScope = spanA.makeCurrent()
         val spanBScope = spanB.makeCurrent()
@@ -53,13 +68,28 @@ class SpanStorageTest {
     @Test
     fun `closing scope out of order ignores the request`() {
         val spanA = MsrSpanBuilder(
-            "span-A", idProvider, timeProvider, spanProcessor, sessionManager, logger
+            "span-A",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger,
         ).startSpan()
         val spanB = MsrSpanBuilder(
-            "span-B", idProvider, timeProvider, spanProcessor, sessionManager, logger
+            "span-B",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger,
         ).startSpan()
         val spanC = MsrSpanBuilder(
-            "span-C", idProvider, timeProvider, spanProcessor, sessionManager, logger
+            "span-C",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger,
         ).startSpan()
 
         val scopeA = spanA.makeCurrent()

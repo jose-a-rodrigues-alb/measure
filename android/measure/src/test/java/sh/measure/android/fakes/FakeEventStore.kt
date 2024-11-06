@@ -12,7 +12,7 @@ internal class FakeEventStore : EventStore {
         trackedEvents.add(event)
     }
 
-    override fun store(spanData: SpanData, sessionId: String) {
+    override fun store(spanData: SpanData) {
         trackedSpans.add(spanData)
     }
 }

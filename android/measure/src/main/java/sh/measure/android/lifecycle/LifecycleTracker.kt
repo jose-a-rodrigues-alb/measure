@@ -17,28 +17,6 @@ import sh.measure.android.tracing.Scope
 import sh.measure.android.tracing.Span
 import sh.measure.android.utils.TimeProvider
 
-internal data class Interaction(
-    val target: String,
-    val targetId: String?,
-    val timestamp: Long,
-    val type: Type,
-) {
-    enum class Type {
-        Click,
-        LongClick,
-        Scroll,
-    }
-}
-
-internal data class ActivityInfo(
-    val firstFrameDrawnTimestamp: Long? = null,
-    val firstInteraction: Interaction? = null,
-    val sameMessage: Boolean,
-    val hasSavedState: Boolean,
-    val spanScope: Scope? = null,
-    val span: Span? = null,
-)
-
 internal class LifecycleTracker(
     private val application: Application,
     private val timeProvider: TimeProvider,
@@ -53,6 +31,29 @@ internal class LifecycleTracker(
     private var transitionSpan: Span? = null
     private var appStartupSpan: Span? = null
     private var appStartupSpanScope: Scope? = null
+
+    private data class ActivityInfo(
+        val firstFrameDrawnTimestamp: Long? = null,
+        val firstInteraction: Interaction? = null,
+        val sameMessage: Boolean,
+        val hasSavedState: Boolean,
+        val spanScope: Scope? = null,
+        val launchType: String? = null,
+        val span: Span? = null,
+    )
+
+    private data class Interaction(
+        val target: String,
+        val targetId: String?,
+        val timestamp: Long,
+        val type: Type,
+    ) {
+        enum class Type {
+            Click,
+            LongClick,
+            Scroll,
+        }
+    }
 
     fun register() {
         application.registerActivityLifecycleCallbacks(this)
@@ -98,7 +99,11 @@ internal class LifecycleTracker(
 
     override fun onActivityStarted(activity: Activity) {
         val currentActivitySpan = internalTracer.startSpan("current_screen")
-        val currentActivityScope = currentActivitySpan.makeCurrent()
+        val currentActivityScope = if (appStartupSpanScope == null) {
+            currentActivitySpan.makeCurrent()
+        } else {
+            null
+        }
         val appWasInvisible = startedActivities.isEmpty()
         if (appWasInvisible) {
             if (!launchInProgress) {
@@ -123,6 +128,7 @@ internal class LifecycleTracker(
         val identityHash = Integer.toHexString(System.identityHashCode(activity))
         resumedActivities += identityHash
         var launchType: String? = null
+
         val activityInfo = createdActivities[identityHash]
         if (activityInfo == null) {
             launchInProgress = false
@@ -141,43 +147,67 @@ internal class LifecycleTracker(
                 when (launchType) {
                     "Cold" -> {
                         coldLaunchComplete = true
+                        val resumedActivity = getResumedActivity()
+                        resumedActivity?.let {
+                            createdActivities[resumedActivity]?.copy(launchType = "cold")?.let {
+                                createdActivities[resumedActivity] = it
+                            }
+                        }
                         getAppStartTime()?.let { startTime ->
                             appStartupSpan?.let { startupSpan ->
                                 internalTracer.startSpan(
                                     "cold_launch.ttid",
                                     startTime = convertToEpochTime(startTime),
-                                ).setParent(startupSpan)
+                                ).setParent(startupSpan).end()
                             }
-                        }?.end(timeProvider.now())
+                        }
                     }
 
                     "Lukewarm" -> {
+                        val resumedActivity = getResumedActivity()
+                        resumedActivity?.let {
+                            createdActivities[resumedActivity]?.copy(launchType = "warm")?.let {
+                                createdActivities[resumedActivity] = it
+                            }
+                        }
                         getAppStartTime()?.let { startTime ->
                             appStartupSpan?.let { startupSpan ->
                                 internalTracer.startSpan("warm_launch.ttid", startTime = startTime)
-                                    .setParent(startupSpan)
+                                    .setParent(startupSpan).end()
                             }
-                        }?.end(timeProvider.now())
+                        }
                     }
 
                     "Warm" -> {
+                        val resumedActivity = getResumedActivity()
+                        resumedActivity?.let {
+                            createdActivities[resumedActivity]?.copy(launchType = "warm")?.let {
+                                createdActivities[resumedActivity] = it
+                            }
+                        }
                         lastAppVisibleTime?.let {
                             internalTracer.startSpan(
                                 "warm_launch.ttid",
                                 startTime = it,
                                 setNoParent = true,
-                            )
-                        }?.end(timeProvider.now())
+                            ).end()
+                        }
                     }
 
                     "Hot" -> {
+                        val resumedActivity = getResumedActivity()
+                        resumedActivity?.let {
+                            createdActivities[resumedActivity]?.copy(launchType = "hot")?.let {
+                                createdActivities[resumedActivity] = it
+                            }
+                        }
                         lastAppVisibleTime?.let {
                             internalTracer.startSpan(
                                 "hot_launch.ttid",
                                 startTime = it,
                                 setNoParent = true,
                             )
-                        }?.end(timeProvider.now())
+                        }?.end()
                     }
 
                     else -> {
@@ -257,46 +287,46 @@ internal class LifecycleTracker(
         ).minOrNull()
     }
 
-    override fun onClick(clickData: ClickData) {
+    private fun trackTtfi(interaction: Interaction) {
         getResumedActivity()?.let { resumedActivity ->
             val activityInfo = createdActivities[resumedActivity]
             if (activityInfo?.firstInteraction == null) {
-                appStartupSpan?.end(timeProvider.now())
-                appStartupSpanScope?.close()
-                appStartupSpan = null
-                appStartupSpanScope = null
-                createdActivities[resumedActivity]?.copy(firstInteraction = clickData.toInteraction())
+                endAppStartupSpan()
+                val name = if (activityInfo?.launchType != null) {
+                    "${activityInfo.launchType}_launch.ttfi"
+                } else {
+                    return
+                }
+
+                getAppStartTime()?.let { startTime ->
+                    internalTracer.startSpan(
+                        name,
+                        startTime = convertToEpochTime(startTime),
+                    ).end()
+                }
+                createdActivities[resumedActivity]?.copy(firstInteraction = interaction)
                     ?.let { createdActivities[resumedActivity] = it }
             }
         }
+    }
+
+    private fun endAppStartupSpan() {
+        appStartupSpanScope?.close()
+        appStartupSpan?.end()
+        appStartupSpan = null
+        appStartupSpanScope = null
+    }
+
+    override fun onClick(clickData: ClickData) {
+        trackTtfi(clickData.toInteraction())
     }
 
     override fun onLongClick(longClickData: LongClickData) {
-        getResumedActivity()?.let { resumedActivity ->
-            val activityInfo = createdActivities[resumedActivity]
-            if (activityInfo?.firstInteraction == null) {
-                appStartupSpan?.end()
-                appStartupSpanScope?.close()
-                appStartupSpan = null
-                appStartupSpanScope = null
-                createdActivities[resumedActivity]?.copy(firstInteraction = longClickData.toInteraction())
-                    ?.let { createdActivities[resumedActivity] = it }
-            }
-        }
+        trackTtfi(longClickData.toInteraction())
     }
 
     override fun onScroll(scrollData: ScrollData) {
-        getResumedActivity()?.let { resumedActivity ->
-            val activityInfo = createdActivities[resumedActivity]
-            if (activityInfo?.firstInteraction == null) {
-                appStartupSpan?.end()
-                appStartupSpanScope?.close()
-                appStartupSpan = null
-                appStartupSpanScope = null
-                createdActivities[resumedActivity]?.copy(firstInteraction = scrollData.toInteraction())
-                    ?.let { createdActivities[resumedActivity] = it }
-            }
-        }
+        trackTtfi(scrollData.toInteraction())
     }
 
     private fun getResumedActivity(): String? {

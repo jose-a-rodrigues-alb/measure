@@ -5,7 +5,7 @@ import sh.measure.android.Measure
 /**
  * Internal API for creating spans, matches the public API.
  */
-interface InternalTracer {
+internal interface InternalTracer {
     fun startSpan(name: String): Span
     fun startSpan(name: String, startTime: Long): Span
     fun startSpan(name: String, startTime: Long, setNoParent: Boolean): Span
@@ -18,7 +18,7 @@ interface InternalTracer {
  * Delegates to [Measure] public API for creating and configuring spans. This class
  * makes unit testing spans easy.
  */
-class InternalTracerImpl : InternalTracer {
+internal class InternalTracerImpl : InternalTracer {
     override fun startSpan(name: String): Span {
         return Measure.startSpan(name)
     }

@@ -9,8 +9,8 @@ internal class FakeSpanProcessor : SpanProcessor {
     val endingSpans = mutableListOf<Span>()
     val endedSpans = mutableListOf<Span>()
 
-    override fun onStart(span: ReadableSpan) {
-        startedSpans += span as Span
+    override fun onStart(span: Span) {
+        startedSpans += span
     }
 
     override fun onEnding(span: ReadableSpan) {

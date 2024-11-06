@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import sh.measure.android.events.AttachmentType
 import sh.measure.android.events.EventType
+import sh.measure.android.tracing.SpanStatus
 
 /**
  * Maps an event to [EventTable] in the database.
@@ -107,4 +108,19 @@ internal data class BatchEntity(
     val batchId: String,
     val eventIds: List<String>,
     val createdAt: Long,
+)
+
+internal data class SpanEntity(
+    val name: String,
+    val traceId: String,
+    val spanId: String,
+    val parentId: String?,
+    val sessionId: String,
+    val startTime: Long,
+    val endTime: Long,
+    val duration: Long,
+    val status: SpanStatus,
+    val serializedAttributes: String?,
+    val serializedEvents: String?,
+    val hasEnded: Boolean,
 )

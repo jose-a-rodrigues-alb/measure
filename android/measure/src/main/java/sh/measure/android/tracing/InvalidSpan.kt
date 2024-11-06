@@ -11,6 +11,8 @@ internal class InvalidSpan : Span {
 
     override val startTime: Long = 0
 
+    override val events: MutableList<String> = mutableListOf()
+
     override fun getStatus(): SpanStatus {
         return SpanStatus.Unset
     }
@@ -28,6 +30,10 @@ internal class InvalidSpan : Span {
     }
 
     override fun end(timestamp: Long): Span {
+        return this
+    }
+
+    override fun setEvent(eventId: String): Span {
         return this
     }
 

@@ -32,10 +32,15 @@ import sh.measure.android.storage.AttachmentEntity
 import sh.measure.android.storage.BatchEntity
 import sh.measure.android.storage.EventEntity
 import sh.measure.android.storage.SessionEntity
+import sh.measure.android.storage.SpanEntity
+import sh.measure.android.storage.toSpanEntity
 import sh.measure.android.tracing.MsrSpan
+import sh.measure.android.tracing.Span
 import sh.measure.android.tracing.SpanData
 import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.SpanStatus
+import sh.measure.android.utils.AndroidTimeProvider
+import sh.measure.android.utils.TestClock
 import sh.measure.android.utils.TimeProvider
 
 internal object TestData {
@@ -487,5 +492,30 @@ internal object TestData {
             sessionId,
             startTime,
         )
+    }
+
+    fun getSpan(
+        name: String = "span-name",
+        spanId: String = "span-id",
+        traceId: String = "trace-id",
+        parentId: String? = null,
+        sessionId: String = "session-id",
+        startTime: Long = 987654321L,
+    ): Span {
+        return getSpan(
+            NoopLogger(),
+            AndroidTimeProvider(TestClock.create()),
+            FakeSpanProcessor(),
+            name,
+            spanId,
+            traceId,
+            parentId,
+            sessionId,
+            startTime,
+        )
+    }
+
+    fun getSpanEntity(): SpanEntity {
+        return getSpanData().toSpanEntity()
     }
 }

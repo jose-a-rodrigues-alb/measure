@@ -886,8 +886,7 @@ class DatabaseTest {
     @Test
     fun `insertSpan inserts span and returns success`() {
         val result = database.insertSpan(
-            "session-id",
-            TestData.getSpanData(),
+            TestData.getSpanEntity(),
         )
         assertTrue(result)
     }

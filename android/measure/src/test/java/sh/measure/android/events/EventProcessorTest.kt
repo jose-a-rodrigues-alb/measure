@@ -24,6 +24,8 @@ import sh.measure.android.fakes.TestData.toEvent
 import sh.measure.android.lifecycle.ActivityLifecycleData
 import sh.measure.android.screenshot.Screenshot
 import sh.measure.android.screenshot.ScreenshotCollector
+import sh.measure.android.tracing.Span
+import sh.measure.android.tracing.SpanBuffer
 import sh.measure.android.utils.iso8601Timestamp
 
 internal class EventProcessorTest {
@@ -33,6 +35,7 @@ internal class EventProcessorTest {
     private val eventStore = FakeEventStore()
     private val exceptionExporter = mock<ExceptionExporter>()
     private val screenshotCollector = mock<ScreenshotCollector>()
+    private val spanBuffer = mock<SpanBuffer>()
     private val configProvider = FakeConfigProvider()
     private val eventTransformer = object : EventTransformer {
         override fun <T> transform(event: Event<T>): Event<T> = event
@@ -51,6 +54,7 @@ internal class EventProcessorTest {
         configProvider = configProvider,
         eventTransformer = eventTransformer,
         userDefinedAttribute = userDefinedAttribute,
+        spanBuffer = spanBuffer,
     )
 
     @Before
@@ -162,6 +166,7 @@ internal class EventProcessorTest {
             configProvider = configProvider,
             eventTransformer = eventTransformer,
             userDefinedAttribute = userDefinedAttribute,
+            spanBuffer = spanBuffer,
         )
 
         // When
@@ -333,6 +338,7 @@ internal class EventProcessorTest {
             configProvider = configProvider,
             eventTransformer = eventTransformer,
             userDefinedAttribute = userDefinedAttribute,
+            spanBuffer = spanBuffer,
         )
 
         // When
@@ -354,8 +360,7 @@ internal class EventProcessorTest {
     @Test
     fun `given transformer modifies event, then stores modified event`() {
         // Given
-        val activityLifecycleData =
-            TestData.getActivityLifecycleData(intent = "intent-data")
+        val activityLifecycleData = TestData.getActivityLifecycleData(intent = "intent-data")
         val timestamp = 9856564654L
         val type = EventType.LIFECYCLE_ACTIVITY
 
@@ -378,6 +383,7 @@ internal class EventProcessorTest {
             configProvider = configProvider,
             eventTransformer = eventTransformer,
             userDefinedAttribute = userDefinedAttribute,
+            spanBuffer = spanBuffer,
         )
 
         // When
@@ -437,6 +443,30 @@ internal class EventProcessorTest {
         )
 
         assertEquals(expectedEvent, eventStore.trackedEvents.first())
+    }
+
+    @Test
+    fun `adds event to active root spans`() {
+        val span: Span = TestData.getSpan()
+        `when`(spanBuffer.getActiveRootSpans()).thenReturn(
+            listOf(span),
+        )
+
+        idProvider.id = "event-1"
+        eventProcessor.trackCrash(
+            data = TestData.getExceptionData(),
+            timestamp = 987654L,
+            type = EventType.EXCEPTION,
+        )
+
+        idProvider.id = "event-2"
+        eventProcessor.track(
+            data = TestData.getClickData(),
+            timestamp = 987654L,
+            type = EventType.CLICK,
+        )
+
+        assertEquals(listOf("event-1", "event-2"), span.events)
     }
 
     @Test

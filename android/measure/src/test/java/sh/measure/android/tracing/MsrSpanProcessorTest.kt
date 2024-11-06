@@ -11,12 +11,13 @@ import sh.measure.android.utils.TestClock
 
 class MsrSpanProcessorTest {
     private val eventProcessor = mock<EventProcessorImpl>()
+    private val spanBuffer = mock<SpanBuffer>()
     private val logger = NoopLogger()
     private val timeProvider = AndroidTimeProvider(TestClock.create())
 
     @Test
     fun `onEnded delegates to event processor`() {
-        val spanProcessor = MsrSpanProcessor(eventProcessor)
+        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer)
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,

@@ -76,10 +76,9 @@ internal class EventStoreTest {
     @Test
     fun `stores span`() {
         val spanData = TestData.getSpanData()
-        val sessionId = "session-id"
-        eventStore.store(spanData, sessionId)
+        eventStore.store(spanData)
 
-        verify(database).insertSpan(sessionId, spanData)
+        verify(database).insertSpan(spanData.toSpanEntity())
     }
 
     @Test

@@ -51,6 +51,16 @@ interface Span {
     fun setParent(parentSpan: Span): Span
 
     /**
+     * Adds an event ID to this span.
+     */
+    fun setEvent(eventId: String): Span
+
+    /**
+     *
+     */
+    val events: MutableList<String>
+
+    /**
      * Ends the span.
      *
      * A span can only be ended once. Attempt to end an already ended span is no-op.

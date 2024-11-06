@@ -15,7 +15,7 @@ import java.io.File
 
 internal interface EventStore {
     fun <T> store(event: Event<T>)
-    fun store(spanData: SpanData, sessionId: String)
+    fun store(spanData: SpanData)
 }
 
 /**
@@ -33,8 +33,9 @@ internal class EventStoreImpl(
     private val idProvider: IdProvider,
 ) : EventStore {
 
-    override fun store(spanData: SpanData, sessionId: String) {
-        val result = database.insertSpan(sessionId, spanData)
+    override fun store(spanData: SpanData) {
+        val spanEntity = spanData.toSpanEntity()
+        val result = database.insertSpan(spanEntity)
         if (!result) {
             logger.log(LogLevel.Error, "Unable to store span(${spanData.name}) to database")
         }

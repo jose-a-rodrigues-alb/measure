@@ -44,6 +44,7 @@ class LifecycleTrackerTest {
         internalTracer.assertSpanStarted("app-startup")
 
         activityController.setup()
+        forceNextDraw()
         lifecycleTracker.onClick(TestData.getClickData())
 
         // ends app-startup span on first interaction
@@ -85,6 +86,45 @@ class LifecycleTrackerTest {
         forceNextDraw()
 
         internalTracer.assertSpanEnded("hot_launch.ttid")
+    }
+
+    @Test
+    fun `tracks cold_launch ttfi span`() {
+        LaunchState.processImportanceOnInit = RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+        lifecycleTracker.register()
+        activityController.setup()
+        forceNextDraw()
+        lifecycleTracker.onClick(TestData.getClickData())
+        internalTracer.assertSpanEnded("cold_launch.ttfi")
+    }
+
+    @Test
+    fun `tracks lukewarm warm_launch ttfi span`() {
+        lifecycleTracker.register()
+        LaunchState.processImportanceOnInit = RunningAppProcessInfo.IMPORTANCE_CACHED
+        activityController.setup()
+        forceNextDraw()
+        lifecycleTracker.onClick(TestData.getClickData())
+        internalTracer.assertSpanEnded("warm_launch.ttfi")
+    }
+
+    @Test
+    fun `tracks hot_launch ttfi span`() {
+        lifecycleTracker.register()
+        LaunchState.processImportanceOnInit = RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+        // trigger cold launch
+        activityController.setup()
+        forceNextDraw()
+
+        // move app to background
+        val savedState = Bundle()
+        activityController.pause().saveInstanceState(savedState).stop()
+
+        // move app to foreground
+        activityController.restart().restoreInstanceState(savedState).resume()
+        forceNextDraw()
+        lifecycleTracker.onClick(TestData.getClickData())
+        internalTracer.assertSpanEnded("hot_launch.ttfi")
     }
 
     @Test

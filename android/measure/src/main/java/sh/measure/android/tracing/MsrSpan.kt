@@ -24,6 +24,7 @@ internal class MsrSpan(
     private var status = SpanStatus.Unset
     private var endTime = 0L
     private var hasEnded: EndState = EndState.NotEnded
+    override var events: MutableList<String> = mutableListOf()
 
     companion object {
         fun startSpan(
@@ -78,6 +79,17 @@ internal class MsrSpan(
                 return this
             }
             this.parentId = parentSpan.spanId
+        }
+        return this
+    }
+
+    override fun setEvent(eventId: String): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.events.add(eventId)
         }
         return this
     }
@@ -148,6 +160,7 @@ internal class MsrSpan(
                 hasEnded = hasEnded == EndState.Ended,
                 parentId = parentId,
                 sessionId = sessionId,
+                events = events,
                 duration = calculateDuration(),
             )
         }

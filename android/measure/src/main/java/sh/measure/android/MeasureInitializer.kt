@@ -73,6 +73,8 @@ import sh.measure.android.tracing.InternalTracer
 import sh.measure.android.tracing.InternalTracerImpl
 import sh.measure.android.tracing.MsrSpanProcessor
 import sh.measure.android.tracing.MsrTracer
+import sh.measure.android.tracing.SpanBuffer
+import sh.measure.android.tracing.SpanBufferImpl
 import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.Tracer
 import sh.measure.android.utils.AndroidSystemClock
@@ -251,6 +253,7 @@ internal class MeasureInitializerImpl(
         exportExecutor = executorServiceRegistry.eventExportExecutor(),
         eventExporter = eventExporter,
     ),
+    private val spanBuffer: SpanBuffer = SpanBufferImpl(),
     override val eventProcessor: EventProcessor = EventProcessorImpl(
         logger = logger,
         ioExecutor = executorServiceRegistry.ioExecutor(),
@@ -263,6 +266,7 @@ internal class MeasureInitializerImpl(
         eventTransformer = eventTransformer,
         configProvider = configProvider,
         userDefinedAttribute = userDefinedAttribute,
+        spanBuffer = spanBuffer,
     ),
     override val userTriggeredEventCollector: UserTriggeredEventCollector = UserTriggeredEventCollectorImpl(
         eventProcessor = eventProcessor,
@@ -372,7 +376,7 @@ internal class MeasureInitializerImpl(
         timeProvider = timeProvider,
         internalTracer = internalTracer,
     ),
-    private val spanProcessor: SpanProcessor = MsrSpanProcessor(eventProcessor),
+    private val spanProcessor: SpanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer),
     override val tracer: Tracer = MsrTracer(
         logger = logger,
         idProvider = idProvider,
