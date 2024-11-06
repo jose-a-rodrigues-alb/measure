@@ -121,6 +121,7 @@ internal data class SpanEntity(
     val duration: Long,
     val status: SpanStatus,
     val serializedAttributes: String?,
-    val serializedEvents: String?,
+    val serializedSpanEvents: String?,
+    val serializedLinkedEvents: String?,
     val hasEnded: Boolean,
 )

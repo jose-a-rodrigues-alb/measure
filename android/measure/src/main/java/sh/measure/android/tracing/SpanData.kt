@@ -61,7 +61,12 @@ internal data class SpanData(
     /**
      * All event IDs part of this span. See [Event] for more details.
      */
-    val events: List<String> = emptyList(),
+    val spanEvents: List<SpanEvent> = emptyList(),
+
+    /**
+     * All event IDs part of this span. See [Event] for more details.
+     */
+    val linkedEvents: List<String> = emptyList(),
 
     /**
      * Whether the span has ended or not.

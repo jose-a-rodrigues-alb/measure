@@ -848,7 +848,8 @@ internal class DatabaseImpl(
             put(SpansTable.COL_END_TIME, spanEntity.endTime)
             put(SpansTable.COL_DURATION, spanEntity.duration)
             put(SpansTable.COL_SERIALIZED_ATTRS, spanEntity.serializedAttributes)
-            put(SpansTable.COL_SERIALIZED_EVENTS, spanEntity.serializedEvents)
+            put(SpansTable.COL_SERIALIZED_LINKED_EVENTS, spanEntity.serializedLinkedEvents)
+            put(SpansTable.COL_SERIALIZED_SPAN_EVENTS, spanEntity.serializedSpanEvents)
             put(SpansTable.COL_STATUS, spanEntity.status.name)
             put(SpansTable.COL_HAS_ENDED, spanEntity.hasEnded)
         }

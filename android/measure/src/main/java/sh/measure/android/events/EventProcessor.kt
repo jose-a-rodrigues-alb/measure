@@ -14,6 +14,7 @@ import sh.measure.android.logger.Logger
 import sh.measure.android.screenshot.ScreenshotCollector
 import sh.measure.android.storage.EventStore
 import sh.measure.android.tracing.InternalTrace
+import sh.measure.android.tracing.MsrSpan
 import sh.measure.android.tracing.SpanBuffer
 import sh.measure.android.tracing.SpanData
 import sh.measure.android.utils.IdProvider
@@ -166,7 +167,9 @@ internal class EventProcessorImpl(
             eventStore.store(event)
             onEventTracked(event)
             spanBuffer.getActiveRootSpans().forEach {
-                it.setEvent(event.id)
+                if (it is MsrSpan) {
+                    it.setEventInternal(event.id)
+                }
             }
             sessionManager.markCrashedSession(event.sessionId)
             exceptionExporter.export(event.sessionId)
@@ -216,7 +219,9 @@ internal class EventProcessorImpl(
                                 eventStore.store(event)
                                 onEventTracked(event)
                                 spanBuffer.getActiveRootSpans().forEach {
-                                    it.setEvent(event.id)
+                                    if (it is MsrSpan) {
+                                        it.setEventInternal(event.id)
+                                    }
                                 }
                                 logger.log(
                                     LogLevel.Debug,

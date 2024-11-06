@@ -188,7 +188,7 @@ class MsrSpanTest {
     }
 
     @Test
-    fun `setEvent adds event to span`() {
+    fun `setEventInternal adds event to span`() {
         val span = MsrSpan.startSpan(
             "span-name",
             logger = logger,
@@ -197,11 +197,46 @@ class MsrSpanTest {
             sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = null,
-        )
-        span.setEvent("event-id")
+        ) as MsrSpan
+        span.setEventInternal("event-id")
 
-        Assert.assertEquals(1, span.events.size)
-        Assert.assertEquals("event-id", span.events.first())
+        Assert.assertEquals(1, span.linkedEvents.size)
+        Assert.assertEquals("event-id", span.linkedEvents.first())
+    }
+
+    @Test
+    fun `setEventInternal on ended span is a no-op`() {
+        val span = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            idProvider = idProvider,
+            parentSpan = null,
+        ).end() as MsrSpan
+        span.setEventInternal("event-id")
+
+        Assert.assertEquals(0, span.linkedEvents.size)
+    }
+
+    @Test
+    fun `setEvent adds event to span`() {
+        val attrs = mapOf(Pair("key", "value"))
+        val expectedEvent = SpanEvent("event-id", timeProvider.now(), attrs)
+        val span = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            idProvider = idProvider,
+            parentSpan = null,
+        ) as MsrSpan
+        span.setEvent(expectedEvent.name, expectedEvent.attributes)
+
+        Assert.assertEquals(1, span.spanEvents.size)
+        Assert.assertEquals(expectedEvent, span.spanEvents.first())
     }
 
     @Test
@@ -215,9 +250,9 @@ class MsrSpanTest {
             idProvider = idProvider,
             parentSpan = null,
         ).end()
-        span.setEvent("event-id")
+        span.setEvent("event-id", emptyMap())
 
-        Assert.assertEquals(0, span.events.size)
+        Assert.assertEquals(0, span.spanEvents.size)
     }
 
     @Test

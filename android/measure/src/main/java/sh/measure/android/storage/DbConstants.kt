@@ -78,7 +78,8 @@ internal object SpansTable {
     const val COL_STATUS = "status"
     const val COL_HAS_ENDED = "has_ended"
     const val COL_SERIALIZED_ATTRS = "serialized_attrs"
-    const val COL_SERIALIZED_EVENTS = "serialized_events"
+    const val COL_SERIALIZED_LINKED_EVENTS = "serialized_linked_events"
+    const val COL_SERIALIZED_SPAN_EVENTS = "serialized_span_events"
 }
 
 internal object UserDefinedAttributesTable {
@@ -173,7 +174,7 @@ internal object Sql {
             ${SpansTable.COL_DURATION} INTEGER NOT NULL,
             ${SpansTable.COL_STATUS} TEXT NOT NULL,
             ${SpansTable.COL_SERIALIZED_ATTRS} TEXT,
-            ${SpansTable.COL_SERIALIZED_EVENTS} TEXT,
+            ${SpansTable.COL_SERIALIZED_LINKED_EVENTS} TEXT,
             ${SpansTable.COL_HAS_ENDED} INTEGER
         )
     """

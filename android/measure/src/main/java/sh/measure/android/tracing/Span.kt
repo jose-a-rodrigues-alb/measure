@@ -1,5 +1,11 @@
 package sh.measure.android.tracing
 
+data class SpanEvent(
+    val name: String,
+    val timestamp: Long,
+    val attributes: Map<String, Any?> = emptyMap(),
+)
+
 /**
  * Represents a span in a trace.
  */
@@ -50,15 +56,19 @@ interface Span {
      */
     fun setParent(parentSpan: Span): Span
 
-    /**
-     * Adds an event ID to this span.
-     */
-    fun setEvent(eventId: String): Span
+     // TODO: this can only be exposed once custom events are supported
+     fun setEvent(name: String, attributes: Map<String, Any?>): Span
 
     /**
-     *
+     * Events collected during the lifecycle of this span. Contains the event IDs of the event
+     * collected. Only set of root spans.
      */
-    val events: MutableList<String>
+    val linkedEvents: MutableList<String>
+
+    /**
+     * Events added explicitly to this span using [setEvent].
+     */
+    val spanEvents: MutableList<SpanEvent>
 
     /**
      *

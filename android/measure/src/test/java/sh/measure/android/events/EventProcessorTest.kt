@@ -466,7 +466,7 @@ internal class EventProcessorTest {
             type = EventType.CLICK,
         )
 
-        assertEquals(listOf("event-1", "event-2"), span.events)
+        assertEquals(listOf("event-1", "event-2"), span.linkedEvents)
     }
 
     @Test
