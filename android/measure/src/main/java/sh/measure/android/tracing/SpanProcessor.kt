@@ -1,6 +1,7 @@
 package sh.measure.android.tracing
 
 import android.util.Log
+import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.events.EventProcessor
 
 internal interface SpanProcessor {
@@ -12,9 +13,13 @@ internal interface SpanProcessor {
 internal class MsrSpanProcessor(
     private val eventProcessor: EventProcessor,
     private val spanBuffer: SpanBuffer,
+    private val attributeProcessors: List<AttributeProcessor>,
 ) : SpanProcessor {
     override fun onStart(span: Span) {
         spanBuffer.onSpanStart(span)
+        attributeProcessors.forEach {
+            it.appendAttributes(span.attributes)
+        }
     }
 
     override fun onEnding(span: ReadableSpan) {
@@ -22,10 +27,7 @@ internal class MsrSpanProcessor(
 
     override fun onEnded(span: ReadableSpan) {
         val spanData = span.toSpanData()
-        Log.i(
-            "MsrSpan",
-            "name: ${spanData.name}, duration: ${spanData.duration}, id: ${spanData.spanId}, parent:${spanData.parentId}, events:${spanData.events.size}",
-        )
+        Log.i("MsrSpan", span.toSpanData().toString())
         spanBuffer.onSpanEnd(spanData.spanId)
         eventProcessor.trackSpan(spanData)
     }

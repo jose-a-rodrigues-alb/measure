@@ -1,8 +1,10 @@
 package sh.measure.android.tracing
 
+import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
+import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.events.EventProcessorImpl
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.TestData
@@ -11,13 +13,93 @@ import sh.measure.android.utils.TestClock
 
 class MsrSpanProcessorTest {
     private val eventProcessor = mock<EventProcessorImpl>()
-    private val spanBuffer = mock<SpanBuffer>()
+    private val spanBuffer = SpanBufferImpl()
     private val logger = NoopLogger()
     private val timeProvider = AndroidTimeProvider(TestClock.create())
 
     @Test
+    fun `onStart stores span in active spans buffer`() {
+        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer, emptyList())
+        val rootSpan = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor,
+            spanId = "root-span",
+            parentId = null,
+        )
+        spanProcessor.onStart(rootSpan)
+
+        Assert.assertEquals(1, spanBuffer.getActiveSpans().size)
+        Assert.assertEquals(1, spanBuffer.getActiveRootSpans().size)
+        Assert.assertEquals(rootSpan, spanBuffer.getActiveSpans().first())
+        Assert.assertEquals(rootSpan, spanBuffer.getActiveRootSpans().first())
+
+        val childSpan = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor,
+            spanId = "child-span",
+            parentId = rootSpan.spanId,
+        )
+        spanProcessor.onStart(childSpan)
+
+        Assert.assertEquals(2, spanBuffer.getActiveSpans().size)
+        Assert.assertEquals(1, spanBuffer.getActiveRootSpans().size)
+        Assert.assertEquals(childSpan, spanBuffer.getActiveSpans().last())
+        Assert.assertEquals(rootSpan, spanBuffer.getActiveRootSpans().last())
+    }
+
+    @Test
+    fun `onStart appends attributes to span`() {
+        val attributeProcessor = object : AttributeProcessor {
+            override fun appendAttributes(attributes: MutableMap<String, Any?>) {
+                attributes["key"] = "value"
+            }
+        }
+        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer, listOf(attributeProcessor))
+        val span = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor,
+        )
+        spanProcessor.onStart(span)
+
+        Assert.assertEquals(1, span.toSpanData().attributes.size)
+        Assert.assertEquals("value", span.toSpanData().attributes["key"])
+    }
+
+    @Test
+    fun `onEnded clears active spans from buffer`() {
+        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer, emptyList())
+        val rootSpan = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor,
+            spanId = "root-span",
+            parentId = null,
+        )
+        spanProcessor.onStart(rootSpan)
+        val childSpan = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor,
+            spanId = "child-span",
+            parentId = rootSpan.spanId,
+        )
+        spanProcessor.onStart(childSpan)
+
+        // When
+        spanProcessor.onEnded(childSpan)
+        spanProcessor.onEnded(rootSpan)
+
+        // Then
+        Assert.assertEquals(0, spanBuffer.getActiveSpans().size)
+        Assert.assertEquals(0, spanBuffer.getActiveRootSpans().size)
+    }
+
+    @Test
     fun `onEnded delegates to event processor`() {
-        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer)
+        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer, emptyList())
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,

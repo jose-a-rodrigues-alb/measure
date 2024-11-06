@@ -25,6 +25,7 @@ internal class MsrSpan(
     private var endTime = 0L
     private var hasEnded: EndState = EndState.NotEnded
     override var events: MutableList<String> = mutableListOf()
+    override val attributes: MutableMap<String, Any?> = mutableMapOf()
 
     companion object {
         fun startSpan(
@@ -90,6 +91,72 @@ internal class MsrSpan(
                 return this
             }
             this.events.add(eventId)
+        }
+        return this
+    }
+
+    override fun setAttribute(key: String, value: Boolean): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.attributes.put(key, value)
+        }
+        return this
+    }
+
+    override fun setAttribute(key: String, value: Double): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.attributes.put(key, value)
+        }
+        return this
+    }
+
+    override fun setAttribute(key: String, value: Float): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.attributes.put(key, value)
+        }
+        return this
+    }
+
+    override fun setAttribute(key: String, value: Int): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.attributes.put(key, value)
+        }
+        return this
+    }
+
+    override fun setAttribute(key: String, value: Long): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.attributes.put(key, value)
+        }
+        return this
+    }
+
+    override fun setAttribute(key: String, value: String): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                return this
+            }
+            this.attributes.put(key, value)
         }
         return this
     }
@@ -161,6 +228,7 @@ internal class MsrSpan(
                 parentId = parentId,
                 sessionId = sessionId,
                 events = events,
+                attributes = attributes,
                 duration = calculateDuration(),
             )
         }
@@ -171,8 +239,6 @@ internal class MsrSpan(
     }
 
     private enum class EndState {
-        NotEnded,
-        Ending,
-        Ended,
+        NotEnded, Ending, Ended,
     }
 }

@@ -61,6 +61,41 @@ interface Span {
     val events: MutableList<String>
 
     /**
+     *
+     */
+    fun setAttribute(key: String, value: Int): Span
+
+    /**
+     *
+     */
+    fun setAttribute(key: String, value: Long): Span
+
+    /**
+     *
+     */
+    fun setAttribute(key: String, value: String): Span
+
+    /**
+     *
+     */
+    fun setAttribute(key: String, value: Boolean): Span
+
+    /**
+     *
+     */
+    fun setAttribute(key: String, value: Double): Span
+
+    /**
+     *
+     */
+    fun setAttribute(key: String, value: Float): Span
+
+    /**
+     *
+     */
+    val attributes: MutableMap<String, Any?>
+
+    /**
      * Ends the span.
      *
      * A span can only be ended once. Attempt to end an already ended span is no-op.
