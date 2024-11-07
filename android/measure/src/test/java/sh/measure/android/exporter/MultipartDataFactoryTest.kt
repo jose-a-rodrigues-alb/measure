@@ -7,6 +7,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.mock
 import sh.measure.android.exporter.MultipartDataFactoryImpl.Companion.ATTACHMENT_NAME_PREFIX
 import sh.measure.android.exporter.MultipartDataFactoryImpl.Companion.EVENT_FORM_NAME
+import sh.measure.android.exporter.MultipartDataFactoryImpl.Companion.SPAN_FORM_NAME
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.TestData
 import sh.measure.android.logger.Logger
@@ -48,6 +49,7 @@ class MultipartDataFactoryTest {
         fun EventPacket.expectedSerializedValue(): String {
             return "{\"id\":\"$eventId\",\"session_id\":\"$sessionId\",\"user_triggered\":$userTriggered,\"timestamp\":\"$timestamp\",\"type\":\"$type\",\"$type\":${getFakeFileContent()},\"attachments\":$serializedAttachments,\"attribute\":$serializedAttributes}"
         }
+
         val eventEntity = TestData.getEventEntity(
             eventId = "event-id",
             filePath = "/path/to/file.json",
@@ -111,6 +113,34 @@ class MultipartDataFactoryTest {
         val result = multipartDataFactory.createFromAttachmentPacket(attachmentPacket)
 
         assertNull(result)
+    }
+
+    @Test
+    fun `createFromSpanPacket returns FormField`() {
+        fun expectedSerializedValue(): String {
+            return "{\"name\":\"span-name\",\"traceId\":\"trace-id\",\"spanId\":\"span-id\",\"parentId\":\"parent-id\",\"sessionId\":\"session-id\",\"startTime\":1000,\"endTime\":2000,\"duration\":1000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"spanEvents\":[{\"name\":\"name\",\"timestamp\":98765432,\"attributes\":{\"key\":\"value\"}}],\"linkedEvents\":[\"event-1\",\"event-2\"],\"hasEnded\":true}"
+        }
+
+        // Given
+        val linkedEvents = listOf("event-1", "event-2")
+        val spanEvent = TestData.getSpanEvent()
+        val attributes = mapOf("key" to "value")
+        val spanEntity = TestData.getSpanEntity(
+            spanId = "span-id",
+            spanEvents = listOf(spanEvent),
+            attributes = attributes,
+            linkedEvents = linkedEvents,
+        )
+        val spanPacket = TestData.getSpanPacket(spanEntity)
+
+        // When
+        val result = multipartDataFactory.createFromSpanPacket(spanPacket)
+
+        // Then
+        assert(result is MultipartData.FormField)
+        val formField = result as MultipartData.FormField
+        assertEquals(SPAN_FORM_NAME, formField.name)
+        assertEquals(expectedSerializedValue(), formField.value)
     }
 
     private fun getFakeFileContent(): String {

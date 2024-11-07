@@ -12,3 +12,19 @@ internal data class EventPacket(
     val serializedAttributes: String,
     val serializedUserDefinedAttributes: String?,
 )
+
+internal data class SpanPacket(
+    val name: String,
+    val traceId: String,
+    val spanId: String,
+    val parentId: String?,
+    val sessionId: String,
+    val startTime: Long,
+    val endTime: Long,
+    val duration: Long,
+    val status: Int,
+    val serializedAttributes: String?,
+    val serializedSpanEvents: String?,
+    val serializedLinkedEvents: String?,
+    val hasEnded: Boolean,
+)

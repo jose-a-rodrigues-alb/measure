@@ -27,7 +27,7 @@ internal class ExceptionExporterImpl(
         try {
             exportExecutor.submit {
                 eventExporter.createBatch(sessionId)?.let {
-                    eventExporter.export(it.batchId, it.eventIds)
+                    eventExporter.export(it)
                 }
             }
         } catch (e: RejectedExecutionException) {

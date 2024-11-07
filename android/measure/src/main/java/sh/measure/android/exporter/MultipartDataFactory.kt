@@ -28,6 +28,11 @@ internal interface MultipartDataFactory {
      * @return [MultipartData] object or null if the file at the [AttachmentPacket]'s file path
      */
     fun createFromAttachmentPacket(attachmentPacket: AttachmentPacket): MultipartData?
+
+    /**
+     * TODO
+     */
+    fun createFromSpanPacket(spanPacket: SpanPacket): MultipartData?
 }
 
 internal class MultipartDataFactoryImpl(
@@ -38,6 +43,7 @@ internal class MultipartDataFactoryImpl(
     internal companion object {
         const val ATTACHMENT_NAME_PREFIX = "blob-"
         const val EVENT_FORM_NAME = "event"
+        const val SPAN_FORM_NAME = "span"
     }
 
     override fun createFromEventPacket(eventPacket: EventPacket): MultipartData? {
@@ -84,6 +90,15 @@ internal class MultipartDataFactoryImpl(
         }
     }
 
+    override fun createFromSpanPacket(spanPacket: SpanPacket): MultipartData {
+        return spanPacket.getSerializedData().let {
+            MultipartData.FormField(
+                name = SPAN_FORM_NAME,
+                value = it,
+            )
+        }
+    }
+
     private fun getFileInputStream(filePath: String): InputStream? {
         return fileStorage.getFile(filePath)?.inputStream().also { fileInputStream ->
             if (fileInputStream == null) {
@@ -111,5 +126,9 @@ internal class MultipartDataFactoryImpl(
             return null
         }
         return "{\"id\":\"$eventId\",\"session_id\":\"$sessionId\",\"user_triggered\":$userTriggered,\"timestamp\":\"$timestamp\",\"type\":\"$type\",\"$type\":$data,\"attachments\":$serializedAttachments,\"attribute\":$serializedAttributes}"
+    }
+
+    private fun SpanPacket.getSerializedData(): String {
+        return "{\"name\":\"$name\",\"traceId\":\"$traceId\",\"spanId\":\"$spanId\",\"parentId\":\"$parentId\",\"sessionId\":\"$sessionId\",\"startTime\":$startTime,\"endTime\":$endTime,\"duration\":$duration,\"status\":\"$status\",\"attributes\":$serializedAttributes,\"spanEvents\":$serializedSpanEvents,\"linkedEvents\":$serializedLinkedEvents,\"hasEnded\":$hasEnded}"
     }
 }

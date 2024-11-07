@@ -67,82 +67,68 @@ class PeriodicEventExporterTest {
 
     @Test
     fun `exports existing batches, when app goes to background`() {
-        val batch1 = "batch1" to mutableListOf("event1, event2")
-        val batch2 = "batch2" to mutableListOf("event1, event2")
-        val batches = LinkedHashMap<String, MutableList<String>>()
-        batches[batch1.first] = batch1.second
-        batches[batch2.first] = batch2.second
-        `when`(eventExporter.getExistingBatches()).thenReturn(batches)
+        val batch1 =
+            Batch("batch1", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
+        val batch2 =
+            Batch("batch2", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
+        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
 
         periodicEventExporter.onAppBackground()
 
-        verify(eventExporter).export(batch1.first, batch1.second)
-        verify(eventExporter).export(batch2.first, batch2.second)
+        verify(eventExporter).export(batch1)
+        verify(eventExporter).export(batch2)
     }
 
     @Test
     fun `stops exporting existing batches if one of them fails to export due to server error`() {
-        val batch1 = "batch1" to mutableListOf("event1, event2")
-        val batch2 = "batch2" to mutableListOf("event1, event2")
-        val batches = LinkedHashMap<String, MutableList<String>>()
-        batches[batch1.first] = batch1.second
-        batches[batch2.first] = batch2.second
-        `when`(eventExporter.getExistingBatches()).thenReturn(batches)
-        `when`(
-            eventExporter.export(
-                batch1.first,
-                batch1.second,
-            ),
-        ).thenReturn(HttpResponse.Error.ServerError(500))
+        val batch1 =
+            Batch("batch1", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
+        val batch2 =
+            Batch("batch2", eventIds = listOf("event3, event4"), spanIds = listOf("span1", "span2"))
+        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
+        `when`(eventExporter.export(batch1)).thenReturn(HttpResponse.Error.ServerError(500))
 
         periodicEventExporter.onAppBackground()
 
-        verify(eventExporter).export(batch1.first, batch1.second)
-        verify(eventExporter, never()).export(batch2.first, batch2.second)
+        verify(eventExporter).export(batch1)
+        verify(eventExporter, never()).export(batch2)
     }
 
     @Test
     fun `stops exporting existing batches if one of them fails to export due to rate limit error`() {
-        val batch1 = "batch1" to mutableListOf("event1, event2")
-        val batch2 = "batch2" to mutableListOf("event1, event2")
-        val batches = LinkedHashMap<String, MutableList<String>>()
-        batches[batch1.first] = batch1.second
-        batches[batch2.first] = batch2.second
-        `when`(eventExporter.getExistingBatches()).thenReturn(batches)
-        `when`(
-            eventExporter.export(
-                batch1.first,
-                batch1.second,
-            ),
-        ).thenReturn(HttpResponse.Error.RateLimitError())
+        val batch1 =
+            Batch("batch1", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
+        val batch2 =
+            Batch("batch2", eventIds = listOf("event3, event4"), spanIds = listOf("span1", "span2"))
+        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
+        `when`(eventExporter.export(batch1)).thenReturn(HttpResponse.Error.RateLimitError())
 
         periodicEventExporter.onAppBackground()
 
-        verify(eventExporter).export(batch1.first, batch1.second)
-        verify(eventExporter, never()).export(batch2.first, batch2.second)
+        verify(eventExporter).export(batch1)
+        verify(eventExporter, never()).export(batch2)
     }
 
     @Test
     fun `creates and exports new batch when app goes to background and conditions are met`() {
         // Given no existing batches to export
-        `when`(eventExporter.getExistingBatches()).thenReturn(linkedMapOf())
+        `when`(eventExporter.getExistingBatches()).thenReturn(listOf())
         // Given a new batch is created successfully
-        `when`(eventExporter.createBatch()).thenReturn(
-            BatchCreationResult("batchId", listOf("event1", "event2")),
-        )
+        val batch = Batch("batchId", listOf("event1", "event2"), listOf("span1", "span2"))
+        `when`(eventExporter.createBatch()).thenReturn(batch)
 
         // When
         periodicEventExporter.onAppBackground()
 
         // Then
-        verify(eventExporter).export("batchId", listOf("event1", "event2"))
+        verify(eventExporter).export(batch)
     }
 
     @Test
     fun `does not export if last batch was created within 30 seconds, when app goes to background`() {
         val initialTime = testClock.epochTime()
         // Given no existing batches to export
-        `when`(eventExporter.getExistingBatches()).thenReturn(linkedMapOf())
+        `when`(eventExporter.getExistingBatches()).thenReturn(listOf())
         periodicEventExporter.lastBatchCreationTimeMs = initialTime
 
         // Advance time within threshold
@@ -152,22 +138,24 @@ class PeriodicEventExporterTest {
         periodicEventExporter.onAppBackground()
 
         // Then
-        verify(eventExporter, never()).export(any<String>(), any<List<String>>())
+        verify(eventExporter, never()).export(any())
     }
 
     @Test
     fun `given an export is in progress, does not trigger new export, when app goes to background`() {
         // ensure other conditions for triggering an export are met
-        val batch1 = "batch1" to mutableListOf("event1, event2")
-        val batches = LinkedHashMap<String, MutableList<String>>()
-        batches[batch1.first] = batch1.second
-        `when`(eventExporter.getExistingBatches()).thenReturn(batches)
+        val batch = Batch(
+            "batch1",
+            eventIds = mutableListOf("event1, event2"),
+            spanIds = listOf("span1", "span2"),
+        )
+        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch))
 
         // forcefully mark an export in progress
         periodicEventExporter.isExportInProgress.set(true)
 
         periodicEventExporter.onAppBackground()
 
-        verify(eventExporter, never()).export(any(), any())
+        verify(eventExporter, never()).export(any())
     }
 }

@@ -49,7 +49,9 @@ internal class LifecycleTracker(
         val type: Type,
     ) {
         enum class Type {
-            Click, LongClick, Scroll,
+            Click,
+            LongClick,
+            Scroll,
         }
     }
 
@@ -141,7 +143,9 @@ internal class LifecycleTracker(
     }
 
     private fun registerFirstFrameDrawn(
-        activity: Activity, identityHash: String, launchType: String?
+        activity: Activity,
+        identityHash: String,
+        launchType: String?,
     ) {
         activity.window.onNextDraw {
             mainHandler.postAtFrontOfQueueAsync {

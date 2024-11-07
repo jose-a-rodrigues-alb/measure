@@ -56,8 +56,8 @@ interface Span {
      */
     fun setParent(parentSpan: Span): Span
 
-     // TODO: this can only be exposed once custom events are supported
-     fun setEvent(name: String, attributes: Map<String, Any?>): Span
+    // TODO: this can only be exposed once custom events are supported
+    fun setEvent(name: String, attributes: Map<String, Any?>): Span
 
     /**
      * Events collected during the lifecycle of this span. Contains the event IDs of the event

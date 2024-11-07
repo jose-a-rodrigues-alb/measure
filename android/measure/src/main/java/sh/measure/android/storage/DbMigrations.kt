@@ -44,5 +44,16 @@ internal object DbMigrations {
 
     private fun migrateToV3(db: SQLiteDatabase) {
         db.execSQL(Sql.CREATE_SPANS_TABLE)
+        db.execSQL(Sql.CREATE_BATCHES_TABLE)
+        db.execSQL(Sql.CREATE_SPANS_BATCH_TABLE)
+        db.execSQL(
+            """
+               INSERT INTO ${BatchesTable.TABLE_NAME}
+                    (${BatchesTable.COL_BATCH_ID}, ${BatchesTable.COL_CREATED_AT})
+                SELECT DISTINCT ${EventsBatchTable.COL_BATCH_ID}, MIN(${EventsBatchTable.COL_CREATED_AT})
+                FROM ${EventsBatchTable.TABLE_NAME}
+                GROUP BY ${EventsBatchTable.COL_BATCH_ID}
+            """.trimIndent(),
+        )
     }
 }

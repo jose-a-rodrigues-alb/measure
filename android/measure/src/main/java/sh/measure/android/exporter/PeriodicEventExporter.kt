@@ -86,9 +86,9 @@ internal class PeriodicEventExporterImpl(
         }
     }
 
-    private fun processExistingBatches(batches: LinkedHashMap<String, MutableList<String>>) {
+    private fun processExistingBatches(batches: List<Batch>) {
         for (batch in batches) {
-            val response = eventExporter.export(batchId = batch.key, eventIds = batch.value)
+            val response = eventExporter.export(batch)
             if (response is HttpResponse.Error.RateLimitError || response is HttpResponse.Error.ServerError) {
                 // stop processing the rest of the batches if one of them fails
                 // this is to avoid the case where we keep trying even if the server is
@@ -100,9 +100,9 @@ internal class PeriodicEventExporterImpl(
 
     private fun processNewBatchIfTimeElapsed() {
         if (timeProvider.millisTime - lastBatchCreationTimeMs >= configProvider.eventsBatchingIntervalMs) {
-            eventExporter.createBatch()?.let { result ->
+            eventExporter.createBatch()?.let { batch ->
                 lastBatchCreationTimeMs = timeProvider.millisTime
-                eventExporter.export(result.batchId, result.eventIds)
+                eventExporter.export(batch)
             }
         } else {
             logger.log(LogLevel.Debug, "Skipping batch creation as interval hasn't elapsed")

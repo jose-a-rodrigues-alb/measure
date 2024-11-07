@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import sh.measure.android.tracing.SpanData
+import sh.measure.android.tracing.SpanEvent
 import sh.measure.android.utils.toJsonElement
 
 internal fun SpanData.toSpanEntity(): SpanEntity {
@@ -17,7 +18,7 @@ internal fun SpanData.toSpanEntity(): SpanEntity {
         parentId = parentId,
         endTime = endTime,
         traceId = traceId,
-        serializedSpanEvents = Json.encodeToString(spanEvents),
+        serializedSpanEvents = serializeSpanEvent(),
         serializedLinkedEvents = Json.encodeToString(linkedEvents),
         serializedAttributes = Json.encodeToString(
             JsonElement.serializer(),
@@ -25,4 +26,13 @@ internal fun SpanData.toSpanEntity(): SpanEntity {
         ),
         hasEnded = hasEnded,
     )
+}
+
+private fun SpanData.serializeSpanEvent(): String {
+    return spanEvents.joinToString(",", prefix = "[", postfix = "]") { it.serialize() }
+}
+
+private fun SpanEvent.serialize(): String {
+    val serializedAttributes = Json.encodeToString(attributes.toJsonElement())
+    return "{\"name\":\"${name}\",\"timestamp\":$timestamp,\"attributes\":$serializedAttributes}"
 }

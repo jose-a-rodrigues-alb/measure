@@ -10,6 +10,7 @@ import sh.measure.android.exceptions.ExceptionData
 import sh.measure.android.exceptions.ExceptionFactory
 import sh.measure.android.exporter.AttachmentPacket
 import sh.measure.android.exporter.EventPacket
+import sh.measure.android.exporter.SpanPacket
 import sh.measure.android.gestures.ClickData
 import sh.measure.android.gestures.LongClickData
 import sh.measure.android.gestures.ScrollData
@@ -37,6 +38,7 @@ import sh.measure.android.storage.toSpanEntity
 import sh.measure.android.tracing.MsrSpan
 import sh.measure.android.tracing.Span
 import sh.measure.android.tracing.SpanData
+import sh.measure.android.tracing.SpanEvent
 import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.SpanStatus
 import sh.measure.android.utils.AndroidTimeProvider
@@ -415,11 +417,13 @@ internal object TestData {
     fun getEventBatchEntity(
         batchId: String = "batch-id",
         eventIds: List<String> = emptyList(),
+        spanIds: List<String> = emptyList(),
         createdAt: Long = 987654321L,
     ): BatchEntity {
         return BatchEntity(
             batchId = batchId,
             eventIds = eventIds,
+            spanIds = spanIds,
             createdAt = createdAt,
         )
     }
@@ -455,18 +459,35 @@ internal object TestData {
         return ScreenViewData(name = "screen-name")
     }
 
-    fun getSpanData(): SpanData {
+    fun getSpanData(
+        name: String = "span-name",
+        traceId: String = "trace-id",
+        spanId: String = "span-id",
+        parentId: String? = "parent-id",
+        sessionId: String = "session-id",
+        startTime: Long = 1000L,
+        endTime: Long = 2000L,
+        duration: Long = 1000L,
+        status: SpanStatus = SpanStatus.Ok,
+        hasEnded: Boolean = true,
+        attributes: Map<String, Any?> = emptyMap(),
+        linkedEvents: List<String> = listOf(),
+        spanEvents: List<SpanEvent> = listOf(),
+    ): SpanData {
         return SpanData(
-            name = "span-name",
-            traceId = "trace-id",
-            spanId = "span-id",
-            parentId = "parent-id",
-            sessionId = "session-id",
-            startTime = 1000L,
-            endTime = 2000L,
-            duration = 1000L,
-            status = SpanStatus.Ok,
-            hasEnded = true,
+            name = name,
+            traceId = traceId,
+            spanId = spanId,
+            parentId = parentId,
+            sessionId = sessionId,
+            startTime = startTime,
+            endTime = endTime,
+            duration = duration,
+            status = status,
+            hasEnded = hasEnded,
+            attributes = attributes,
+            linkedEvents = linkedEvents,
+            spanEvents = spanEvents,
         )
     }
 
@@ -515,7 +536,61 @@ internal object TestData {
         )
     }
 
-    fun getSpanEntity(): SpanEntity {
-        return getSpanData().toSpanEntity()
+    fun getSpanEntity(
+        name: String = "span-name",
+        traceId: String = "trace-id",
+        spanId: String = "span-id",
+        parentId: String? = "parent-id",
+        sessionId: String = "session-id",
+        startTime: Long = 1000L,
+        endTime: Long = 2000L,
+        duration: Long = 1000L,
+        status: SpanStatus = SpanStatus.Ok,
+        hasEnded: Boolean = true,
+        attributes: Map<String, Any?> = emptyMap(),
+        linkedEvents: List<String> = listOf(),
+        spanEvents: List<SpanEvent> = listOf(),
+    ): SpanEntity {
+        return getSpanData(
+            name = name,
+            traceId = traceId,
+            spanId = spanId,
+            parentId = parentId,
+            sessionId = sessionId,
+            startTime = startTime,
+            endTime = endTime,
+            duration = duration,
+            status = status,
+            hasEnded = hasEnded,
+            attributes = attributes,
+            linkedEvents = linkedEvents,
+            spanEvents = spanEvents,
+        ).toSpanEntity()
+    }
+
+    fun getSpanPacket(spanEntity: SpanEntity): SpanPacket {
+        return SpanPacket(
+            name = spanEntity.name,
+            traceId = spanEntity.traceId,
+            spanId = spanEntity.spanId,
+            parentId = spanEntity.parentId,
+            sessionId = spanEntity.sessionId,
+            startTime = spanEntity.startTime,
+            endTime = spanEntity.endTime,
+            duration = spanEntity.duration,
+            status = spanEntity.status.ordinal,
+            serializedAttributes = spanEntity.serializedAttributes,
+            serializedSpanEvents = spanEntity.serializedSpanEvents,
+            serializedLinkedEvents = spanEntity.serializedLinkedEvents,
+            hasEnded = spanEntity.hasEnded,
+        )
+    }
+
+    fun getSpanEvent(): SpanEvent {
+        return SpanEvent(
+            name = "name",
+            timestamp = 98765432L,
+            attributes = mapOf("key" to "value"),
+        )
     }
 }

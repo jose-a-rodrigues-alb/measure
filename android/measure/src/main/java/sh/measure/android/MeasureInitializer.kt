@@ -377,12 +377,14 @@ internal class MeasureInitializerImpl(
         internalTracer = internalTracer,
     ),
     private val spanProcessor: SpanProcessor = MsrSpanProcessor(
-        eventProcessor, spanBuffer, attributeProcessors = listOf(
+        eventProcessor,
+        spanBuffer,
+        attributeProcessors = listOf(
             userAttributeProcessor,
             deviceAttributeProcessor,
             appAttributeProcessor,
             installationIdAttributeProcessor,
-        )
+        ),
     ),
     override val tracer: Tracer = MsrTracer(
         logger = logger,

@@ -23,11 +23,18 @@ class ExceptionExporterTest {
     fun `given a batch is created, exports it`() {
         val batchId = "batch-id"
         val eventIds = listOf("event1", "event2")
-        `when`(eventExporter.createBatch("session-id")).thenReturn(BatchCreationResult(batchId, eventIds))
+        val spanIds = listOf("span1", "span2")
+        `when`(eventExporter.createBatch("session-id")).thenReturn(
+            Batch(
+                batchId,
+                eventIds,
+                spanIds,
+            ),
+        )
 
         exceptionExporter.export("session-id")
 
-        verify(eventExporter).export(batchId, eventIds)
+        verify(eventExporter).export(Batch(batchId, eventIds, spanIds))
     }
 
     @Test
@@ -36,6 +43,6 @@ class ExceptionExporterTest {
 
         exceptionExporter.export("session-id")
 
-        verify(eventExporter, never()).export(any(), any())
+        verify(eventExporter, never()).export(any())
     }
 }
