@@ -304,6 +304,7 @@ internal class LifecycleTracker(
                 val name = if (activityInfo?.launchType != null) {
                     "${activityInfo.launchType}_launch.ttfi"
                 } else {
+                    endAppStartupSpan()
                     return
                 }
 
@@ -313,6 +314,7 @@ internal class LifecycleTracker(
                         startTime = convertToEpochTime(startTime),
                     ).end()
                 }
+                endAppStartupSpan()
                 createdActivities[resumedActivity]?.copy(firstInteraction = interaction)
                     ?.let { createdActivities[resumedActivity] = it }
             }
