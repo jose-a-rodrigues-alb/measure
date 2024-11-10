@@ -14,8 +14,6 @@ import sh.measure.android.logger.Logger
 import sh.measure.android.screenshot.ScreenshotCollector
 import sh.measure.android.storage.EventStore
 import sh.measure.android.tracing.InternalTrace
-import sh.measure.android.tracing.MsrSpan
-import sh.measure.android.tracing.SpanBuffer
 import sh.measure.android.tracing.SpanData
 import sh.measure.android.utils.IdProvider
 import sh.measure.android.utils.iso8601Timestamp
@@ -106,7 +104,6 @@ internal class EventProcessorImpl(
     private val exceptionExporter: ExceptionExporter,
     private val screenshotCollector: ScreenshotCollector,
     private val configProvider: ConfigProvider,
-    private val spanBuffer: SpanBuffer,
 ) : EventProcessor {
 
     override fun <T> track(
@@ -166,11 +163,6 @@ internal class EventProcessorImpl(
         eventTransformer.transform(event)?.let {
             eventStore.store(event)
             onEventTracked(event)
-            spanBuffer.getActiveRootSpans().forEach {
-                if (it is MsrSpan) {
-                    it.setEventInternal(event.id)
-                }
-            }
             sessionManager.markCrashedSession(event.sessionId)
             exceptionExporter.export(event.sessionId)
             logger.log(LogLevel.Debug, "Event processed: $type, ${event.sessionId}")
@@ -218,11 +210,6 @@ internal class EventProcessorImpl(
                             InternalTrace.trace(label = { "msr-store-event" }, block = {
                                 eventStore.store(event)
                                 onEventTracked(event)
-                                spanBuffer.getActiveRootSpans().forEach {
-                                    if (it is MsrSpan) {
-                                        it.setEventInternal(event.id)
-                                    }
-                                }
                                 logger.log(
                                     LogLevel.Debug,
                                     "Event processed: $type, ${event.sessionId}",

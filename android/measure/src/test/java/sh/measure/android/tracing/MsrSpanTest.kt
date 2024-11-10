@@ -189,39 +189,6 @@ class MsrSpanTest {
     }
 
     @Test
-    fun `setEventInternal adds event to span`() {
-        val span = MsrSpan.startSpan(
-            "span-name",
-            logger = logger,
-            timeProvider = timeProvider,
-            spanProcessor = spanProcessor,
-            sessionManager = sessionManager,
-            idProvider = idProvider,
-            parentSpan = null,
-        ) as MsrSpan
-        span.setEventInternal("event-id")
-
-        Assert.assertEquals(1, span.linkedEvents.size)
-        Assert.assertEquals("event-id", span.linkedEvents.first())
-    }
-
-    @Test
-    fun `setEventInternal on ended span is a no-op`() {
-        val span = MsrSpan.startSpan(
-            "span-name",
-            logger = logger,
-            timeProvider = timeProvider,
-            spanProcessor = spanProcessor,
-            sessionManager = sessionManager,
-            idProvider = idProvider,
-            parentSpan = null,
-        ).end() as MsrSpan
-        span.setEventInternal("event-id")
-
-        Assert.assertEquals(0, span.linkedEvents.size)
-    }
-
-    @Test
     fun `setEvent adds event to span`() {
         val attrs = mapOf(Pair("key", "value"))
         val expectedEvent = SpanEvent("event-id", timeProvider.now(), attrs)

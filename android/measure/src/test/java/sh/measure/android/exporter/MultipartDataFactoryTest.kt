@@ -118,18 +118,16 @@ class MultipartDataFactoryTest {
     @Test
     fun `createFromSpanPacket returns FormField`() {
         fun expectedSerializedValue(): String {
-            return "{\"name\":\"span-name\",\"traceId\":\"trace-id\",\"spanId\":\"span-id\",\"parentId\":\"parent-id\",\"sessionId\":\"session-id\",\"startTime\":1000,\"endTime\":2000,\"duration\":1000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"spanEvents\":[{\"name\":\"name\",\"timestamp\":98765432,\"attributes\":{\"key\":\"value\"}}],\"linkedEvents\":[\"event-1\",\"event-2\"],\"hasEnded\":true}"
+            return "{\"name\":\"span-name\",\"traceId\":\"trace-id\",\"spanId\":\"span-id\",\"parentId\":\"parent-id\",\"sessionId\":\"session-id\",\"startTime\":1000,\"endTime\":2000,\"duration\":1000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"spanEvents\":[{\"name\":\"name\",\"timestamp\":98765432,\"attributes\":{\"key\":\"value\"}}],\"hasEnded\":true}"
         }
 
         // Given
-        val linkedEvents = listOf("event-1", "event-2")
         val spanEvent = TestData.getSpanEvent()
         val attributes = mapOf("key" to "value")
         val spanEntity = TestData.getSpanEntity(
             spanId = "span-id",
             spanEvents = listOf(spanEvent),
             attributes = attributes,
-            linkedEvents = linkedEvents,
         )
         val spanPacket = TestData.getSpanPacket(spanEntity)
 

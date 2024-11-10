@@ -476,8 +476,6 @@ internal class DatabaseImpl(
                 val statusIndex = it.getColumnIndex(SpansTable.COL_STATUS)
                 val hasEndedIndex = it.getColumnIndex(SpansTable.COL_HAS_ENDED)
                 val serializedAttrsIndex = it.getColumnIndex(SpansTable.COL_SERIALIZED_ATTRS)
-                val serializedLinkedEventsIndex =
-                    it.getColumnIndex(SpansTable.COL_SERIALIZED_LINKED_EVENTS)
                 val serializedSpanEventsIndex =
                     it.getColumnIndex(SpansTable.COL_SERIALIZED_SPAN_EVENTS)
 
@@ -492,7 +490,6 @@ internal class DatabaseImpl(
                 val status = it.getInt(statusIndex)
                 val hasEnded = it.getInt(hasEndedIndex) == 0
                 val serializedAttrs = it.getString(serializedAttrsIndex)
-                val serializedLinkedEvents = it.getString(serializedLinkedEventsIndex)
                 val serializedSpanEvents = it.getString(serializedSpanEventsIndex)
 
                 spanPackets.add(
@@ -507,7 +504,6 @@ internal class DatabaseImpl(
                         duration = duration,
                         status = status,
                         serializedAttributes = serializedAttrs,
-                        serializedLinkedEvents = serializedLinkedEvents,
                         serializedSpanEvents = serializedSpanEvents,
                         hasEnded = hasEnded,
                     ),
@@ -1035,7 +1031,6 @@ internal class DatabaseImpl(
             put(SpansTable.COL_END_TIME, spanEntity.endTime)
             put(SpansTable.COL_DURATION, spanEntity.duration)
             put(SpansTable.COL_SERIALIZED_ATTRS, spanEntity.serializedAttributes)
-            put(SpansTable.COL_SERIALIZED_LINKED_EVENTS, spanEntity.serializedLinkedEvents)
             put(SpansTable.COL_SERIALIZED_SPAN_EVENTS, spanEntity.serializedSpanEvents)
             put(SpansTable.COL_STATUS, spanEntity.status.ordinal)
             put(SpansTable.COL_HAS_ENDED, spanEntity.hasEnded)

@@ -59,12 +59,6 @@ interface Span {
     fun setEvent(name: String, attributes: Map<String, Any?>): Span
 
     /**
-     * Events collected during the lifecycle of this span. Contains the event IDs of the event
-     * collected. Only set of root spans.
-     */
-    val linkedEvents: MutableList<String>
-
-    /**
      * Events added explicitly to this span using [setEvent].
      */
     val spanEvents: MutableList<SpanEvent>

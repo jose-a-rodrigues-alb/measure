@@ -36,13 +36,10 @@ import sh.measure.android.storage.SessionEntity
 import sh.measure.android.storage.SpanEntity
 import sh.measure.android.storage.toSpanEntity
 import sh.measure.android.tracing.MsrSpan
-import sh.measure.android.tracing.Span
 import sh.measure.android.tracing.SpanData
 import sh.measure.android.tracing.SpanEvent
 import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.SpanStatus
-import sh.measure.android.utils.AndroidTimeProvider
-import sh.measure.android.utils.TestClock
 import sh.measure.android.utils.TimeProvider
 
 internal object TestData {
@@ -331,15 +328,6 @@ internal object TestData {
         )
     }
 
-    fun getAttachmentPackets(eventEntity: EventEntity): List<AttachmentPacket> {
-        return eventEntity.attachmentEntities?.map {
-            AttachmentPacket(
-                id = it.id,
-                filePath = it.path,
-            )
-        } ?: emptyList()
-    }
-
     fun getAttachment(
         type: String = "type",
         name: String = "name",
@@ -471,7 +459,6 @@ internal object TestData {
         status: SpanStatus = SpanStatus.Ok,
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
-        linkedEvents: List<String> = listOf(),
         spanEvents: List<SpanEvent> = listOf(),
     ): SpanData {
         return SpanData(
@@ -486,7 +473,6 @@ internal object TestData {
             status = status,
             hasEnded = hasEnded,
             attributes = attributes,
-            linkedEvents = linkedEvents,
             spanEvents = spanEvents,
         )
     }
@@ -515,27 +501,6 @@ internal object TestData {
         )
     }
 
-    fun getSpan(
-        name: String = "span-name",
-        spanId: String = "span-id",
-        traceId: String = "trace-id",
-        parentId: String? = null,
-        sessionId: String = "session-id",
-        startTime: Long = 987654321L,
-    ): Span {
-        return getSpan(
-            NoopLogger(),
-            AndroidTimeProvider(TestClock.create()),
-            FakeSpanProcessor(),
-            name,
-            spanId,
-            traceId,
-            parentId,
-            sessionId,
-            startTime,
-        )
-    }
-
     fun getSpanEntity(
         name: String = "span-name",
         traceId: String = "trace-id",
@@ -548,7 +513,6 @@ internal object TestData {
         status: SpanStatus = SpanStatus.Ok,
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
-        linkedEvents: List<String> = listOf(),
         spanEvents: List<SpanEvent> = listOf(),
     ): SpanEntity {
         return getSpanData(
@@ -563,7 +527,6 @@ internal object TestData {
             status = status,
             hasEnded = hasEnded,
             attributes = attributes,
-            linkedEvents = linkedEvents,
             spanEvents = spanEvents,
         ).toSpanEntity()
     }
@@ -581,7 +544,6 @@ internal object TestData {
             status = spanEntity.status.ordinal,
             serializedAttributes = spanEntity.serializedAttributes,
             serializedSpanEvents = spanEntity.serializedSpanEvents,
-            serializedLinkedEvents = spanEntity.serializedLinkedEvents,
             hasEnded = spanEntity.hasEnded,
         )
     }

@@ -123,6 +123,5 @@ internal data class SpanEntity(
     val status: SpanStatus = SpanStatus.Ok,
     val serializedAttributes: String? = null,
     val serializedSpanEvents: String? = null,
-    val serializedLinkedEvents: String? = null,
     val hasEnded: Boolean = true,
 )

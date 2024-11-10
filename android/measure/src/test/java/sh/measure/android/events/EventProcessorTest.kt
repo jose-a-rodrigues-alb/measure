@@ -24,7 +24,6 @@ import sh.measure.android.fakes.TestData.toEvent
 import sh.measure.android.lifecycle.ActivityLifecycleData
 import sh.measure.android.screenshot.Screenshot
 import sh.measure.android.screenshot.ScreenshotCollector
-import sh.measure.android.tracing.Span
 import sh.measure.android.tracing.SpanBuffer
 import sh.measure.android.utils.iso8601Timestamp
 
@@ -54,7 +53,6 @@ internal class EventProcessorTest {
         configProvider = configProvider,
         eventTransformer = eventTransformer,
         userDefinedAttribute = userDefinedAttribute,
-        spanBuffer = spanBuffer,
     )
 
     @Before
@@ -166,7 +164,6 @@ internal class EventProcessorTest {
             configProvider = configProvider,
             eventTransformer = eventTransformer,
             userDefinedAttribute = userDefinedAttribute,
-            spanBuffer = spanBuffer,
         )
 
         // When
@@ -338,7 +335,6 @@ internal class EventProcessorTest {
             configProvider = configProvider,
             eventTransformer = eventTransformer,
             userDefinedAttribute = userDefinedAttribute,
-            spanBuffer = spanBuffer,
         )
 
         // When
@@ -383,7 +379,6 @@ internal class EventProcessorTest {
             configProvider = configProvider,
             eventTransformer = eventTransformer,
             userDefinedAttribute = userDefinedAttribute,
-            spanBuffer = spanBuffer,
         )
 
         // When
@@ -443,30 +438,6 @@ internal class EventProcessorTest {
         )
 
         assertEquals(expectedEvent, eventStore.trackedEvents.first())
-    }
-
-    @Test
-    fun `adds event to active root spans`() {
-        val span: Span = TestData.getSpan()
-        `when`(spanBuffer.getActiveRootSpans()).thenReturn(
-            listOf(span),
-        )
-
-        idProvider.id = "event-1"
-        eventProcessor.trackCrash(
-            data = TestData.getExceptionData(),
-            timestamp = 987654L,
-            type = EventType.EXCEPTION,
-        )
-
-        idProvider.id = "event-2"
-        eventProcessor.track(
-            data = TestData.getClickData(),
-            timestamp = 987654L,
-            type = EventType.CLICK,
-        )
-
-        assertEquals(listOf("event-1", "event-2"), span.linkedEvents)
     }
 
     @Test

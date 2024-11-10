@@ -11,7 +11,6 @@ internal class InvalidSpan : Span {
 
     override val startTime: Long = 0
 
-    override val linkedEvents: MutableList<String> = mutableListOf()
     override val spanEvents: MutableList<SpanEvent> = mutableListOf()
 
     override fun setAttribute(key: String, value: Int): Span {

@@ -1080,8 +1080,9 @@ class DatabaseTest {
 
     @Test
     fun `insertSpan inserts span and returns success`() {
+        database.insertSession(TestData.getSessionEntity(id = "session-id"))
         val result = database.insertSpan(
-            TestData.getSpanEntity(),
+            TestData.getSpanEntity(sessionId = "session-id"),
         )
         assertTrue(result)
     }
@@ -1311,21 +1312,6 @@ class DatabaseTest {
         assertEquals(
             event.id,
             cursor.getString(cursor.getColumnIndex(AttachmentTable.COL_EVENT_ID)),
-        )
-    }
-
-    private fun assertBatchedEventInCursor(
-        eventId: String,
-        @Suppress("SameParameterValue") batchId: String,
-        cursor: Cursor,
-    ) {
-        assertEquals(
-            eventId,
-            cursor.getString(cursor.getColumnIndex(EventsBatchTable.COL_EVENT_ID)),
-        )
-        assertEquals(
-            batchId,
-            cursor.getString(cursor.getColumnIndex(EventsBatchTable.COL_BATCH_ID)),
         )
     }
 

@@ -25,6 +25,5 @@ internal data class SpanPacket(
     val status: Int,
     val serializedAttributes: String?,
     val serializedSpanEvents: String?,
-    val serializedLinkedEvents: String?,
     val hasEnded: Boolean,
 )

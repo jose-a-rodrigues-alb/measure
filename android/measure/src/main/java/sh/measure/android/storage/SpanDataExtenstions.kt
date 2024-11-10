@@ -19,7 +19,6 @@ internal fun SpanData.toSpanEntity(): SpanEntity {
         endTime = endTime,
         traceId = traceId,
         serializedSpanEvents = serializeSpanEvent(),
-        serializedLinkedEvents = Json.encodeToString(linkedEvents),
         serializedAttributes = Json.encodeToString(
             JsonElement.serializer(),
             attributes.toJsonElement(),

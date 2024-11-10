@@ -266,7 +266,6 @@ internal class MeasureInitializerImpl(
         eventTransformer = eventTransformer,
         configProvider = configProvider,
         userDefinedAttribute = userDefinedAttribute,
-        spanBuffer = spanBuffer,
     ),
     override val userTriggeredEventCollector: UserTriggeredEventCollector = UserTriggeredEventCollectorImpl(
         eventProcessor = eventProcessor,
