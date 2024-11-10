@@ -8,7 +8,6 @@ import sh.measure.android.utils.TimeProvider
 import java.io.PrintWriter
 import java.io.StringWriter
 
-
 /**
  * A thread safe implementation of [Span].
  */
@@ -263,6 +262,8 @@ internal class MsrSpan(
     }
 
     private enum class EndState {
-        NotEnded, Ending, Ended,
+        NotEnded,
+        Ending,
+        Ended,
     }
 }

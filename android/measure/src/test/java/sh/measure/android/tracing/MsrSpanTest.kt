@@ -304,15 +304,14 @@ class MsrSpanTest {
         Assert.assertEquals(1, span.spanEvents.size)
         Assert.assertEquals(
             "java.io.IOException",
-            span.spanEvents.first().attributes["exception.name"]
+            span.spanEvents.first().attributes["exception.name"],
         )
         Assert.assertEquals(
             "exception message",
-            span.spanEvents.first().attributes["exception.message"]
+            span.spanEvents.first().attributes["exception.message"],
         )
         Assert.assertTrue(
-            span.spanEvents.first().attributes["exception.stacktrace"].toString().isNotEmpty()
+            span.spanEvents.first().attributes["exception.stacktrace"].toString().isNotEmpty(),
         )
     }
-
 }
