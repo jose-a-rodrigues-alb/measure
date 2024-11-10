@@ -206,6 +206,8 @@ internal interface Database : Closeable {
     fun insertSpan(spanEntity: SpanEntity): Boolean
 
     fun deleteBatch(batchId: String, eventIds: List<String>, spanIds: List<String>)
+
+    fun getSpansCount(): Int
 }
 
 /**
@@ -981,6 +983,16 @@ internal class DatabaseImpl(
     override fun getEventsCount(): Int {
         val count: Int
         readableDatabase.rawQuery(Sql.getEventsCount(), null).use {
+            it.moveToFirst()
+            val countIndex = it.getColumnIndex("count")
+            count = it.getInt(countIndex)
+        }
+        return count
+    }
+
+    override fun getSpansCount(): Int {
+        val count: Int
+        readableDatabase.rawQuery(Sql.getSpansCount(), null).use {
             it.moveToFirst()
             val countIndex = it.getColumnIndex("count")
             count = it.getInt(countIndex)

@@ -959,6 +959,37 @@ class DatabaseTest {
     }
 
     @Test
+    fun `deleteSessions also deletes spans for the session`() {
+        // given
+        database.insertSession(TestData.getSessionEntity("session-id-1"))
+        database.insertSession(TestData.getSessionEntity("session-id-2"))
+        val spanToDelete =
+            TestData.getSpanEntity(spanId = "span-id-1", sessionId = "session-id-1")
+        val spanToNotDelete =
+            TestData.getSpanEntity(spanId = "span-id-2", sessionId = "session-id-2")
+        database.insertSpan(spanToDelete)
+        database.insertSpan(spanToNotDelete)
+
+        // when
+        database.deleteSessions(listOf("session-id-1"))
+
+        // then
+        database.readableDatabase.query(
+            SpansTable.TABLE_NAME,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+        ).use {
+            assertEquals(1, it.count)
+            it.moveToFirst()
+            assertEquals("span-id-2", it.getString(it.getColumnIndex(SpansTable.COL_SPAN_ID)))
+        }
+    }
+
+    @Test
     fun `getEventsForSessions returns all event Ids for given session Ids`() {
         // given
         val event1 = TestData.getEventEntity(eventId = "event-id-1", sessionId = "session-id-1")

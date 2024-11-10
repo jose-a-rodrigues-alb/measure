@@ -41,5 +41,5 @@ internal data class Config(
         EventType.LIFECYCLE_FRAGMENT,
         EventType.SCREEN_VIEW,
     )
-    override val maxEventsInDatabase: Int = 50_000
+    override val maxSignalsInDatabase: Int = 50_000
 }

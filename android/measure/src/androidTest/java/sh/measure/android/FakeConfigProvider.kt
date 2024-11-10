@@ -47,5 +47,5 @@ class FakeConfigProvider : ConfigProvider {
     override var screenshotMaskHexColor: String = "#222222"
     override var screenshotCompressionQuality: Int = 100
     override var eventTypeExportAllowList: List<String> = emptyList()
-    override var maxEventsInDatabase: Int = 50000
+    override var maxSignalsInDatabase: Int = 50000
 }

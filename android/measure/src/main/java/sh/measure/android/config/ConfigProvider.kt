@@ -58,8 +58,8 @@ internal class ConfigProviderImpl(
         get() = getMergedConfig { screenshotCompressionQuality }
     override val eventTypeExportAllowList: List<String>
         get() = getMergedConfig { eventTypeExportAllowList }
-    override val maxEventsInDatabase: Int
-        get() = getMergedConfig { maxEventsInDatabase }
+    override val maxSignalsInDatabase: Int
+        get() = getMergedConfig { maxSignalsInDatabase }
     override val trackHttpHeaders: Boolean
         get() = getMergedConfig { trackHttpHeaders }
     override val trackHttpBody: Boolean

@@ -206,7 +206,8 @@ internal object Sql {
             ${SpansTable.COL_SERIALIZED_ATTRS} TEXT,
             ${SpansTable.COL_SERIALIZED_LINKED_EVENTS} TEXT,
             ${SpansTable.COL_SERIALIZED_SPAN_EVENTS} TEXT,
-            ${SpansTable.COL_HAS_ENDED} INTEGER
+            ${SpansTable.COL_HAS_ENDED} INTEGER,
+            FOREIGN KEY (${SpansTable.COL_SESSION_ID}) REFERENCES ${SessionsTable.TABLE_NAME}(${SessionsTable.COL_SESSION_ID}) ON DELETE CASCADE
         )
     """
 
@@ -479,6 +480,13 @@ internal object Sql {
         return """
             SELECT COUNT(${EventTable.COL_ID}) AS count
             FROM ${EventTable.TABLE_NAME}
+        """.trimIndent()
+    }
+
+    fun getSpansCount(): String {
+        return """
+            SELECT COUNT(${SpansTable.COL_SPAN_ID}) AS count
+            FROM ${SpansTable.TABLE_NAME}
         """.trimIndent()
     }
 

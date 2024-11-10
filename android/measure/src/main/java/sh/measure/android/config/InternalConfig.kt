@@ -76,9 +76,9 @@ internal interface InternalConfig {
     val eventTypeExportAllowList: List<String>
 
     /**
-     * The maximum number of events allowed in the database.
+     * The maximum number of (events + spans) allowed in the database.
      * If the number of events exceeds this limit, the oldest session is deleted everytime
      * cleanup is triggered until the total number of events is below this limit.
      */
-    val maxEventsInDatabase: Int
+    val maxSignalsInDatabase: Int
 }
