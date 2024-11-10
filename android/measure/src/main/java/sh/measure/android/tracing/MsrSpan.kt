@@ -5,6 +5,9 @@ import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
 import sh.measure.android.utils.IdProvider
 import sh.measure.android.utils.TimeProvider
+import java.io.PrintWriter
+import java.io.StringWriter
+
 
 /**
  * A thread safe implementation of [Span].
@@ -100,7 +103,7 @@ internal class MsrSpan(
     internal fun setEventInternal(eventId: String): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set event after span ended")
                 return this
             }
             this.linkedEvents.add(eventId)
@@ -111,7 +114,7 @@ internal class MsrSpan(
     override fun setAttribute(key: String, value: Boolean): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
                 return this
             }
             this.attributes.put(key, value)
@@ -122,7 +125,7 @@ internal class MsrSpan(
     override fun setAttribute(key: String, value: Double): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
                 return this
             }
             this.attributes.put(key, value)
@@ -133,7 +136,7 @@ internal class MsrSpan(
     override fun setAttribute(key: String, value: Float): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
                 return this
             }
             this.attributes.put(key, value)
@@ -144,7 +147,7 @@ internal class MsrSpan(
     override fun setAttribute(key: String, value: Int): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
                 return this
             }
             this.attributes.put(key, value)
@@ -155,7 +158,7 @@ internal class MsrSpan(
     override fun setAttribute(key: String, value: Long): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
                 return this
             }
             this.attributes.put(key, value)
@@ -166,10 +169,31 @@ internal class MsrSpan(
     override fun setAttribute(key: String, value: String): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
+                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
                 return this
             }
             this.attributes.put(key, value)
+        }
+        return this
+    }
+
+    override fun setException(exception: Throwable): Span {
+        synchronized(lock) {
+            if (hasEnded != EndState.NotEnded) {
+                logger.log(LogLevel.Warning, "Attempt to set exception after span ended")
+                return this
+            }
+            val attributes = mutableMapOf<String, String>()
+            attributes["exception.name"] = exception.javaClass.name
+            exception.message?.let { attributes["exception.message"] = it }
+            val stringWriter = StringWriter()
+            PrintWriter(stringWriter).use { printWriter ->
+                exception.printStackTrace(printWriter)
+            }
+            val stackTrace = stringWriter.toString()
+            attributes["exception.stacktrace"] = stackTrace
+            val exceptionEvent = SpanEvent("exception", timeProvider.now(), attributes)
+            this.spanEvents.add(exceptionEvent)
         }
         return this
     }
@@ -253,8 +277,6 @@ internal class MsrSpan(
     }
 
     private enum class EndState {
-        NotEnded,
-        Ending,
-        Ended,
+        NotEnded, Ending, Ended,
     }
 }

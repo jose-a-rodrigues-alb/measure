@@ -12,6 +12,7 @@ import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.IdProviderImpl
 import sh.measure.android.utils.RandomizerImpl
 import sh.measure.android.utils.TestClock
+import java.io.IOException
 import java.time.Duration
 
 class MsrSpanTest {
@@ -319,4 +320,32 @@ class MsrSpanTest {
 
         Assert.assertEquals(0, duration)
     }
+
+    @Test
+    fun `setException adds exception event to span`() {
+        val span = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            idProvider = idProvider,
+            parentSpan = null,
+        )
+        span.setException(IOException("exception message"))
+
+        Assert.assertEquals(1, span.spanEvents.size)
+        Assert.assertEquals(
+            "java.io.IOException",
+            span.spanEvents.first().attributes["exception.name"]
+        )
+        Assert.assertEquals(
+            "exception message",
+            span.spanEvents.first().attributes["exception.message"]
+        )
+        Assert.assertTrue(
+            span.spanEvents.first().attributes["exception.stacktrace"].toString().isNotEmpty()
+        )
+    }
+
 }

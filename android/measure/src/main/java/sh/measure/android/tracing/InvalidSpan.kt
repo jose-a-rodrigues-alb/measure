@@ -38,6 +38,10 @@ internal class InvalidSpan : Span {
         return this
     }
 
+    override fun setException(exception: Throwable): Span {
+        return this
+    }
+
     override val attributes: MutableMap<String, Any?> = mutableMapOf()
 
     override fun getStatus(): SpanStatus {

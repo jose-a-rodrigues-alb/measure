@@ -56,7 +56,6 @@ interface Span {
      */
     fun setParent(parentSpan: Span): Span
 
-    // TODO: this can only be exposed once custom events are supported
     fun setEvent(name: String, attributes: Map<String, Any?>): Span
 
     /**
@@ -99,6 +98,11 @@ interface Span {
      *
      */
     fun setAttribute(key: String, value: Float): Span
+
+    /**
+     *
+     */
+    fun setException(exception: Throwable): Span
 
     /**
      *
