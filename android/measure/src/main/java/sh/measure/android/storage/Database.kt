@@ -13,6 +13,7 @@ import sh.measure.android.exporter.EventPacket
 import sh.measure.android.exporter.SpanPacket
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
+import sh.measure.android.utils.iso8601Timestamp
 import java.io.Closeable
 
 internal interface Database : Closeable {
@@ -476,7 +477,7 @@ internal class DatabaseImpl(
                 val statusIndex = it.getColumnIndex(SpansTable.COL_STATUS)
                 val hasEndedIndex = it.getColumnIndex(SpansTable.COL_HAS_ENDED)
                 val serializedAttrsIndex = it.getColumnIndex(SpansTable.COL_SERIALIZED_ATTRS)
-                val serializedSpanEventsIndex =
+                val serializedCheckpointsIndex =
                     it.getColumnIndex(SpansTable.COL_SERIALIZED_SPAN_EVENTS)
 
                 val name = it.getString(nameIndex)
@@ -490,7 +491,7 @@ internal class DatabaseImpl(
                 val status = it.getInt(statusIndex)
                 val hasEnded = it.getInt(hasEndedIndex) == 0
                 val serializedAttrs = it.getString(serializedAttrsIndex)
-                val serializedSpanEvents = it.getString(serializedSpanEventsIndex)
+                val serializedCheckpoints = it.getString(serializedCheckpointsIndex)
 
                 spanPackets.add(
                     SpanPacket(
@@ -499,12 +500,12 @@ internal class DatabaseImpl(
                         spanId = spanId,
                         sessionId = sessionId,
                         parentId = parentId,
-                        startTime = startTime,
-                        endTime = endTime,
+                        startTime = startTime.iso8601Timestamp(),
+                        endTime = endTime.iso8601Timestamp(),
                         duration = duration,
                         status = status,
                         serializedAttributes = serializedAttrs,
-                        serializedSpanEvents = serializedSpanEvents,
+                        serializedCheckpoints = serializedCheckpoints,
                         hasEnded = hasEnded,
                     ),
                 )
@@ -1031,7 +1032,7 @@ internal class DatabaseImpl(
             put(SpansTable.COL_END_TIME, spanEntity.endTime)
             put(SpansTable.COL_DURATION, spanEntity.duration)
             put(SpansTable.COL_SERIALIZED_ATTRS, spanEntity.serializedAttributes)
-            put(SpansTable.COL_SERIALIZED_SPAN_EVENTS, spanEntity.serializedSpanEvents)
+            put(SpansTable.COL_SERIALIZED_SPAN_EVENTS, spanEntity.serializedCheckpoints)
             put(SpansTable.COL_STATUS, spanEntity.status.ordinal)
             put(SpansTable.COL_HAS_ENDED, spanEntity.hasEnded)
         }

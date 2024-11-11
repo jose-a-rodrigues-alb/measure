@@ -1,9 +1,8 @@
 package sh.measure.android.tracing
 
-data class SpanEvent(
+data class Checkpoint(
     val name: String,
     val timestamp: Long,
-    val attributes: Map<String, Any?> = emptyMap(),
 )
 
 /**
@@ -56,12 +55,12 @@ interface Span {
      */
     fun setParent(parentSpan: Span): Span
 
-    fun setEvent(name: String, attributes: Map<String, Any?>): Span
+    fun setCheckpoint(name: String): Span
 
     /**
-     * Events added explicitly to this span using [setEvent].
+     * Checkpoints added explicitly to this span using [setCheckpoint].
      */
-    val spanEvents: MutableList<SpanEvent>
+    val checkpoints: MutableList<Checkpoint>
 
     /**
      *
@@ -92,11 +91,6 @@ interface Span {
      *
      */
     fun setAttribute(key: String, value: Float): Span
-
-    /**
-     *
-     */
-    fun setException(exception: Throwable): Span
 
     /**
      *

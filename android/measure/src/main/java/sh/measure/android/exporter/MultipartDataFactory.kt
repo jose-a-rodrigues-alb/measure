@@ -129,6 +129,6 @@ internal class MultipartDataFactoryImpl(
     }
 
     private fun SpanPacket.getSerializedData(): String {
-        return "{\"name\":\"$name\",\"traceId\":\"$traceId\",\"spanId\":\"$spanId\",\"parentId\":\"$parentId\",\"sessionId\":\"$sessionId\",\"startTime\":$startTime,\"endTime\":$endTime,\"duration\":$duration,\"status\":\"$status\",\"attributes\":$serializedAttributes,\"spanEvents\":$serializedSpanEvents,\"hasEnded\":$hasEnded}"
+        return "{\"name\":\"$name\",\"trace_id\":\"$traceId\",\"span_id\":\"$spanId\",\"parent_id\":\"$parentId\",\"session_id\":\"$sessionId\",\"start_time\":\"$startTime\",\"end_time\":\"$endTime\",\"duration\":$duration,\"status\":\"$status\",\"attributes\":$serializedAttributes,\"checkpoints\":$serializedCheckpoints,\"has_ended\":$hasEnded}"
     }
 }

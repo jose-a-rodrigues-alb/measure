@@ -5,8 +5,6 @@ import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
 import sh.measure.android.utils.IdProvider
 import sh.measure.android.utils.TimeProvider
-import java.io.PrintWriter
-import java.io.StringWriter
 
 /**
  * A thread safe implementation of [Span].
@@ -26,7 +24,7 @@ internal class MsrSpan(
     private var status = SpanStatus.Unset
     private var endTime = 0L
     private var hasEnded: EndState = EndState.NotEnded
-    override val spanEvents: MutableList<SpanEvent> = mutableListOf()
+    override val checkpoints: MutableList<Checkpoint> = mutableListOf()
     override val attributes: MutableMap<String, Any?> = mutableMapOf()
 
     companion object {
@@ -86,13 +84,14 @@ internal class MsrSpan(
         return this
     }
 
-    override fun setEvent(name: String, attributes: Map<String, Any?>): Span {
+    override fun setCheckpoint(name: String): Span {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {
                 logger.log(LogLevel.Warning, "Attempt to set parent after span ended")
                 return this
             }
-            this.spanEvents.add(SpanEvent(name, timeProvider.now(), attributes))
+            val checkpoint = Checkpoint(name, timeProvider.now())
+            this.checkpoints.add(checkpoint)
         }
         return this
     }
@@ -163,27 +162,6 @@ internal class MsrSpan(
         return this
     }
 
-    override fun setException(exception: Throwable): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set exception after span ended")
-                return this
-            }
-            val attributes = mutableMapOf<String, String>()
-            attributes["exception.name"] = exception.javaClass.name
-            exception.message?.let { attributes["exception.message"] = it }
-            val stringWriter = StringWriter()
-            PrintWriter(stringWriter).use { printWriter ->
-                exception.printStackTrace(printWriter)
-            }
-            val stackTrace = stringWriter.toString()
-            attributes["exception.stacktrace"] = stackTrace
-            val exceptionEvent = SpanEvent("exception", timeProvider.now(), attributes)
-            this.spanEvents.add(exceptionEvent)
-        }
-        return this
-    }
-
     override fun end(): Span {
         endSpanInternal(timeProvider.now())
         return this
@@ -250,7 +228,7 @@ internal class MsrSpan(
                 hasEnded = hasEnded == EndState.Ended,
                 parentId = parentId,
                 sessionId = sessionId,
-                spanEvents = spanEvents,
+                checkpoints = checkpoints,
                 attributes = attributes,
                 duration = calculateDuration(),
             )

@@ -18,13 +18,13 @@ import org.mockito.kotlin.verify
 import sh.measure.android.fakes.FakeConfigProvider
 import sh.measure.android.fakes.FakeIdProvider
 import sh.measure.android.fakes.NoopLogger
+import sh.measure.android.fakes.TestData
 import sh.measure.android.storage.AttachmentEntity
 import sh.measure.android.storage.BatchEntity
 import sh.measure.android.storage.DatabaseImpl
 import sh.measure.android.storage.EventEntity
 import sh.measure.android.storage.FileStorageImpl
 import sh.measure.android.storage.SessionEntity
-import sh.measure.android.storage.SpanEntity
 import sh.measure.android.storage.SpansTable
 import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.TestClock
@@ -362,6 +362,6 @@ internal class EventExporterTest {
     }
 
     private fun insertSpanInDb(sessionId: String, spanId: String) {
-        database.insertSpan(SpanEntity(spanId = spanId, sessionId = sessionId))
+        database.insertSpan(TestData.getSpanEntity(sessionId = sessionId, spanId = spanId))
     }
 }

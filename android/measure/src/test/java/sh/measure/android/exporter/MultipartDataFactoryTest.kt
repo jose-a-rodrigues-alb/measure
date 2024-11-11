@@ -12,6 +12,7 @@ import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.TestData
 import sh.measure.android.logger.Logger
 import sh.measure.android.storage.FileStorage
+import sh.measure.android.utils.iso8601Timestamp
 import java.io.File
 import java.io.InputStream
 
@@ -117,16 +118,21 @@ class MultipartDataFactoryTest {
 
     @Test
     fun `createFromSpanPacket returns FormField`() {
+        val startTime: Long = 1000
+        val endTime: Long = 5000
+        val checkpoint = TestData.getCheckpoint()
         fun expectedSerializedValue(): String {
-            return "{\"name\":\"span-name\",\"traceId\":\"trace-id\",\"spanId\":\"span-id\",\"parentId\":\"parent-id\",\"sessionId\":\"session-id\",\"startTime\":1000,\"endTime\":2000,\"duration\":1000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"spanEvents\":[{\"name\":\"name\",\"timestamp\":98765432,\"attributes\":{\"key\":\"value\"}}],\"hasEnded\":true}"
+            return "{\"name\":\"span-name\",\"trace_id\":\"trace-id\",\"span_id\":\"span-id\",\"parent_id\":\"parent-id\",\"session_id\":\"session-id\",\"start_time\":\"${startTime.iso8601Timestamp()}\",\"end_time\":\"${endTime.iso8601Timestamp()}\",\"duration\":4000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"checkpoints\":[{\"name\":\"${checkpoint.name}\",\"timestamp\":\"${checkpoint.timestamp.iso8601Timestamp()}\"}],\"has_ended\":true}"
         }
 
         // Given
-        val spanEvent = TestData.getSpanEvent()
         val attributes = mapOf("key" to "value")
         val spanEntity = TestData.getSpanEntity(
             spanId = "span-id",
-            spanEvents = listOf(spanEvent),
+            checkpoints = listOf(checkpoint),
+            startTime = startTime,
+            endTime = endTime,
+            duration = endTime - startTime,
             attributes = attributes,
         )
         val spanPacket = TestData.getSpanPacket(spanEntity)

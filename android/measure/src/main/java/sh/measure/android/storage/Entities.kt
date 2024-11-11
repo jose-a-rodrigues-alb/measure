@@ -112,16 +112,16 @@ internal data class BatchEntity(
 )
 
 internal data class SpanEntity(
-    val name: String = "name",
-    val traceId: String = "traceId",
-    val spanId: String = "spanId",
-    val parentId: String? = null,
-    val sessionId: String = "sessionId",
-    val startTime: Long = 9876543L,
-    val endTime: Long = 9876543L + 1000L,
-    val duration: Long = 1000,
-    val status: SpanStatus = SpanStatus.Ok,
+    val name: String,
+    val traceId: String,
+    val spanId: String,
+    val parentId: String?,
+    val sessionId: String,
+    val startTime: Long,
+    val endTime: Long,
+    val duration: Long,
+    val status: SpanStatus,
     val serializedAttributes: String? = null,
-    val serializedSpanEvents: String? = null,
+    val serializedCheckpoints: String? = null,
     val hasEnded: Boolean = true,
 )

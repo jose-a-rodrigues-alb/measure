@@ -11,7 +11,7 @@ internal class InvalidSpan : Span {
 
     override val startTime: Long = 0
 
-    override val spanEvents: MutableList<SpanEvent> = mutableListOf()
+    override val checkpoints: MutableList<Checkpoint> = mutableListOf()
 
     override fun setAttribute(key: String, value: Int): Span {
         return this
@@ -37,10 +37,6 @@ internal class InvalidSpan : Span {
         return this
     }
 
-    override fun setException(exception: Throwable): Span {
-        return this
-    }
-
     override val attributes: MutableMap<String, Any?> = mutableMapOf()
 
     override fun getStatus(): SpanStatus {
@@ -55,7 +51,7 @@ internal class InvalidSpan : Span {
         return this
     }
 
-    override fun setEvent(name: String, attributes: Map<String, Any?>): Span {
+    override fun setCheckpoint(name: String): Span {
         return this
     }
 

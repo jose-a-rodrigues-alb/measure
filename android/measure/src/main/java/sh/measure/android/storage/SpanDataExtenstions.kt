@@ -1,10 +1,10 @@
 package sh.measure.android.storage
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import sh.measure.android.tracing.Checkpoint
 import sh.measure.android.tracing.SpanData
-import sh.measure.android.tracing.SpanEvent
+import sh.measure.android.utils.iso8601Timestamp
 import sh.measure.android.utils.toJsonElement
 
 internal fun SpanData.toSpanEntity(): SpanEntity {
@@ -18,7 +18,7 @@ internal fun SpanData.toSpanEntity(): SpanEntity {
         parentId = parentId,
         endTime = endTime,
         traceId = traceId,
-        serializedSpanEvents = serializeSpanEvent(),
+        serializedCheckpoints = serializeCheckpoints(),
         serializedAttributes = Json.encodeToString(
             JsonElement.serializer(),
             attributes.toJsonElement(),
@@ -27,11 +27,10 @@ internal fun SpanData.toSpanEntity(): SpanEntity {
     )
 }
 
-private fun SpanData.serializeSpanEvent(): String {
-    return spanEvents.joinToString(",", prefix = "[", postfix = "]") { it.serialize() }
+private fun SpanData.serializeCheckpoints(): String {
+    return checkpoints.joinToString(",", prefix = "[", postfix = "]") { it.serialize() }
 }
 
-private fun SpanEvent.serialize(): String {
-    val serializedAttributes = Json.encodeToString(attributes.toJsonElement())
-    return "{\"name\":\"${name}\",\"timestamp\":$timestamp,\"attributes\":$serializedAttributes}"
+private fun Checkpoint.serialize(): String {
+    return "{\"name\":\"${name}\",\"timestamp\":\"${timestamp.iso8601Timestamp()}\"}"
 }

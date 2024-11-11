@@ -12,7 +12,6 @@ import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.IdProviderImpl
 import sh.measure.android.utils.RandomizerImpl
 import sh.measure.android.utils.TestClock
-import java.io.IOException
 import java.time.Duration
 
 class MsrSpanTest {
@@ -190,8 +189,7 @@ class MsrSpanTest {
 
     @Test
     fun `setEvent adds event to span`() {
-        val attrs = mapOf(Pair("key", "value"))
-        val expectedEvent = SpanEvent("event-id", timeProvider.now(), attrs)
+        val expectedEvent = Checkpoint("event-id", timeProvider.now())
         val span = MsrSpan.startSpan(
             "span-name",
             logger = logger,
@@ -201,10 +199,10 @@ class MsrSpanTest {
             idProvider = idProvider,
             parentSpan = null,
         ) as MsrSpan
-        span.setEvent(expectedEvent.name, expectedEvent.attributes)
+        span.setCheckpoint(expectedEvent.name)
 
-        Assert.assertEquals(1, span.spanEvents.size)
-        Assert.assertEquals(expectedEvent, span.spanEvents.first())
+        Assert.assertEquals(1, span.checkpoints.size)
+        Assert.assertEquals(expectedEvent, span.checkpoints.first())
     }
 
     @Test
@@ -218,9 +216,9 @@ class MsrSpanTest {
             idProvider = idProvider,
             parentSpan = null,
         ).end()
-        span.setEvent("event-id", emptyMap())
+        span.setCheckpoint("event-id")
 
-        Assert.assertEquals(0, span.spanEvents.size)
+        Assert.assertEquals(0, span.checkpoints.size)
     }
 
     @Test
@@ -286,32 +284,5 @@ class MsrSpanTest {
         val duration = span.getDuration()
 
         Assert.assertEquals(0, duration)
-    }
-
-    @Test
-    fun `setException adds exception event to span`() {
-        val span = MsrSpan.startSpan(
-            "span-name",
-            logger = logger,
-            timeProvider = timeProvider,
-            spanProcessor = spanProcessor,
-            sessionManager = sessionManager,
-            idProvider = idProvider,
-            parentSpan = null,
-        )
-        span.setException(IOException("exception message"))
-
-        Assert.assertEquals(1, span.spanEvents.size)
-        Assert.assertEquals(
-            "java.io.IOException",
-            span.spanEvents.first().attributes["exception.name"],
-        )
-        Assert.assertEquals(
-            "exception message",
-            span.spanEvents.first().attributes["exception.message"],
-        )
-        Assert.assertTrue(
-            span.spanEvents.first().attributes["exception.stacktrace"].toString().isNotEmpty(),
-        )
     }
 }

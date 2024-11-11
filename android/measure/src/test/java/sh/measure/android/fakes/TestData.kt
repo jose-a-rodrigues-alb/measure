@@ -35,12 +35,13 @@ import sh.measure.android.storage.EventEntity
 import sh.measure.android.storage.SessionEntity
 import sh.measure.android.storage.SpanEntity
 import sh.measure.android.storage.toSpanEntity
+import sh.measure.android.tracing.Checkpoint
 import sh.measure.android.tracing.MsrSpan
 import sh.measure.android.tracing.SpanData
-import sh.measure.android.tracing.SpanEvent
 import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.SpanStatus
 import sh.measure.android.utils.TimeProvider
+import sh.measure.android.utils.iso8601Timestamp
 
 internal object TestData {
 
@@ -459,7 +460,7 @@ internal object TestData {
         status: SpanStatus = SpanStatus.Ok,
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
-        spanEvents: List<SpanEvent> = listOf(),
+        checkpoints: List<Checkpoint> = listOf(),
     ): SpanData {
         return SpanData(
             name = name,
@@ -473,7 +474,7 @@ internal object TestData {
             status = status,
             hasEnded = hasEnded,
             attributes = attributes,
-            spanEvents = spanEvents,
+            checkpoints = checkpoints,
         )
     }
 
@@ -513,7 +514,7 @@ internal object TestData {
         status: SpanStatus = SpanStatus.Ok,
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
-        spanEvents: List<SpanEvent> = listOf(),
+        checkpoints: List<Checkpoint> = listOf(),
     ): SpanEntity {
         return getSpanData(
             name = name,
@@ -527,7 +528,7 @@ internal object TestData {
             status = status,
             hasEnded = hasEnded,
             attributes = attributes,
-            spanEvents = spanEvents,
+            checkpoints = checkpoints,
         ).toSpanEntity()
     }
 
@@ -538,21 +539,20 @@ internal object TestData {
             spanId = spanEntity.spanId,
             parentId = spanEntity.parentId,
             sessionId = spanEntity.sessionId,
-            startTime = spanEntity.startTime,
-            endTime = spanEntity.endTime,
+            startTime = spanEntity.startTime.iso8601Timestamp(),
+            endTime = spanEntity.endTime.iso8601Timestamp(),
             duration = spanEntity.duration,
             status = spanEntity.status.ordinal,
             serializedAttributes = spanEntity.serializedAttributes,
-            serializedSpanEvents = spanEntity.serializedSpanEvents,
+            serializedCheckpoints = spanEntity.serializedCheckpoints,
             hasEnded = spanEntity.hasEnded,
         )
     }
 
-    fun getSpanEvent(): SpanEvent {
-        return SpanEvent(
+    fun getCheckpoint(): Checkpoint {
+        return Checkpoint(
             name = "name",
             timestamp = 98765432L,
-            attributes = mapOf("key" to "value"),
         )
     }
 }
