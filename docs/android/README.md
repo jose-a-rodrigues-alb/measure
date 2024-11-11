@@ -4,8 +4,9 @@
 * [Quick reference](#quick-reference)
 * [Getting started](#getting-started)
 * [Custom events](#custom-events)
-  * [Handled exceptions](#handled-exceptions)
-  * [Navigation](#navigation)
+    * [Handled exceptions](#handled-exceptions)
+    * [Navigation](#navigation)
+* [Performance Tracing](#performance-tracing)
 * [Features](#features)
 * [Benchmarks](#benchmarks)
 
@@ -21,8 +22,7 @@
 
 A quick reference to the entire public API for Measure Android SDK.
 
-<img src="https://github.com/user-attachments/assets/ff835b3b-2953-4920-b5fa-060761862cac" width="60%" alt="Cheatsheet">
-
+![cheatsheet-0.9.0.png](images/cheatsheet-0.9.0.png)
 
 # Getting started
 
@@ -35,8 +35,8 @@ Copy the API Key and API URL from the dashboard and add it to `AndroidManifest.x
 ```xml
 
 <application>
-    <meta-data android:name="sh.measure.android.API_KEY" android:value="YOUR_API_KEY" />
-    <meta-data android:name="sh.measure.android.API_URL" android:value="API_URL" />
+    <meta-data android:name="sh.measure.android.API_KEY" android:value="YOUR_API_KEY"/>
+    <meta-data android:name="sh.measure.android.API_URL" android:value="API_URL"/>
 </application>
 ```
 
@@ -86,8 +86,8 @@ Then add the following in the `AndroidManifest.xml` file:
 ```xml
 
 <application>
-    <meta-data android:name="sh.measure.android.API_KEY" android:value="${measureApiKey}" />
-    <meta-data android:name="sh.measure.android.API_URL" android:value="${measureUrlKey}" />
+    <meta-data android:name="sh.measure.android.API_KEY" android:value="${measureApiKey}"/>
+    <meta-data android:name="sh.measure.android.API_URL" android:value="${measureUrlKey}"/>
 </application>
 ```
 
@@ -129,11 +129,11 @@ For example to disable the plugin for `debug` variants, add the following to you
 
 ```kotlin
 measure {
-  variantFilter {
-    if (name.contains("debug")) {
-      enabled = false
+    variantFilter {
+        if (name.contains("debug")) {
+            enabled = false
+        }
     }
-  }
 }
 ```
 
@@ -141,16 +141,15 @@ or in the `build.gradle` file:
 
 ```groovy
 measure {
-  variantFilter {
-    if (name.contains("debug")) {
-      enabled = false
+    variantFilter {
+        if (name.contains("debug")) {
+            enabled = false
+        }
     }
-  }
 }
 ```
 
 </details>
-
 
 ### 3. Add Measure SDK
 
@@ -178,8 +177,6 @@ Add the following to your app's Application class `onCreate` method.
 Measure.init(context)
 ```
 
-
-
 If you wish to configure the SDK during initialization with a custom config use the overloaded function:
 
 ```kotlin
@@ -200,12 +197,17 @@ after the SDK is initialized:
 ```kotlin
 throw RuntimeException("This is a test crash")
 ```
+
 Reopen the app and launch the dashboard, you should see the crash report in the dashboard.
 
 > [!CAUTION]
 > Make sure to remove the test crash code before releasing the app to production.
 
 🎉 Congratulations, you have successfully integrated Measure into your app!
+
+# Performance tracing
+
+Refer to [Performance Tracing](features/feature_performance_tracing.md) to get started.
 
 # Custom events
 
@@ -246,7 +248,7 @@ Measure.trackNavigationEvent(
 
 # Features
 
-All the features supported by the Measure SDK are listed below. 
+All the features supported by the Measure SDK are listed below.
 
 * [Crash tracking](features/feature_crash_tracking.md)
 * [ANR tracking](features/feature_anr_tracking.md)
@@ -259,12 +261,16 @@ All the features supported by the Measure SDK are listed below.
 * [CPU monitoring](features/feature_cpu_monitoring.md)
 * [Memory monitoring](features/feature_memory_monitoring.md)
 * [App size](features/feature_app_size.md)
+* [Performance Tracing](features/feature_performance_tracing.md)
 
 # Session
 
-A session represents a continuous period of activity in the app. A new session begins when an app is launched for the first time, 
-or when there's been no activity for a 20-minute period. A single session can continue across multiple app background and 
-foreground events; brief interruptions will not cause a new session to be created. This approach is helpful when reviewing 
+A session represents a continuous period of activity in the app. A new session begins when an app is launched for the
+first time,
+or when there's been no activity for a 20-minute period. A single session can continue across multiple app background
+and
+foreground events; brief interruptions will not cause a new session to be created. This approach is helpful when
+reviewing
 session replays, as it shows the app switching between background and foreground states within the same session.
 
 # Benchmarks
@@ -272,7 +278,7 @@ session replays, as it shows the app switching between background and foreground
 Measure SDK has a set of benchmarks to measure the performance impact of the SDK on the app.
 These benchmarks are collected using macro-benchmark on a Pixel 4a device running Android 13 (API 33).
 Each benchmark is run 35 times. See the [android/benchmarks](../../android/benchmarks/README.md) for
-more details, and the raw results are available in the 
+more details, and the raw results are available in the
 [android/benchmarkData](../../android/benchmarks/README.md) folder.
 
 > [!IMPORTANT]

@@ -63,37 +63,37 @@ interface Span {
     val checkpoints: MutableList<Checkpoint>
 
     /**
-     *
+     * Adds an integer attribute to the span.
      */
     fun setAttribute(key: String, value: Int): Span
 
     /**
-     *
+     * Adds a long attribute to the span.
      */
     fun setAttribute(key: String, value: Long): Span
 
     /**
-     *
+     * Adds a string attribute to the span.
      */
     fun setAttribute(key: String, value: String): Span
 
     /**
-     *
+     * Adds a boolean attribute to the span.
      */
     fun setAttribute(key: String, value: Boolean): Span
 
     /**
-     *
+     * Adds an double attribute to the span.
      */
     fun setAttribute(key: String, value: Double): Span
 
     /**
-     *
+     * Adds an float attribute to the span.
      */
     fun setAttribute(key: String, value: Float): Span
 
     /**
-     *
+     * All attributes added to the span.
      */
     val attributes: MutableMap<String, Any?>
 
