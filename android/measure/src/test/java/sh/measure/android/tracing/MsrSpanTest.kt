@@ -188,8 +188,8 @@ class MsrSpanTest {
     }
 
     @Test
-    fun `setEvent adds event to span`() {
-        val expectedEvent = Checkpoint("event-id", timeProvider.now())
+    fun `setCheckpoint adds checkpoint to span`() {
+        val expectedCheckpoint = Checkpoint("name", timeProvider.now())
         val span = MsrSpan.startSpan(
             "span-name",
             logger = logger,
@@ -199,10 +199,10 @@ class MsrSpanTest {
             idProvider = idProvider,
             parentSpan = null,
         ) as MsrSpan
-        span.setCheckpoint(expectedEvent.name)
+        span.setCheckpoint(expectedCheckpoint.name)
 
         Assert.assertEquals(1, span.checkpoints.size)
-        Assert.assertEquals(expectedEvent, span.checkpoints.first())
+        Assert.assertEquals(expectedCheckpoint, span.checkpoints.first())
     }
 
     @Test

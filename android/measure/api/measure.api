@@ -73,8 +73,10 @@ public final class sh/measure/android/okhttp/MeasureOkHttpApplicationInterceptor
 public final class sh/measure/android/tracing/Checkpoint {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;J)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getName ()Ljava/lang/String;
 	public final fun getTimestamp ()J
+	public fun hashCode ()I
 }
 
 public abstract interface class sh/measure/android/tracing/Scope : java/lang/AutoCloseable {

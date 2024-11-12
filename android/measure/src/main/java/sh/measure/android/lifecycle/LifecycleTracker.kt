@@ -101,7 +101,7 @@ internal class LifecycleTracker(
     override fun onActivityStarted(activity: Activity) {
         val currentActivitySpan = internalTracer.startSpan(SpanConstant.CURRENT_ACTIVITY)
             .setAttribute(SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name)
-        val currentActivityScope = if (appStartupSpanScope == null) {
+        val currentActivityScope = if (appStartupSpanScope == null || !launchInProgress) {
             currentActivitySpan.makeCurrent()
         } else {
             null

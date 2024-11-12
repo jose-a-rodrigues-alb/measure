@@ -16,6 +16,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 import sh.measure.android.TestLifecycleActivity
 import sh.measure.android.applaunch.LaunchState
+import sh.measure.android.attributes.SpanConstant
 import sh.measure.android.fakes.TestData
 import sh.measure.android.tracing.TestTracer
 import sh.measure.android.utils.AndroidTimeProvider
@@ -41,14 +42,14 @@ class LifecycleTrackerTest {
         lifecycleTracker.register()
 
         // creates app-startup span on initialization
-        internalTracer.assertSpanStarted("app-startup")
+        internalTracer.assertSpanStarted(SpanConstant.APP_STARTUP)
 
         activityController.setup()
         forceNextDraw()
         lifecycleTracker.onClick(TestData.getClickData())
 
         // ends app-startup span on first interaction
-        internalTracer.assertSpanEnded("app-startup")
+        internalTracer.assertSpanEnded(SpanConstant.APP_STARTUP)
     }
 
     @Test
@@ -57,7 +58,7 @@ class LifecycleTrackerTest {
         lifecycleTracker.register()
         activityController.setup()
         forceNextDraw()
-        internalTracer.assertSpanEnded("cold_launch.ttid")
+        internalTracer.assertSpanEnded(SpanConstant.COLD_LAUNCH_TTID)
     }
 
     @Test
@@ -66,7 +67,7 @@ class LifecycleTrackerTest {
         LaunchState.processImportanceOnInit = RunningAppProcessInfo.IMPORTANCE_CACHED
         activityController.setup()
         forceNextDraw()
-        internalTracer.assertSpanEnded("warm_launch.ttid")
+        internalTracer.assertSpanEnded(SpanConstant.WARM_LAUNCH_TTID)
     }
 
     @Test
@@ -85,7 +86,7 @@ class LifecycleTrackerTest {
         activityController.restart().restoreInstanceState(savedState).resume()
         forceNextDraw()
 
-        internalTracer.assertSpanEnded("hot_launch.ttid")
+        internalTracer.assertSpanEnded(SpanConstant.HOT_LAUNCH_TTID)
     }
 
     @Test
@@ -95,7 +96,7 @@ class LifecycleTrackerTest {
         activityController.setup()
         forceNextDraw()
         lifecycleTracker.onClick(TestData.getClickData())
-        internalTracer.assertSpanEnded("cold_launch.ttfi")
+        internalTracer.assertSpanEnded(SpanConstant.COLD_LAUNCH_TTFI)
     }
 
     @Test
@@ -105,7 +106,7 @@ class LifecycleTrackerTest {
         activityController.setup()
         forceNextDraw()
         lifecycleTracker.onClick(TestData.getClickData())
-        internalTracer.assertSpanEnded("warm_launch.ttfi")
+        internalTracer.assertSpanEnded(SpanConstant.WARM_LAUNCH_TTFI)
     }
 
     @Test
@@ -124,16 +125,16 @@ class LifecycleTrackerTest {
         activityController.restart().restoreInstanceState(savedState).resume()
         forceNextDraw()
         lifecycleTracker.onClick(TestData.getClickData())
-        internalTracer.assertSpanEnded("hot_launch.ttfi")
+        internalTracer.assertSpanEnded(SpanConstant.HOT_LAUNCH_TTFI)
     }
 
     @Test
-    fun `tracks current_screen span`() {
+    fun `tracks current_activity span`() {
         lifecycleTracker.register()
         activityController.setup()
-        internalTracer.assertSpanStarted("current_screen")
+        internalTracer.assertSpanStarted(SpanConstant.CURRENT_ACTIVITY)
         activityController.pause()
-        internalTracer.assertSpanEnded("current_screen")
+        internalTracer.assertSpanEnded(SpanConstant.CURRENT_ACTIVITY)
     }
 
     private fun forceNextDraw() {
