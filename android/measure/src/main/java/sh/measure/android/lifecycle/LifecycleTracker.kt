@@ -98,7 +98,7 @@ internal class LifecycleTracker(
     }
 
     override fun onActivityStarted(activity: Activity) {
-        val currentActivitySpan = internalTracer.startSpan("current_screen")
+        val currentActivitySpan = internalTracer.startSpan("current_activity")
         val currentActivityScope = if (appStartupSpanScope == null) {
             currentActivitySpan.makeCurrent()
         } else {
@@ -111,7 +111,7 @@ internal class LifecycleTracker(
                 appMightBecomeVisible()
             }
         } else {
-            transitionSpan = internalTracer.startSpan("screen_transition", setNoParent = true)
+            transitionSpan = internalTracer.startSpan("activity_transition", setNoParent = true)
         }
         val identityHash = Integer.toHexString(System.identityHashCode(activity))
         startedActivities += identityHash
