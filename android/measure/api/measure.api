@@ -70,6 +70,13 @@ public final class sh/measure/android/okhttp/MeasureOkHttpApplicationInterceptor
 	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
 }
 
+public final class sh/measure/android/tracing/Checkpoint {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;J)V
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTimestamp ()J
+}
+
 public abstract interface class sh/measure/android/tracing/Scope : java/lang/AutoCloseable {
 }
 
@@ -77,6 +84,8 @@ public abstract interface class sh/measure/android/tracing/Span {
 	public static final field Companion Lsh/measure/android/tracing/Span$Companion;
 	public abstract fun end ()Lsh/measure/android/tracing/Span;
 	public abstract fun end (J)Lsh/measure/android/tracing/Span;
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getCheckpoints ()Ljava/util/List;
 	public abstract fun getDuration ()J
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getParentId ()Ljava/lang/String;
@@ -87,6 +96,14 @@ public abstract interface class sh/measure/android/tracing/Span {
 	public abstract fun getTraceId ()Ljava/lang/String;
 	public abstract fun hasEnded ()Z
 	public abstract fun makeCurrent ()Lsh/measure/android/tracing/Scope;
+	public abstract fun setAttribute (Ljava/lang/String;D)Lsh/measure/android/tracing/Span;
+	public abstract fun setAttribute (Ljava/lang/String;F)Lsh/measure/android/tracing/Span;
+	public abstract fun setAttribute (Ljava/lang/String;I)Lsh/measure/android/tracing/Span;
+	public abstract fun setAttribute (Ljava/lang/String;J)Lsh/measure/android/tracing/Span;
+	public abstract fun setAttribute (Ljava/lang/String;Ljava/lang/String;)Lsh/measure/android/tracing/Span;
+	public abstract fun setAttribute (Ljava/lang/String;Z)Lsh/measure/android/tracing/Span;
+	public abstract fun setCheckpoint (Ljava/lang/String;)Lsh/measure/android/tracing/Span;
+	public abstract fun setParent (Lsh/measure/android/tracing/Span;)Lsh/measure/android/tracing/Span;
 	public abstract fun setStatus (Lsh/measure/android/tracing/SpanStatus;)Lsh/measure/android/tracing/Span;
 	public abstract fun withScope (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
