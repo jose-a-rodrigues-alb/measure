@@ -6,6 +6,7 @@ import android.app.Application
 import android.os.Bundle
 import curtains.onNextDraw
 import sh.measure.android.applaunch.LaunchState
+import sh.measure.android.attributes.SpanConstant
 import sh.measure.android.gestures.ClickData
 import sh.measure.android.gestures.GestureListener
 import sh.measure.android.gestures.LongClickData
@@ -33,6 +34,7 @@ internal class LifecycleTracker(
     private var appStartupSpanScope: Scope? = null
 
     private data class ActivityInfo(
+        val activityName: String,
         val firstFrameDrawnTimestamp: Long? = null,
         val firstInteraction: Interaction? = null,
         val sameMessage: Boolean,
@@ -49,9 +51,7 @@ internal class LifecycleTracker(
         val type: Type,
     ) {
         enum class Type {
-            Click,
-            LongClick,
-            Scroll,
+            Click, LongClick, Scroll,
         }
     }
 
@@ -59,7 +59,7 @@ internal class LifecycleTracker(
         application.registerActivityLifecycleCallbacks(this)
         getAppStartTime()?.let { startTime ->
             appStartupSpan = internalTracer.startSpan(
-                "app-startup",
+                SpanConstant.APP_STARTUP,
                 startTime = convertToEpochTime(startTime),
                 setNoParent = true,
             ).apply {
@@ -74,6 +74,7 @@ internal class LifecycleTracker(
         createdActivities[identityHash] = ActivityInfo(
             sameMessage = true,
             hasSavedState = hasSavedState,
+            activityName = activity.javaClass.name
         )
 
         // Helps differentiating between warm and hot launches.
@@ -98,7 +99,8 @@ internal class LifecycleTracker(
     }
 
     override fun onActivityStarted(activity: Activity) {
-        val currentActivitySpan = internalTracer.startSpan("current_activity")
+        val currentActivitySpan = internalTracer.startSpan(SpanConstant.CURRENT_ACTIVITY)
+            .setAttribute(SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name)
         val currentActivityScope = if (appStartupSpanScope == null) {
             currentActivitySpan.makeCurrent()
         } else {
@@ -111,7 +113,14 @@ internal class LifecycleTracker(
                 appMightBecomeVisible()
             }
         } else {
-            transitionSpan = internalTracer.startSpan("activity_transition", setNoParent = true)
+            val previousActivity = startedActivities.lastOrNull()
+            if (previousActivity != null) {
+                createdActivities[previousActivity]?.activityName?.let { activityName ->
+                    transitionSpan = internalTracer.startSpan(
+                        SpanConstant.ACTIVITY_TRANSITION, setNoParent = true
+                    ).setAttribute(SpanConstant.PREVIOUS_SCREEN_NAME, activityName.javaClass.name)
+                }
+            }
         }
         val identityHash = Integer.toHexString(System.identityHashCode(activity))
         startedActivities += identityHash
@@ -163,10 +172,13 @@ internal class LifecycleTracker(
                         getAppStartTime()?.let { startTime ->
                             appStartupSpan?.let { startupSpan ->
                                 internalTracer.startSpan(
-                                    "cold_launch.ttid",
+                                    SpanConstant.COLD_LAUNCH_TTID,
                                     startTime = convertToEpochTime(startTime),
-                                ).setParent(startupSpan).setAttribute("launchType", launchType)
-                                    .end()
+                                ).setParent(startupSpan)
+                                    .setAttribute(SpanConstant.LAUNCH_TYPE, launchType.lowercase())
+                                    .setAttribute(
+                                        SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name
+                                    ).end()
                             }
                         }
                     }
@@ -180,9 +192,12 @@ internal class LifecycleTracker(
                         }
                         getAppStartTime()?.let { startTime ->
                             appStartupSpan?.let { startupSpan ->
-                                internalTracer.startSpan("warm_launch.ttid", startTime = startTime)
-                                    .setAttribute("launchType", launchType).setParent(startupSpan)
-                                    .end()
+                                internalTracer.startSpan(
+                                    SpanConstant.WARM_LAUNCH_TTID, startTime = startTime
+                                ).setAttribute(SpanConstant.LAUNCH_TYPE, launchType.lowercase())
+                                    .setAttribute(
+                                        SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name
+                                    ).setParent(startupSpan).end()
                             }
                         }
                     }
@@ -196,10 +211,13 @@ internal class LifecycleTracker(
                         }
                         lastAppVisibleTime?.let {
                             internalTracer.startSpan(
-                                "warm_launch.ttid",
+                                SpanConstant.WARM_LAUNCH_TTID,
                                 startTime = it,
                                 setNoParent = true,
-                            ).setAttribute("launchType", launchType).end()
+                            ).setAttribute(SpanConstant.LAUNCH_TYPE, launchType.lowercase())
+                                .setAttribute(
+                                    SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name
+                                ).end()
                         }
                     }
 
@@ -212,15 +230,20 @@ internal class LifecycleTracker(
                         }
                         lastAppVisibleTime?.let {
                             internalTracer.startSpan(
-                                "hot_launch.ttid",
+                                SpanConstant.HOT_LAUNCH_TTID,
                                 startTime = it,
                                 setNoParent = true,
                             )
-                        }?.setAttribute("launchType", launchType)?.end()
+                        }?.setAttribute(SpanConstant.LAUNCH_TYPE, launchType.lowercase())
+                            ?.setAttribute(
+                                SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name
+                            )?.end()
                     }
 
                     else -> {
-                        transitionSpan?.end()
+                        transitionSpan?.setAttribute(
+                            SpanConstant.CURRENT_SCREEN_NAME, activity.javaClass.name
+                        )?.end()
                         transitionSpan = null
                     }
                 }
@@ -300,9 +323,14 @@ internal class LifecycleTracker(
         getResumedActivity()?.let { resumedActivity ->
             val activityInfo = createdActivities[resumedActivity]
             if (activityInfo?.firstInteraction == null) {
-                endAppStartupSpan()
                 val name = if (activityInfo?.launchType != null) {
-                    "${activityInfo.launchType}_launch.ttfi"
+                    when (activityInfo.launchType.lowercase()) {
+                        "cold" -> SpanConstant.COLD_LAUNCH_TTFI
+                        "warm" -> SpanConstant.WARM_LAUNCH_TTFI
+                        "lukewarm" -> SpanConstant.WARM_LAUNCH_TTFI
+                        "hot" -> SpanConstant.HOT_LAUNCH_TTFI
+                        else -> throw IllegalArgumentException("No launch type named ${activityInfo.launchType}")
+                    }
                 } else {
                     endAppStartupSpan()
                     return
@@ -312,7 +340,18 @@ internal class LifecycleTracker(
                     internalTracer.startSpan(
                         name,
                         startTime = convertToEpochTime(startTime),
-                    ).end()
+                    ).setAttribute(SpanConstant.CURRENT_SCREEN_NAME, resumedActivity.javaClass.name)
+                        .apply {
+                            interaction.targetId?.let {
+                                setAttribute(
+                                    SpanConstant.GESTURE_TARGET_ID, it
+                                )
+                            }
+                            setAttribute(SpanConstant.GESTURE_TARGET_NAME, interaction.target)
+                            setAttribute(
+                                SpanConstant.GESTURE_TYPE, interaction.type.name.lowercase()
+                            )
+                        }.end()
                 }
                 endAppStartupSpan()
                 createdActivities[resumedActivity]?.copy(firstInteraction = interaction)
