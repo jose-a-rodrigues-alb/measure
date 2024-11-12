@@ -1,10 +1,5 @@
 package sh.measure.android.tracing
 
-data class Checkpoint(
-    val name: String,
-    val timestamp: Long,
-)
-
 /**
  * Represents a span in a trace.
  */
@@ -41,6 +36,16 @@ interface Span {
     val startTime: Long
 
     /**
+     * Checkpoints added explicitly to this span using [setCheckpoint].
+     */
+    val checkpoints: MutableList<Checkpoint>
+
+    /**
+     * All attributes added to the span.
+     */
+    val attributes: MutableMap<String, Any?>
+
+    /**
      * Returns the status of the span.
      */
     fun getStatus(): SpanStatus
@@ -55,12 +60,10 @@ interface Span {
      */
     fun setParent(parentSpan: Span): Span
 
-    fun setCheckpoint(name: String): Span
-
     /**
-     * Checkpoints added explicitly to this span using [setCheckpoint].
+     * Annotate current time with a [name]
      */
-    val checkpoints: MutableList<Checkpoint>
+    fun setCheckpoint(name: String): Span
 
     /**
      * Adds an integer attribute to the span.
@@ -91,11 +94,6 @@ interface Span {
      * Adds an float attribute to the span.
      */
     fun setAttribute(key: String, value: Float): Span
-
-    /**
-     * All attributes added to the span.
-     */
-    val attributes: MutableMap<String, Any?>
 
     /**
      * Ends the span.
