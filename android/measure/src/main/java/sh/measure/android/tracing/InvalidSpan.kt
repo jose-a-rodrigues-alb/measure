@@ -15,6 +15,8 @@ internal class InvalidSpan : Span {
 
     override val attributes: MutableMap<String, Any?> = mutableMapOf()
 
+    override val isSampled: Boolean = false
+
     override fun getStatus(): SpanStatus {
         return SpanStatus.Unset
     }

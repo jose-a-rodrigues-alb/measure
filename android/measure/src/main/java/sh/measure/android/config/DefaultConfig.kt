@@ -11,4 +11,5 @@ internal object DefaultConfig {
     val HTTP_URL_ALLOWLIST: List<String> = emptyList()
     const val TRACK_ACTIVITY_INTENT_DATA: Boolean = false
     const val SESSION_SAMPLING_RATE: Float = 0.0f
+    const val TRACE_SAMPLING_RATE: Float = 0.0001f
 }

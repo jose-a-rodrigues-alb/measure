@@ -67,4 +67,9 @@ internal data class SpanData(
      * Whether the span has ended or not.
      */
     val hasEnded: Boolean,
+
+    /**
+     * Whether the span has been sampled or not.
+     */
+    val isSampled: Boolean,
 )

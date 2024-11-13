@@ -124,4 +124,5 @@ internal data class SpanEntity(
     val serializedAttributes: String? = null,
     val serializedCheckpoints: String? = null,
     val hasEnded: Boolean = true,
+    val sampled: Boolean = true,
 )

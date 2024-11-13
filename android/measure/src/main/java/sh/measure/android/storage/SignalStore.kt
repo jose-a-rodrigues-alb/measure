@@ -34,6 +34,10 @@ internal class SignalStoreImpl(
 ) : SignalStore {
 
     override fun store(spanData: SpanData) {
+        if (!spanData.isSampled) {
+            // Do not store spans that are not sampled
+            return
+        }
         val spanEntity = spanData.toSpanEntity()
         val result = database.insertSpan(spanEntity)
         if (!result) {

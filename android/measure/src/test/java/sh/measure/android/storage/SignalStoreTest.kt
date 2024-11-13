@@ -74,11 +74,19 @@ internal class SignalStoreTest {
     }
 
     @Test
-    fun `stores span`() {
-        val spanData = TestData.getSpanData()
+    fun `stores sampled span`() {
+        val spanData = TestData.getSpanData(isSampled = true)
         signalStore.store(spanData)
 
         verify(database).insertSpan(spanData.toSpanEntity())
+    }
+
+    @Test
+    fun `does not store non-sampled span`() {
+        val spanData = TestData.getSpanData(isSampled = false)
+        signalStore.store(spanData)
+
+        verify(database, never()).insertSpan(any())
     }
 
     @Test

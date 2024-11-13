@@ -3,6 +3,7 @@ package sh.measure.android.tracing
 import org.junit.Assert
 import org.junit.Test
 import sh.measure.android.fakes.FakeSessionManager
+import sh.measure.android.fakes.FakeTraceSampler
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.NoopSpanProcessor
 import sh.measure.android.utils.AndroidTimeProvider
@@ -17,6 +18,7 @@ class MsrSpanBuilderTest {
     private val logger = NoopLogger()
     private val spanProcessor = NoopSpanProcessor()
     private val sessionManager = FakeSessionManager()
+    private val traceSampler = FakeTraceSampler()
 
     @Test
     fun `setsParent sets span parent`() {
@@ -26,6 +28,7 @@ class MsrSpanBuilderTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val span = MsrSpanBuilder(
@@ -34,6 +37,7 @@ class MsrSpanBuilderTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).setParent(parentSpan).startSpan()
 
@@ -48,6 +52,7 @@ class MsrSpanBuilderTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         SpanStorage.instance.makeCurrent(parentSpan).use {
@@ -57,6 +62,7 @@ class MsrSpanBuilderTest {
                 timeProvider,
                 spanProcessor,
                 sessionManager,
+                traceSampler,
                 logger,
             ).startSpan()
             Assert.assertEquals(parentSpan.spanId, span.parentId)
@@ -71,6 +77,7 @@ class MsrSpanBuilderTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         SpanStorage.instance.makeCurrent(parentSpan).use {
@@ -80,6 +87,7 @@ class MsrSpanBuilderTest {
                 timeProvider,
                 spanProcessor,
                 sessionManager,
+                traceSampler,
                 logger,
             ).setNoParent().startSpan()
             Assert.assertNull(span.parentId)

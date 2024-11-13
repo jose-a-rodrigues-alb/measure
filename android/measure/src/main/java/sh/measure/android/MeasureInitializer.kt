@@ -72,6 +72,7 @@ import sh.measure.android.storage.SignalStoreImpl
 import sh.measure.android.tracing.MsrSpanProcessor
 import sh.measure.android.tracing.MsrTracer
 import sh.measure.android.tracing.SpanProcessor
+import sh.measure.android.tracing.TraceSamplerImpl
 import sh.measure.android.tracing.Tracer
 import sh.measure.android.utils.AndroidSystemClock
 import sh.measure.android.utils.AndroidTimeProvider
@@ -383,6 +384,7 @@ internal class MeasureInitializerImpl(
         timeProvider = timeProvider,
         spanProcessor = spanProcessor,
         sessionManager = sessionManager,
+        traceSampler = TraceSamplerImpl(randomizer, configProvider),
     ),
 ) : MeasureInitializer
 

@@ -74,6 +74,8 @@ internal class ConfigProviderImpl(
         get() = getMergedConfig { trackActivityIntentData }
     override val sessionSamplingRate: Float
         get() = getMergedConfig { sessionSamplingRate }
+    override val traceSamplingRate: Float
+        get() = getMergedConfig { traceSamplingRate }
     override val eventsBatchingIntervalMs: Long
         get() = getMergedConfig { eventsBatchingIntervalMs }
     override val maxEventsInBatch: Int

@@ -7,6 +7,7 @@ import org.mockito.Mockito.times
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.verify
 import sh.measure.android.fakes.FakeSessionManager
+import sh.measure.android.fakes.FakeTraceSampler
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.IdProviderImpl
@@ -21,6 +22,7 @@ class MsrSpanTest {
     private val idProvider = IdProviderImpl(randomizer = RandomizerImpl())
     private val spanProcessor = mock<SpanProcessor>()
     private val sessionManager = FakeSessionManager()
+    private val traceSampler = FakeTraceSampler()
 
     @Test
     fun `startSpan sets parent span if provided`() {
@@ -28,6 +30,7 @@ class MsrSpanTest {
             logger = logger,
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
+            isSampled = true,
             name = "parent-span",
             spanId = "span-id",
             traceId = "trace-id",
@@ -41,6 +44,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = parentSpan,
             timestamp = null,
@@ -58,6 +62,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
             timestamp = null,
@@ -74,6 +79,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
             timestamp = timestamp,
@@ -89,6 +95,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -104,6 +111,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -118,6 +126,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         ).setStatus(SpanStatus.Ok)
@@ -132,6 +141,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -146,6 +156,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         ).end()
@@ -160,6 +171,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -177,6 +189,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         ).end() as MsrSpan
@@ -196,6 +209,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         ) as MsrSpan
@@ -213,6 +227,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         ).end()
@@ -229,6 +244,7 @@ class MsrSpanTest {
             timeProvider = timeProvider,
             spanProcessor = spanProcessor,
             sessionManager = sessionManager,
+            traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
         )
@@ -236,5 +252,91 @@ class MsrSpanTest {
         val duration = span.getDuration()
 
         Assert.assertEquals(0, duration)
+    }
+
+    @Test
+    fun `startSpan sets sampling state for root span based on trace sampler`() {
+        traceSampler.setSampled(true)
+        val span1 = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            traceSampler = traceSampler,
+            idProvider = idProvider,
+            parentSpan = null,
+        )
+        Assert.assertTrue(span1.isSampled)
+
+        traceSampler.setSampled(false)
+        val span2 = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            traceSampler = traceSampler,
+            idProvider = idProvider,
+            parentSpan = null,
+        )
+        Assert.assertFalse(span2.isSampled)
+    }
+
+
+    @Test
+    fun `startSpan samples child span if parent span is sampled`() {
+        traceSampler.setSampled(true)
+        val sampledParentSpan = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            traceSampler = traceSampler,
+            idProvider = idProvider,
+            parentSpan = null,
+        )
+        traceSampler.setSampled(false)
+        val childSpan = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            traceSampler = traceSampler,
+            idProvider = idProvider,
+            parentSpan = sampledParentSpan,
+        )
+
+        Assert.assertTrue(childSpan.isSampled)
+    }
+
+    @Test
+    fun `startSpan does not sample child span if parent span is not sampled`() {
+        traceSampler.setSampled(false)
+        val unsampledParentSpan = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            traceSampler = traceSampler,
+            idProvider = idProvider,
+            parentSpan = null,
+        )
+        traceSampler.setSampled(true)
+        val childSpan = MsrSpan.startSpan(
+            "span-name",
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            sessionManager = sessionManager,
+            traceSampler = traceSampler,
+            idProvider = idProvider,
+            parentSpan = unsampledParentSpan,
+        )
+
+        Assert.assertFalse(childSpan.isSampled)
     }
 }

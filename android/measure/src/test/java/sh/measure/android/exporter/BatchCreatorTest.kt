@@ -70,7 +70,6 @@ class BatchCreatorTest {
             database.getUnBatchedSpans(
                 spanCount = any(),
                 ascending = eq(true),
-                sessionId = eq(null),
             ),
         ).thenReturn(
             listOf(),

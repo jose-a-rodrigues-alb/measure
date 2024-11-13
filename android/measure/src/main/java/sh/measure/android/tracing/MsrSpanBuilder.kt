@@ -11,6 +11,7 @@ internal class MsrSpanBuilder(
     private val timeProvider: TimeProvider,
     private val spanProcessor: SpanProcessor,
     private val sessionManager: SessionManager,
+    private val traceSampler: TraceSampler,
     private val logger: Logger,
 ) : SpanBuilder {
     private var parentSpan: Span? = null
@@ -36,6 +37,7 @@ internal class MsrSpanBuilder(
             sessionManager = sessionManager,
             idProvider = idProvider,
             parentSpan = parent,
+            traceSampler = traceSampler,
         )
     }
 
@@ -50,6 +52,7 @@ internal class MsrSpanBuilder(
             sessionManager = sessionManager,
             parentSpan = parent,
             timestamp = timestamp,
+            traceSampler = traceSampler,
         )
     }
 

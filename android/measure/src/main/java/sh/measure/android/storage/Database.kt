@@ -48,7 +48,6 @@ internal interface Database : Closeable {
     fun getUnBatchedSpans(
         spanCount: Int,
         ascending: Boolean = true,
-        sessionId: String? = null,
     ): List<String>
 
     /**
@@ -342,9 +341,8 @@ internal class DatabaseImpl(
     override fun getUnBatchedSpans(
         spanCount: Int,
         ascending: Boolean,
-        sessionId: String?,
     ): List<String> {
-        val query = Sql.getSpansBatchQuery(spanCount, ascending, sessionId)
+        val query = Sql.getSpansBatchQuery(spanCount, ascending)
         val cursor = readableDatabase.rawQuery(query, null)
         val spanIds = mutableListOf<String>()
 
@@ -1033,6 +1031,7 @@ internal class DatabaseImpl(
             put(SpansTable.COL_DURATION, spanEntity.duration)
             put(SpansTable.COL_SERIALIZED_ATTRS, spanEntity.serializedAttributes)
             put(SpansTable.COL_SERIALIZED_SPAN_EVENTS, spanEntity.serializedCheckpoints)
+            put(SpansTable.COL_SAMPLED, spanEntity.sampled)
             put(SpansTable.COL_STATUS, spanEntity.status.ordinal)
             put(SpansTable.COL_HAS_ENDED, spanEntity.hasEnded)
         }

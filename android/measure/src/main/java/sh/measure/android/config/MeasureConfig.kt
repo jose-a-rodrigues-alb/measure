@@ -14,6 +14,7 @@ internal interface IMeasureConfig {
     val httpUrlAllowlist: List<String>
     val trackActivityIntentData: Boolean
     val sessionSamplingRate: Float
+    val traceSamplingRate: Float
 }
 
 /**
@@ -118,10 +119,24 @@ class MeasureConfig(
      * Setting a value outside the range will throw an [IllegalArgumentException].
      */
     override val sessionSamplingRate: Float = DefaultConfig.SESSION_SAMPLING_RATE,
+
+    /**
+     * Allows setting a sampling rate for traces. Defaults to 0.0001.
+     *
+     * The sampling rate is a value between 0 and 1. For example, a value of `0.0001` will export
+     * only 0.01% of all traces, a value of `0` will disable exporting of traces.
+     *
+     * Setting a value outside the range will throw an [IllegalArgumentException].
+     */
+    override val traceSamplingRate: Float = DefaultConfig.TRACE_SAMPLING_RATE,
 ) : IMeasureConfig {
     init {
         require(sessionSamplingRate in 0.0..1.0) {
             "Session sampling rate must be between 0.0 and 1.0"
+        }
+
+        require(traceSamplingRate in 0.0..1.0) {
+            "Trace sampling rate must be between 0.0 and 1.0"
         }
     }
 }

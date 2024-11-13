@@ -59,8 +59,7 @@ internal class BatchCreatorImpl(
             }
 
             val eventIds = filterEventsForMaxAttachmentSize(eventToAttachmentSizeMap)
-            val spanIds =
-                database.getUnBatchedSpans(configProvider.maxEventsInBatch, sessionId = sessionId)
+            val spanIds = database.getUnBatchedSpans(configProvider.maxEventsInBatch)
 
             if (spanIds.isEmpty() && eventIds.isEmpty()) {
                 logger.log(LogLevel.Debug, "No events or spans to batch")

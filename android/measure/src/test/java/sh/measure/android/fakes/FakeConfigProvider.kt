@@ -32,6 +32,7 @@ internal class FakeConfigProvider : ConfigProvider {
     override var maxUserDefinedAttributeKeyLength: Int = 64
     override var maxUserDefinedAttributeValueLength: Int = 256
     override var userDefinedAttributeKeyWithSpaces: Boolean = false
+    override val traceSamplingRate: Float = 1.0f
 
     var shouldTrackHttpBody = false
     override fun shouldTrackHttpBody(url: String, contentType: String?): Boolean {

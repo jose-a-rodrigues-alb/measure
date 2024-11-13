@@ -46,6 +46,12 @@ interface Span {
     val attributes: MutableMap<String, Any?>
 
     /**
+     * Whether this span has been sampled or not. A sampled span is sent to the server,
+     * otherwise it is not.
+     */
+    val isSampled: Boolean
+
+    /**
      * Returns the status of the span.
      */
     fun getStatus(): SpanStatus

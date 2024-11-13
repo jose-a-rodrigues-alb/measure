@@ -11,8 +11,17 @@ internal class MsrTracer(
     private val timeProvider: TimeProvider,
     private val spanProcessor: SpanProcessor,
     private val sessionManager: SessionManager,
+    private val traceSampler: TraceSampler,
 ) : Tracer {
     override fun spanBuilder(name: String): SpanBuilder {
-        return MsrSpanBuilder(name, idProvider, timeProvider, spanProcessor, sessionManager, logger)
+        return MsrSpanBuilder(
+            name,
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            traceSampler,
+            logger
+        )
     }
 }

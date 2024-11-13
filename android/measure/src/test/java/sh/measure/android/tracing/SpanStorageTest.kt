@@ -3,6 +3,7 @@ package sh.measure.android.tracing
 import org.junit.Assert
 import org.junit.Test
 import sh.measure.android.fakes.FakeSessionManager
+import sh.measure.android.fakes.FakeTraceSampler
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.NoopSpanProcessor
 import sh.measure.android.utils.AndroidTimeProvider
@@ -17,6 +18,7 @@ class SpanStorageTest {
     private val logger = NoopLogger()
     private val spanProcessor = NoopSpanProcessor()
     private val sessionManager = FakeSessionManager()
+    private val traceSampler = FakeTraceSampler()
 
     @Test
     fun `current returns null by default`() {
@@ -31,6 +33,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val scope = SpanStorage.instance.makeCurrent(span)
@@ -46,6 +49,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val spanB = MsrSpanBuilder(
@@ -54,6 +58,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val spanAScope = SpanStorage.instance.makeCurrent(spanA)
@@ -73,6 +78,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val spanB = MsrSpanBuilder(
@@ -81,6 +87,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val spanC = MsrSpanBuilder(
@@ -89,6 +96,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
 
@@ -123,6 +131,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
+            traceSampler,
             logger,
         ).startSpan()
         val scope1 = SpanStorage.instance.makeCurrent(span)

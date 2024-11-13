@@ -92,6 +92,7 @@ internal object SpansTable {
     const val COL_HAS_ENDED = "has_ended"
     const val COL_SERIALIZED_ATTRS = "serialized_attrs"
     const val COL_SERIALIZED_SPAN_EVENTS = "serialized_span_events"
+    const val COL_SAMPLED = "sampled"
 }
 
 internal object UserDefinedAttributesTable {
@@ -204,8 +205,8 @@ internal object Sql {
             ${SpansTable.COL_STATUS} TEXT NOT NULL,
             ${SpansTable.COL_SERIALIZED_ATTRS} TEXT,
             ${SpansTable.COL_SERIALIZED_SPAN_EVENTS} TEXT,
-            ${SpansTable.COL_HAS_ENDED} INTEGER,
-            FOREIGN KEY (${SpansTable.COL_SESSION_ID}) REFERENCES ${SessionsTable.TABLE_NAME}(${SessionsTable.COL_SESSION_ID}) ON DELETE CASCADE
+            ${SpansTable.COL_SAMPLED} INTEGER DEFAULT 0,
+            ${SpansTable.COL_HAS_ENDED} INTEGER
         )
     """
 
@@ -292,51 +293,17 @@ internal object Sql {
         }
     }
 
-    fun getSpansBatchQuery(spanCount: Int, ascending: Boolean, sessionId: String?): String {
-        if (sessionId != null) {
-            /**
-             * ```sql
-             * SELECT s.*
-             * FROM spans s
-             * LEFT JOIN spans_batch eb ON s.id = sb.event_id
-             * WHERE sb.span_id IS NULL
-             * AND s.session_id = '$sessionId'
-             * ORDER BY s.timestamp ASC
-             * LIMIT 100
-             * ```
-             */
-            return """
-                SELECT s.${SpansTable.COL_SPAN_ID} 
-                FROM ${SpansTable.TABLE_NAME} s
-                LEFT JOIN ${SpansBatchTable.TABLE_NAME} sb ON s.${SpansTable.COL_SPAN_ID} = sb.${SpansBatchTable.COL_SPAN_ID}
-                WHERE sb.${SpansBatchTable.COL_SPAN_ID} IS NULL
-                AND s.${SpansTable.COL_SESSION_ID} = '$sessionId'
-                ORDER BY s.${SpansTable.COL_END_TIME} ${if (ascending) "ASC" else "DESC"}
-                LIMIT $spanCount
+    fun getSpansBatchQuery(spanCount: Int, ascending: Boolean): String {
+        return """
+            SELECT sp.${SpansTable.COL_SPAN_ID} 
+            FROM ${SpansTable.TABLE_NAME} sp
+            LEFT JOIN ${SpansBatchTable.TABLE_NAME} sb ON sp.${SpansTable.COL_SPAN_ID} = sb.${SpansBatchTable.COL_SPAN_ID}
+            JOIN ${SessionsTable.TABLE_NAME} s ON sp.${SpansTable.COL_SESSION_ID} = s.${SessionsTable.COL_SESSION_ID}
+            WHERE sb.${SpansBatchTable.COL_SPAN_ID} IS NULL
+            AND sp.${SpansTable.COL_SAMPLED} = 1
+            ORDER BY sp.${SpansTable.COL_END_TIME} ${if (ascending) "ASC" else "DESC"}
+            LIMIT $spanCount
             """.trimIndent()
-        } else {
-            /**
-             * ```sql
-             * SELECT sp.*
-             * FROM spans sp
-             * LEFT JOIN spans_batch sb ON sp.id = sb.event_id
-             * JOIN sessions s ON sp.session_id = s.session_id
-             * WHERE sb.event_id IS NULL
-             * AND s.needs_reporting = 1
-             * LIMIT 100
-             * ```
-             */
-            return """
-                SELECT sp.${SpansTable.COL_SPAN_ID} 
-                FROM ${SpansTable.TABLE_NAME} sp
-                LEFT JOIN ${SpansBatchTable.TABLE_NAME} sb ON sp.${SpansTable.COL_SPAN_ID} = sb.${SpansBatchTable.COL_SPAN_ID}
-                JOIN ${SessionsTable.TABLE_NAME} s ON sp.${SpansTable.COL_SESSION_ID} = s.${SessionsTable.COL_SESSION_ID}
-                WHERE sb.${SpansBatchTable.COL_SPAN_ID} IS NULL
-                AND s.${SessionsTable.COL_NEEDS_REPORTING} = 1
-                ORDER BY sp.${SpansTable.COL_END_TIME} ${if (ascending) "ASC" else "DESC"}
-                LIMIT $spanCount
-            """.trimIndent()
-        }
     }
 
     fun getBatches(maxCount: Int): String {

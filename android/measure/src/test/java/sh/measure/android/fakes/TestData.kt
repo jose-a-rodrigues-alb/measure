@@ -461,6 +461,7 @@ internal object TestData {
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
         checkpoints: List<Checkpoint> = listOf(),
+        isSampled: Boolean = true,
     ): SpanData {
         return SpanData(
             name = name,
@@ -475,6 +476,7 @@ internal object TestData {
             hasEnded = hasEnded,
             attributes = attributes,
             checkpoints = checkpoints,
+            isSampled = isSampled,
         )
     }
 
@@ -488,11 +490,13 @@ internal object TestData {
         parentId: String? = null,
         sessionId: String = "session-id",
         startTime: Long = 987654321L,
+        isSampled: Boolean = true,
     ): MsrSpan {
         return MsrSpan(
             logger,
             timeProvider,
             spanProcessor,
+            isSampled,
             name,
             spanId,
             traceId,

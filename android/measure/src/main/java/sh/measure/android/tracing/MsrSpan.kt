@@ -13,6 +13,7 @@ internal class MsrSpan(
     private val logger: Logger,
     private val timeProvider: TimeProvider,
     private val spanProcessor: SpanProcessor,
+    override val isSampled: Boolean,
     override val name: String,
     override val spanId: String,
     override val traceId: String,
@@ -35,6 +36,7 @@ internal class MsrSpan(
             spanProcessor: SpanProcessor,
             sessionManager: SessionManager,
             idProvider: IdProvider,
+            traceSampler: TraceSampler,
             parentSpan: Span?,
             timestamp: Long? = null,
         ): Span {
@@ -42,6 +44,7 @@ internal class MsrSpan(
             val spanId: String = idProvider.spanId()
             val traceId = parentSpan?.traceId ?: idProvider.traceId()
             val sessionId = sessionManager.getSessionId()
+            val isSampled = parentSpan?.isSampled ?: traceSampler.shouldSample()
             val span = MsrSpan(
                 logger = logger,
                 timeProvider = timeProvider,
@@ -52,6 +55,7 @@ internal class MsrSpan(
                 parentId = parentSpan?.spanId,
                 sessionId = sessionId,
                 startTime = startTime,
+                isSampled = isSampled,
             )
             spanProcessor.onStart(span)
             return span
@@ -161,6 +165,7 @@ internal class MsrSpan(
                 checkpoints = checkpoints,
                 attributes = attributes,
                 duration = calculateDuration(),
+                isSampled = isSampled,
             )
         }
     }

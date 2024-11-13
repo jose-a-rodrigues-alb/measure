@@ -457,17 +457,12 @@ class DatabaseTest {
     }
 
     @Test
-    fun `getUnBatchedSpans returns spans from session that needs reporting, but discards already batched spans`() {
+    fun `getUnBatchedSpans returns sampled spans, but discards already batched spans`() {
         // given
         val span1 = TestData.getSpanEntity(spanId = "span-id-1", sessionId = "session-id-1")
         val span2 = TestData.getSpanEntity(spanId = "span-id-2", sessionId = "session-id-1")
         val batchedSpan = TestData.getSpanEntity(spanId = "span-id-3", sessionId = "session-id-1")
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-1",
-                needsReporting = true,
-            ),
-        )
+        database.insertSession(TestData.getSessionEntity(id = "session-id-1"))
         database.insertSpan(span1)
         database.insertSpan(span2)
         database.insertSpan(batchedSpan)
@@ -486,75 +481,15 @@ class DatabaseTest {
     }
 
     @Test
-    fun `getUnBatchedSpans returns spans, but discards events from sessions that do not need reporting`() {
-        val span1 = TestData.getSpanEntity(spanId = "span-id-1", sessionId = "session-id-1")
-        val span2 = TestData.getSpanEntity(spanId = "span-id-2", sessionId = "session-id-2")
-        val span3 = TestData.getSpanEntity(spanId = "span-id-3", sessionId = "session-id-2")
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-1",
-                needsReporting = true,
-            ),
-        )
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-2",
-                needsReporting = false,
-            ),
-        )
-        database.insertSpan(span1)
-        database.insertSpan(span2)
-        database.insertSpan(span3)
-
-        val spansToBatch = database.getUnBatchedSpans(100)
-        assertEquals(1, spansToBatch.size)
-    }
-
-    @Test
-    fun `getUnBatchedSpans given a session ID, returns all spans from the given sessions, even if session does not need reporting`() {
-        val span1 = TestData.getSpanEntity(spanId = "span-id-1", sessionId = "session-id-1")
-        val span2 = TestData.getSpanEntity(spanId = "span-id-2", sessionId = "session-id-1")
-        val span3 = TestData.getSpanEntity(spanId = "span-id-3", sessionId = "session-id-2")
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-1",
-                needsReporting = true,
-            ),
-        )
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-2",
-                needsReporting = false,
-            ),
-        )
-        database.insertSpan(span1)
-        database.insertSpan(span2)
-        database.insertSpan(span3)
-
-        val eventsToBatch = database.getUnBatchedSpans(100, sessionId = "session-id-1")
-        assertEquals(2, eventsToBatch.size)
-    }
-
-    @Test
-    fun `getUnBatchedSpans given sessions which need reporting, respects the maximum number of spans to return`() {
+    fun `getUnBatchedSpans returns sampled spans, respects the maximum number of spans to return`() {
         // given
         val span1 = TestData.getSpanEntity(spanId = "span-id-1", sessionId = "session-id-1")
         val span2 = TestData.getSpanEntity(spanId = "span-id-2", sessionId = "session-id-1")
         val span3 = TestData.getSpanEntity(spanId = "span-id-3", sessionId = "session-id-2")
         val span4 = TestData.getSpanEntity(spanId = "span-id-4", sessionId = "session-id-2")
         val span5 = TestData.getSpanEntity(spanId = "span-id-5", sessionId = "session-id-2")
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-1",
-                needsReporting = true,
-            ),
-        )
-        database.insertSession(
-            TestData.getSessionEntity(
-                id = "session-id-2",
-                needsReporting = true,
-            ),
-        )
+        database.insertSession(TestData.getSessionEntity(id = "session-id-1"))
+        database.insertSession(TestData.getSessionEntity(id = "session-id-2"));
         database.insertSpan(span1)
         database.insertSpan(span2)
         database.insertSpan(span3)

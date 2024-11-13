@@ -38,14 +38,14 @@ internal class DataCleanupServiceImpl(
         try {
             ioExecutor.submit {
                 deleteSessionsNotMarkedForReporting()
-                trimEvents()
+                trimEventsAndSpans()
             }
         } catch (e: RejectedExecutionException) {
             logger.log(LogLevel.Error, "Failed to submit data cleanup task to executor", e)
         }
     }
 
-    private fun trimEvents() {
+    private fun trimEventsAndSpans() {
         val eventsCount = database.getEventsCount()
         val spansCount = database.getSpansCount()
         val totalSignals = eventsCount + spansCount
@@ -82,8 +82,8 @@ internal class DataCleanupServiceImpl(
         val eventIds = database.getEventsForSessions(sessionIds)
         val attachmentIds = database.getAttachmentsForEvents(eventIds)
         fileStorage.deleteEventsIfExist(eventIds, attachmentIds)
-        // deleting sessions from db will also delete events for the session as they are cascaded
-        // deletes.
+        // deleting sessions from db will also delete events for the session as they ar
+        // e cascaded deletes.
         val result = database.deleteSessions(sessionIds)
         if (result) {
             logger.log(LogLevel.Debug, "Deleted ${eventIds.size} events")
