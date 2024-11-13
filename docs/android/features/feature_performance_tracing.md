@@ -14,6 +14,14 @@
 * [Distributed Tracing](#distributed-tracing)
     * [OkHttp example](#example-with-okhttp)
     * [OkHttp interceptor example](#example-with-okhttp-interceptor)
+* [Naming Convention](#naming-conventions)
+    * [Span Names](#span-names)
+        * [Function Calls](#function-calls)
+        * [User journey](#user-journey)
+        * [Http](#http)
+        * [Screen](#screen)
+        * [Database](#database)
+        * [Launch](#launch)
 
 ## Introduction
 
@@ -120,7 +128,7 @@ val spanScope: Scope = Measure.startSpan("span-name").makeCurrent()
 > use `span.withScope` which will make sure the scope is closed correctly, even if the app crashes while running the
 > code being tracked.
 
-When `makeCurrent` is called, the span is stored as a thread local on the current thread. Calling `getSpan` on another 
+When `makeCurrent` is called, the span is stored as a thread local on the current thread. Calling `getSpan` on another
 thread would not work. This is a standard practice to avoid using synchronization when starting/ending a span. But comes
 with considerable manual management of scopes.
 
@@ -253,3 +261,57 @@ val okHttpClient = OkHttpClient.Builder()
     .addInterceptor(TracingInterceptor())
     .build()
 ```
+
+## Naming conventions
+
+### Span Names
+
+The span name concisely identifies the work represented by the Span, for example, an RPC method name, a function name,
+or the name of a subtask or stage within a larger computation.
+
+> The span name SHOULD be the most general string that identifies a (statistically) interesting class of Spans, rather
+> than individual Span instances while still being human-readable. That is, "get_user" is a reasonable name, while
+"get_user/314159", where "314159" is a user ID, is not a good name due to its high cardinality. Generality SHOULD be
+> prioritized over human-readability
+*[Excerpt from Open Telemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.37.0/specification/trace/api.md#span)*
+
+Here are some common conventions you can use when naming spans:
+
+#### Function Calls
+`{CLASS_NAME}.{METHOD_NAME}`
+- UserRepository.getUser
+- OrderService.processOrder
+- CartManager.updateCache
+- AuthService._refreshToken
+
+#### User Journey
+`journey.{FLOW_NAME}.{STEP}`
+- journey.checkout.add_to_cart
+- journey.subscription.select_plan
+- journey.onboarding.setup_profile
+
+#### HTTP
+`HTTP {METHOD} {ROUTE}`
+- HTTP GET /users
+- HTTP POST /orders/{orderId}
+- HTTP PUT /products/{productId}
+
+#### Screen
+`screen.{TYPE} {NAME}`
+- screen.activity HomeActivity
+- screen.fragment ProfileFragment
+- screen.composable settings/notifications
+
+#### Database
+`db.{OPERATION} {TABLE_NAME}`
+- db.select users
+- db.insert orders
+- db.update products
+- db.delete sessions
+
+#### Launch
+`launch.{TYPE}.{METRIC}`
+- launch.cold.ttid
+- launch.cold.ttfd
+- launch.warm.ttid
+- launch.hot.ttid
