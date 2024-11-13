@@ -50,7 +50,7 @@ class MsrSpanProcessorTest {
     }
 
     @Test
-    fun `onStart appends attributes to root spans`() {
+    fun `onStart appends attributes to spans`() {
         val attributeProcessor = object : AttributeProcessor {
             override fun appendAttributes(attributes: MutableMap<String, Any?>) {
                 attributes["key"] = "value"
@@ -67,25 +67,6 @@ class MsrSpanProcessorTest {
 
         Assert.assertEquals(1, span.toSpanData().attributes.size)
         Assert.assertEquals("value", span.toSpanData().attributes["key"])
-    }
-
-    @Test
-    fun `onStart does not append attributes to child spans`() {
-        val attributeProcessor = object : AttributeProcessor {
-            override fun appendAttributes(attributes: MutableMap<String, Any?>) {
-                attributes["key"] = "value"
-            }
-        }
-        val spanProcessor = MsrSpanProcessor(eventProcessor, spanBuffer, listOf(attributeProcessor))
-        val span = TestData.getSpan(
-            logger = logger,
-            timeProvider = timeProvider,
-            spanProcessor,
-            parentId = "parent-id",
-        )
-        spanProcessor.onStart(span)
-
-        Assert.assertEquals(0, span.toSpanData().attributes.size)
     }
 
     @Test
