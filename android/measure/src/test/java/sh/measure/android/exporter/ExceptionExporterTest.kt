@@ -11,11 +11,11 @@ import sh.measure.android.fakes.ImmediateExecutorService
 import sh.measure.android.fakes.NoopLogger
 
 class ExceptionExporterTest {
-    private val eventExporter = mock<EventExporter>()
+    private val exporter = mock<Exporter>()
     private val executorService = ImmediateExecutorService(ResolvableFuture.create<Any>())
     private val exceptionExporter = ExceptionExporterImpl(
         NoopLogger(),
-        eventExporter,
+        exporter,
         executorService,
     )
 
@@ -24,7 +24,7 @@ class ExceptionExporterTest {
         val batchId = "batch-id"
         val eventIds = listOf("event1", "event2")
         val spanIds = listOf("span1", "span2")
-        `when`(eventExporter.createBatch("session-id")).thenReturn(
+        `when`(exporter.createBatch("session-id")).thenReturn(
             Batch(
                 batchId,
                 eventIds,
@@ -34,15 +34,15 @@ class ExceptionExporterTest {
 
         exceptionExporter.export("session-id")
 
-        verify(eventExporter).export(Batch(batchId, eventIds, spanIds))
+        verify(exporter).export(Batch(batchId, eventIds, spanIds))
     }
 
     @Test
     fun `given batch is not created, does not trigger export`() {
-        `when`(eventExporter.createBatch("session-id")).thenReturn(null)
+        `when`(exporter.createBatch("session-id")).thenReturn(null)
 
         exceptionExporter.export("session-id")
 
-        verify(eventExporter, never()).export(any())
+        verify(exporter, never()).export(any())
     }
 }

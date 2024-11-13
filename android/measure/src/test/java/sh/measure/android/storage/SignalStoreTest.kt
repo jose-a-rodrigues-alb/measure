@@ -18,13 +18,13 @@ import sh.measure.android.fakes.TestData
 import sh.measure.android.fakes.TestData.toEvent
 import java.io.File
 
-internal class EventStoreTest {
+internal class SignalStoreTest {
     private val logger = NoopLogger()
     private val fileStorage = mock<FileStorage>()
     private val database = mock<Database>()
     private val idProvider = FakeIdProvider()
 
-    private val eventStore: EventStore = EventStoreImpl(
+    private val signalStore: SignalStore = SignalStoreImpl(
         logger,
         fileStorage,
         database,
@@ -40,7 +40,7 @@ internal class EventStoreTest {
         `when`(fileStorage.writeEventData(any(), any())).thenReturn("fake-file-path")
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // then
         verify(fileStorage).writeEventData(
@@ -61,7 +61,7 @@ internal class EventStoreTest {
         `when`(fileStorage.writeEventData(any(), any())).thenReturn("fake-file-path")
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // then
         verify(fileStorage).writeEventData(
@@ -76,7 +76,7 @@ internal class EventStoreTest {
     @Test
     fun `stores span`() {
         val spanData = TestData.getSpanData()
-        eventStore.store(spanData)
+        signalStore.store(spanData)
 
         verify(database).insertSpan(spanData.toSpanEntity())
     }
@@ -91,7 +91,7 @@ internal class EventStoreTest {
         `when`(fileStorage.writeEventData(any(), any())).thenReturn("fake-file-path")
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // then
         verify(fileStorage).writeEventData(
@@ -113,7 +113,7 @@ internal class EventStoreTest {
         `when`(fileStorage.writeEventData(any(), any())).thenReturn("fake-file-path")
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // then
         verify(fileStorage).writeEventData(
@@ -130,7 +130,7 @@ internal class EventStoreTest {
         val httpData = TestData.getHttpData(requestBody = null, responseBody = null)
         val event = httpData.toEvent(type = EventType.HTTP)
         val argumentCaptor = argumentCaptor<EventEntity>()
-        eventStore.store(event)
+        signalStore.store(event)
 
         verify(database).insertEvent(argumentCaptor.capture())
         val eventEntity = argumentCaptor.firstValue
@@ -147,7 +147,7 @@ internal class EventStoreTest {
         `when`(fileStorage.writeEventData(any(), any())).thenReturn("fake-file-path")
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // then
         verify(fileStorage).writeEventData(
@@ -164,7 +164,7 @@ internal class EventStoreTest {
         val appExit = TestData.getAppExit(trace = null)
         val event = appExit.toEvent(type = EventType.APP_EXIT)
         val argumentCaptor = argumentCaptor<EventEntity>()
-        eventStore.store(event)
+        signalStore.store(event)
 
         verify(database).insertEvent(argumentCaptor.capture())
         val eventEntity = argumentCaptor.firstValue
@@ -182,7 +182,7 @@ internal class EventStoreTest {
             .toEvent(type = EventType.CLICK, attachments = mutableListOf(attachment), id = idProvider.id)
         `when`(fileStorage.writeAttachment(event.id, attachment.bytes!!)).thenReturn("fake-path")
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         verify(fileStorage).writeAttachment(event.id, attachment.bytes)
         val argumentCaptor = argumentCaptor<EventEntity>()
@@ -201,7 +201,7 @@ internal class EventStoreTest {
         val event = TestData.getClickData()
             .toEvent(type = EventType.CLICK, attachments = mutableListOf(attachment), id = idProvider.id)
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -221,7 +221,7 @@ internal class EventStoreTest {
         val event = TestData.getClickData()
             .toEvent(type = EventType.CLICK, attachments = mutableListOf(attachment), id = idProvider.id)
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -245,7 +245,7 @@ internal class EventStoreTest {
         val event = TestData.getClickData()
             .toEvent(type = EventType.CLICK, attachments = mutableListOf(attachment), id = idProvider.id)
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -262,7 +262,7 @@ internal class EventStoreTest {
         val event = TestData.getClickData()
             .toEvent(type = EventType.CLICK, attachments = mutableListOf(), id = idProvider.id)
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -280,7 +280,7 @@ internal class EventStoreTest {
             File.createTempFile("fake-attachment", "txt").apply { writeText(attachmentContent) }
         `when`(fileStorage.getFile(attachment.path!!)).thenReturn(file)
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -296,7 +296,7 @@ internal class EventStoreTest {
             attributes = mutableMapOf("key" to "value"),
         )
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -313,7 +313,7 @@ internal class EventStoreTest {
             userDefinedAttributes = mutableMapOf("key" to "value"),
         )
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -330,7 +330,7 @@ internal class EventStoreTest {
             userTriggered = true,
         )
 
-        eventStore.store(event)
+        signalStore.store(event)
 
         val argumentCaptor = argumentCaptor<EventEntity>()
         verify(database).insertEvent(argumentCaptor.capture())
@@ -353,7 +353,7 @@ internal class EventStoreTest {
         `when`(database.insertEvent(any())).thenReturn(false)
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // verify that the event and its attachments are deleted from file storage
         // attachment IDs are repeated because the event has two attachments
@@ -377,7 +377,7 @@ internal class EventStoreTest {
         `when`(fileStorage.writeEventData(any(), any())).thenReturn(null)
 
         // when
-        eventStore.store(event)
+        signalStore.store(event)
 
         // verify that the event is not inserted in the database
         verify(database, never()).insertEvent(any())

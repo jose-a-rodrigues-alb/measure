@@ -6,14 +6,14 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import sh.measure.android.attributes.Attribute
 import sh.measure.android.attributes.AttributeProcessor
-import sh.measure.android.events.EventProcessorImpl
+import sh.measure.android.events.SignalProcessorImpl
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.TestData
 import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.TestClock
 
 class MsrSpanProcessorTest {
-    private val eventProcessor = mock<EventProcessorImpl>()
+    private val signalProcessor = mock<SignalProcessorImpl>()
     private val logger = NoopLogger()
     private val timeProvider = AndroidTimeProvider(TestClock.create())
 
@@ -24,7 +24,7 @@ class MsrSpanProcessorTest {
                 attributes["key"] = "value"
             }
         }
-        val spanProcessor = MsrSpanProcessor(eventProcessor, listOf(attributeProcessor))
+        val spanProcessor = MsrSpanProcessor(signalProcessor, listOf(attributeProcessor))
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,
@@ -40,7 +40,7 @@ class MsrSpanProcessorTest {
 
     @Test
     fun `onStart adds thread name to attributes`() {
-        val spanProcessor = MsrSpanProcessor(eventProcessor, emptyList())
+        val spanProcessor = MsrSpanProcessor(signalProcessor, emptyList())
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,
@@ -56,7 +56,7 @@ class MsrSpanProcessorTest {
 
     @Test
     fun `onEnded delegates to event processor`() {
-        val spanProcessor = MsrSpanProcessor(eventProcessor, emptyList())
+        val spanProcessor = MsrSpanProcessor(signalProcessor, emptyList())
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,
@@ -64,6 +64,6 @@ class MsrSpanProcessorTest {
         )
         spanProcessor.onEnded(span)
 
-        verify(eventProcessor).trackSpan(span.toSpanData())
+        verify(signalProcessor).trackSpan(span.toSpanData())
     }
 }

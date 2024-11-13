@@ -15,7 +15,7 @@ import sh.measure.android.logger.LogLevel
 internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     ApplicationLifecycleStateListener, ColdLaunchListener {
     val logger by lazy { measureInitializer.logger }
-    val eventProcessor by lazy { measureInitializer.eventProcessor }
+    val signalProcessor by lazy { measureInitializer.signalProcessor }
     val sessionManager by lazy { measureInitializer.sessionManager }
     val timeProvider by lazy { measureInitializer.timeProvider }
     val httpEventCollector by lazy { measureInitializer.httpEventCollector }
@@ -35,7 +35,7 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     private val appLaunchCollector by lazy { measureInitializer.appLaunchCollector }
     private val networkChangesCollector by lazy { measureInitializer.networkChangesCollector }
     private val appExitCollector by lazy { measureInitializer.appExitCollector }
-    private val periodicEventExporter by lazy { measureInitializer.periodicEventExporter }
+    private val periodicExporter by lazy { measureInitializer.periodicExporter }
     private val userAttributeProcessor by lazy { measureInitializer.userAttributeProcessor }
     private val userDefinedAttribute by lazy { measureInitializer.userDefinedAttribute }
     private val configProvider by lazy { measureInitializer.configProvider }
@@ -93,20 +93,20 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
         sessionManager.onAppForeground()
         cpuUsageCollector.resume()
         memoryUsageCollector.resume()
-        periodicEventExporter.onAppForeground()
+        periodicExporter.onAppForeground()
     }
 
     override fun onAppBackground() {
         sessionManager.onAppBackground()
         cpuUsageCollector.pause()
         memoryUsageCollector.pause()
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
         dataCleanupService.clearStaleData()
     }
 
     override fun onColdLaunch() {
         networkChangesCollector.register()
-        periodicEventExporter.onColdLaunch()
+        periodicExporter.onColdLaunch()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             appExitCollector.onColdLaunch()
         }

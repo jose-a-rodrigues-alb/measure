@@ -13,25 +13,25 @@ import sh.measure.android.tracing.SpanData
 import sh.measure.android.utils.IdProvider
 import java.io.File
 
-internal interface EventStore {
+internal interface SignalStore {
     fun <T> store(event: Event<T>)
     fun store(spanData: SpanData)
 }
 
 /**
- * Event store implementation that writes events to the database and file storage.
+ * Signal store implementation that writes events and spans to the database and file storage.
  *
  * Events with large sizes are stored in the [FileStorage] and their paths are stored in the [Database].
  * While, smaller events are serialized and stored directly in the [Database].
  *
  * All event attachments are stored in the [FileStorage] and their paths are stored in the [Database].
  */
-internal class EventStoreImpl(
+internal class SignalStoreImpl(
     private val logger: Logger,
     private val fileStorage: FileStorage,
     private val database: Database,
     private val idProvider: IdProvider,
-) : EventStore {
+) : SignalStore {
 
     override fun store(spanData: SpanData) {
         val spanEntity = spanData.toSpanEntity()

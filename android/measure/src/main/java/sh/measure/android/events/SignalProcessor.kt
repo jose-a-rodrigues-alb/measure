@@ -12,7 +12,7 @@ import sh.measure.android.exporter.ExceptionExporter
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
 import sh.measure.android.screenshot.ScreenshotCollector
-import sh.measure.android.storage.EventStore
+import sh.measure.android.storage.SignalStore
 import sh.measure.android.tracing.InternalTrace
 import sh.measure.android.tracing.SpanData
 import sh.measure.android.utils.IdProvider
@@ -20,11 +20,11 @@ import sh.measure.android.utils.iso8601Timestamp
 import java.util.concurrent.RejectedExecutionException
 
 /**
- * An interface for processing events. It is responsible for tracking events, processing them
+ * An interface for processing event and span signals. It is responsible for tracking signals processing them
  * by applying various attributes and transformations, and then eventually storing them or sending
  * them to the server.
  */
-internal interface EventProcessor {
+internal interface SignalProcessor {
     /**
      * Tracks an event with the given data, timestamp and type.
      *
@@ -92,10 +92,10 @@ internal interface EventProcessor {
     fun trackSpan(spanData: SpanData)
 }
 
-internal class EventProcessorImpl(
+internal class SignalProcessorImpl(
     private val logger: Logger,
     private val ioExecutor: MeasureExecutorService,
-    private val eventStore: EventStore,
+    private val signalStore: SignalStore,
     private val idProvider: IdProvider,
     private val sessionManager: SessionManager,
     private val attributeProcessors: List<AttributeProcessor>,
@@ -104,7 +104,7 @@ internal class EventProcessorImpl(
     private val exceptionExporter: ExceptionExporter,
     private val screenshotCollector: ScreenshotCollector,
     private val configProvider: ConfigProvider,
-) : EventProcessor {
+) : SignalProcessor {
 
     override fun <T> track(
         data: T,
@@ -161,7 +161,7 @@ internal class EventProcessorImpl(
         }
         applyAttributes(event, threadName)
         eventTransformer.transform(event)?.let {
-            eventStore.store(event)
+            signalStore.store(event)
             onEventTracked(event)
             sessionManager.markCrashedSession(event.sessionId)
             exceptionExporter.export(event.sessionId)
@@ -171,7 +171,7 @@ internal class EventProcessorImpl(
 
     override fun trackSpan(spanData: SpanData) {
         ioExecutor.submit {
-            eventStore.store(spanData)
+            signalStore.store(spanData)
             logger.log(LogLevel.Info, "Span processed: ${spanData.name}")
         }
     }
@@ -208,7 +208,7 @@ internal class EventProcessorImpl(
 
                         if (transformedEvent != null) {
                             InternalTrace.trace(label = { "msr-store-event" }, block = {
-                                eventStore.store(event)
+                                signalStore.store(event)
                                 onEventTracked(event)
                                 logger.log(
                                     LogLevel.Debug,

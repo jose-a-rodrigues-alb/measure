@@ -32,7 +32,7 @@ import sh.measure.android.utils.TestClock
 // This test uses robolectric and a real instance of batch creator to ensure that the batch creator
 // and exporter work together correctly with a real database.
 @RunWith(AndroidJUnit4::class)
-internal class EventExporterTest {
+internal class ExporterTest {
     private val logger = NoopLogger()
     private val idProvider = FakeIdProvider()
     private val context =
@@ -50,7 +50,7 @@ internal class EventExporterTest {
         timeProvider = timeProvider,
         configProvider = configProvider,
     )
-    private val eventExporter = EventExporterImpl(
+    private val exporter = ExporterImpl(
         batchCreator = batchCreator,
         fileStorage = fileStorage,
         networkClient = networkClient,
@@ -72,7 +72,7 @@ internal class EventExporterTest {
             ),
         )
 
-        eventExporter.export(
+        exporter.export(
             Batch(
                 "batch1",
                 eventIds = listOf("event1", "event2"),
@@ -124,7 +124,7 @@ internal class EventExporterTest {
             ),
         )
 
-        eventExporter.export(
+        exporter.export(
             Batch(
                 "batchId",
                 eventIds = listOf("event1", "event2"),
@@ -153,7 +153,7 @@ internal class EventExporterTest {
 
     @Test
     fun `does not trigger export if no events are found in a batch`() {
-        eventExporter.export(
+        exporter.export(
             Batch(
                 "batch1",
                 eventIds = listOf("event-id"),
@@ -162,7 +162,7 @@ internal class EventExporterTest {
         )
 
         verify(networkClient, never()).execute(any(), any(), any(), any())
-        Assert.assertEquals(0, eventExporter.batchIdsInTransit.size)
+        Assert.assertEquals(0, exporter.batchIdsInTransit.size)
     }
 
     @Test
@@ -187,7 +187,7 @@ internal class EventExporterTest {
             ),
         )
 
-        val batches = eventExporter.getExistingBatches()
+        val batches = exporter.getExistingBatches()
 
         Assert.assertEquals(2, batches.size)
         Assert.assertEquals(
@@ -209,7 +209,7 @@ internal class EventExporterTest {
 
     @Test
     fun `returns empty map if no batches exist in database`() {
-        val batches = eventExporter.getExistingBatches()
+        val batches = exporter.getExistingBatches()
         Assert.assertEquals(0, batches.size)
     }
 
@@ -238,7 +238,7 @@ internal class EventExporterTest {
         Assert.assertNotNull(fileStorage.getFile(attachmentPath))
         Assert.assertEquals(1, database.getBatches(1).size)
 
-        eventExporter.export(Batch("batch1", eventIds = eventIds, spanIds = emptyList()))
+        exporter.export(Batch("batch1", eventIds = eventIds, spanIds = emptyList()))
 
         // ensure batch, events, attachments are deleted from storage
         Assert.assertEquals(0, database.getEvents(eventIds).size)
@@ -282,7 +282,7 @@ internal class EventExporterTest {
             Assert.assertEquals(1, it.count)
         }
 
-        eventExporter.export(Batch("batch1", eventIds = eventIds, spanIds = spanIds))
+        exporter.export(Batch("batch1", eventIds = eventIds, spanIds = spanIds))
 
         // ensure batch, events, attachments are deleted from storage
         Assert.assertEquals(

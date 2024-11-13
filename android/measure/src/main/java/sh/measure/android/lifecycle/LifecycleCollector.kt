@@ -5,8 +5,8 @@ import android.app.Application
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import sh.measure.android.events.EventProcessor
 import sh.measure.android.events.EventType
+import sh.measure.android.events.SignalProcessor
 import sh.measure.android.utils.TimeProvider
 import sh.measure.android.utils.isClassAvailable
 
@@ -20,14 +20,14 @@ internal interface ApplicationLifecycleStateListener {
  */
 internal class LifecycleCollector(
     private val application: Application,
-    private val eventProcessor: EventProcessor,
+    private val signalProcessor: SignalProcessor,
     private val timeProvider: TimeProvider,
 ) : ActivityLifecycleAdapter {
     private val fragmentLifecycleCollector by lazy {
-        FragmentLifecycleCollector(eventProcessor, timeProvider)
+        FragmentLifecycleCollector(signalProcessor, timeProvider)
     }
     private val androidXFragmentNavigationCollector by lazy {
-        AndroidXFragmentNavigationCollector(eventProcessor, timeProvider)
+        AndroidXFragmentNavigationCollector(signalProcessor, timeProvider)
     }
     private val startedActivities = mutableSetOf<String>()
     private var applicationLifecycleStateListener: ApplicationLifecycleStateListener? = null
@@ -43,7 +43,7 @@ internal class LifecycleCollector(
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         registerFragmentLifecycleCollector(activity)
         registerAndroidXFragmentNavigationCollector(activity)
-        eventProcessor.track(
+        signalProcessor.track(
             timestamp = timeProvider.now(),
             type = EventType.LIFECYCLE_ACTIVITY,
             data = ActivityLifecycleData(
@@ -61,7 +61,7 @@ internal class LifecycleCollector(
             // session manager depends on this sequence to ensure that new session ID (if created)
             // is reflected in all events collected after the launch.
             applicationLifecycleStateListener?.onAppForeground()
-            eventProcessor.track(
+            signalProcessor.track(
                 timestamp = timeProvider.now(),
                 type = EventType.LIFECYCLE_APP,
                 data = ApplicationLifecycleData(
@@ -74,7 +74,7 @@ internal class LifecycleCollector(
     }
 
     override fun onActivityResumed(activity: Activity) {
-        eventProcessor.track(
+        signalProcessor.track(
             timestamp = timeProvider.now(),
             type = EventType.LIFECYCLE_ACTIVITY,
             data = ActivityLifecycleData(
@@ -85,7 +85,7 @@ internal class LifecycleCollector(
     }
 
     override fun onActivityPaused(activity: Activity) {
-        eventProcessor.track(
+        signalProcessor.track(
             timestamp = timeProvider.now(),
             type = EventType.LIFECYCLE_ACTIVITY,
             data = ActivityLifecycleData(
@@ -99,7 +99,7 @@ internal class LifecycleCollector(
         val hash = Integer.toHexString(System.identityHashCode(activity))
         startedActivities.remove(hash)
         if (startedActivities.isEmpty()) {
-            eventProcessor.track(
+            signalProcessor.track(
                 timestamp = timeProvider.now(),
                 type = EventType.LIFECYCLE_APP,
                 data = ApplicationLifecycleData(
@@ -114,7 +114,7 @@ internal class LifecycleCollector(
     }
 
     override fun onActivityDestroyed(activity: Activity) {
-        eventProcessor.track(
+        signalProcessor.track(
             timestamp = timeProvider.now(),
             type = EventType.LIFECYCLE_ACTIVITY,
             data = ActivityLifecycleData(

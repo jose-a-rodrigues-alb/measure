@@ -1,10 +1,10 @@
 package sh.measure.android.fakes
 
 import sh.measure.android.events.Event
-import sh.measure.android.storage.EventStore
+import sh.measure.android.storage.SignalStore
 import sh.measure.android.tracing.SpanData
 
-internal class FakeEventStore : EventStore {
+internal class FakeSignalStore : SignalStore {
     val trackedEvents = mutableListOf<Event<*>>()
     val trackedSpans = mutableListOf<SpanData>()
 

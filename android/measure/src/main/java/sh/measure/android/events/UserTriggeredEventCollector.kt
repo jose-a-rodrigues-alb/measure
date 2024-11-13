@@ -14,13 +14,13 @@ internal interface UserTriggeredEventCollector {
 }
 
 internal class UserTriggeredEventCollectorImpl(
-    private val eventProcessor: EventProcessor,
+    private val signalProcessor: SignalProcessor,
     private val timeProvider: TimeProvider,
     private val processInfoProvider: ProcessInfoProvider,
 ) : UserTriggeredEventCollector {
     @Deprecated("Use trackScreenView instead")
     override fun trackNavigation(to: String, from: String?) {
-        eventProcessor.trackUserTriggered(
+        signalProcessor.trackUserTriggered(
             data = NavigationData(
                 to = to,
                 from = from,
@@ -34,7 +34,7 @@ internal class UserTriggeredEventCollectorImpl(
     override fun trackHandledException(throwable: Throwable) {
         // this is a safe assumption that we're on the same thread as the exception was captured on
         val thread = Thread.currentThread()
-        eventProcessor.trackUserTriggered(
+        signalProcessor.trackUserTriggered(
             data = ExceptionFactory.createMeasureException(
                 throwable = throwable,
                 handled = true,
@@ -47,7 +47,7 @@ internal class UserTriggeredEventCollectorImpl(
     }
 
     override fun trackScreenView(screenName: String) {
-        eventProcessor.trackUserTriggered(
+        signalProcessor.trackUserTriggered(
             data = ScreenViewData(name = screenName),
             timestamp = timeProvider.now(),
             type = EventType.SCREEN_VIEW,

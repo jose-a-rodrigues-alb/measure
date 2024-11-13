@@ -9,9 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Abstraction to run common functions for exporting of events and synchronizing different
- * exporters like [PeriodicEventExporter] and [ExceptionExporter].
+ * exporters like [PeriodicExporter] and [ExceptionExporter].
  */
-internal interface EventExporter {
+internal interface Exporter {
     fun createBatch(sessionId: String? = null): Batch?
     fun getExistingBatches(): List<Batch>
 
@@ -23,13 +23,13 @@ internal interface EventExporter {
     fun export(batch: Batch): HttpResponse?
 }
 
-internal class EventExporterImpl(
+internal class ExporterImpl(
     private val logger: Logger,
     private val database: Database,
     private val fileStorage: FileStorage,
     private val networkClient: NetworkClient,
     private val batchCreator: BatchCreator,
-) : EventExporter {
+) : Exporter {
     private companion object {
         const val MAX_EXISTING_BATCHES_TO_EXPORT = 5
     }

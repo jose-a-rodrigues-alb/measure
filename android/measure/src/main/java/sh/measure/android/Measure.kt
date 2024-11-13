@@ -7,8 +7,8 @@ import org.jetbrains.annotations.TestOnly
 import sh.measure.android.applaunch.LaunchState
 import sh.measure.android.config.MeasureConfig
 import sh.measure.android.events.Attachment
-import sh.measure.android.events.EventProcessor
 import sh.measure.android.events.EventType
+import sh.measure.android.events.SignalProcessor
 import sh.measure.android.exceptions.ExceptionData
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.okhttp.OkHttpEventCollector
@@ -383,9 +383,9 @@ object Measure {
         }
     }
 
-    internal fun getEventProcessor(): EventProcessor? {
+    internal fun getSignalProcessor(): SignalProcessor? {
         if (isInitialized.get()) {
-            return measure.eventProcessor
+            return measure.signalProcessor
         }
         return null
     }
@@ -429,7 +429,7 @@ object Measure {
         attributes: MutableMap<String, Any?>,
         attachments: MutableList<Attachment>,
     ) {
-        measure.eventProcessor.trackCrash(
+        measure.signalProcessor.trackCrash(
             data = data,
             timestamp = timestamp,
             type = type,
@@ -445,7 +445,7 @@ object Measure {
         attributes: MutableMap<String, Any?>,
         attachments: MutableList<Attachment>,
     ) {
-        measure.eventProcessor.trackCrash(
+        measure.signalProcessor.trackCrash(
             type = EventType.ANR,
             data = data,
             timestamp = timestamp,

@@ -15,32 +15,32 @@ import sh.measure.android.utils.AndroidTimeProvider
 import sh.measure.android.utils.TestClock
 import java.time.Duration
 
-class PeriodicEventExporterTest {
+class PeriodicExporterTest {
     private val logger = NoopLogger()
     private val configProvider = FakeConfigProvider()
     private val executorService = ImmediateExecutorService(ResolvableFuture.create<Any>())
     private val testClock = TestClock.create()
     private val timeProvider = AndroidTimeProvider(testClock)
     private val heartbeat = mock<Heartbeat>()
-    private val eventExporter = mock<EventExporter>()
+    private val exporter = mock<Exporter>()
 
-    private val periodicEventExporter = PeriodicEventExporterImpl(
+    private val periodicExporter = PeriodicExporterImpl(
         logger,
         configProvider,
         executorService,
         timeProvider,
         heartbeat,
-        eventExporter,
+        exporter,
     )
 
     @Test
     fun `adds a listener to heartbeat on initialization`() {
-        verify(heartbeat).addListener(periodicEventExporter)
+        verify(heartbeat).addListener(periodicExporter)
     }
 
     @Test
     fun `starts heartbeat when app comes to foreground with a delay`() {
-        periodicEventExporter.onAppForeground()
+        periodicExporter.onAppForeground()
 
         verify(heartbeat, atMostOnce()).start(
             configProvider.eventsBatchingIntervalMs,
@@ -50,7 +50,7 @@ class PeriodicEventExporterTest {
 
     @Test
     fun `starts heartbeat on cold launch with a delay`() {
-        periodicEventExporter.onColdLaunch()
+        periodicExporter.onColdLaunch()
 
         verify(heartbeat, atMostOnce()).start(
             configProvider.eventsBatchingIntervalMs,
@@ -60,7 +60,7 @@ class PeriodicEventExporterTest {
 
     @Test
     fun `stops heartbeat when app goes to background`() {
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
         verify(heartbeat, atMostOnce()).stop()
     }
@@ -71,12 +71,12 @@ class PeriodicEventExporterTest {
             Batch("batch1", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
         val batch2 =
             Batch("batch2", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
-        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
+        `when`(exporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
 
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
-        verify(eventExporter).export(batch1)
-        verify(eventExporter).export(batch2)
+        verify(exporter).export(batch1)
+        verify(exporter).export(batch2)
     }
 
     @Test
@@ -85,13 +85,13 @@ class PeriodicEventExporterTest {
             Batch("batch1", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
         val batch2 =
             Batch("batch2", eventIds = listOf("event3, event4"), spanIds = listOf("span1", "span2"))
-        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
-        `when`(eventExporter.export(batch1)).thenReturn(HttpResponse.Error.ServerError(500))
+        `when`(exporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
+        `when`(exporter.export(batch1)).thenReturn(HttpResponse.Error.ServerError(500))
 
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
-        verify(eventExporter).export(batch1)
-        verify(eventExporter, never()).export(batch2)
+        verify(exporter).export(batch1)
+        verify(exporter, never()).export(batch2)
     }
 
     @Test
@@ -100,45 +100,45 @@ class PeriodicEventExporterTest {
             Batch("batch1", eventIds = listOf("event1, event2"), spanIds = listOf("span1", "span2"))
         val batch2 =
             Batch("batch2", eventIds = listOf("event3, event4"), spanIds = listOf("span1", "span2"))
-        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
-        `when`(eventExporter.export(batch1)).thenReturn(HttpResponse.Error.RateLimitError())
+        `when`(exporter.getExistingBatches()).thenReturn(listOf(batch1, batch2))
+        `when`(exporter.export(batch1)).thenReturn(HttpResponse.Error.RateLimitError())
 
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
-        verify(eventExporter).export(batch1)
-        verify(eventExporter, never()).export(batch2)
+        verify(exporter).export(batch1)
+        verify(exporter, never()).export(batch2)
     }
 
     @Test
     fun `creates and exports new batch when app goes to background and conditions are met`() {
         // Given no existing batches to export
-        `when`(eventExporter.getExistingBatches()).thenReturn(listOf())
+        `when`(exporter.getExistingBatches()).thenReturn(listOf())
         // Given a new batch is created successfully
         val batch = Batch("batchId", listOf("event1", "event2"), listOf("span1", "span2"))
-        `when`(eventExporter.createBatch()).thenReturn(batch)
+        `when`(exporter.createBatch()).thenReturn(batch)
 
         // When
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
         // Then
-        verify(eventExporter).export(batch)
+        verify(exporter).export(batch)
     }
 
     @Test
     fun `does not export if last batch was created within 30 seconds, when app goes to background`() {
         val initialTime = testClock.epochTime()
         // Given no existing batches to export
-        `when`(eventExporter.getExistingBatches()).thenReturn(listOf())
-        periodicEventExporter.lastBatchCreationTimeMs = initialTime
+        `when`(exporter.getExistingBatches()).thenReturn(listOf())
+        periodicExporter.lastBatchCreationTimeMs = initialTime
 
         // Advance time within threshold
         testClock.advance(Duration.ofSeconds(29))
 
         // When
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
         // Then
-        verify(eventExporter, never()).export(any())
+        verify(exporter, never()).export(any())
     }
 
     @Test
@@ -149,13 +149,13 @@ class PeriodicEventExporterTest {
             eventIds = mutableListOf("event1, event2"),
             spanIds = listOf("span1", "span2"),
         )
-        `when`(eventExporter.getExistingBatches()).thenReturn(listOf(batch))
+        `when`(exporter.getExistingBatches()).thenReturn(listOf(batch))
 
         // forcefully mark an export in progress
-        periodicEventExporter.isExportInProgress.set(true)
+        periodicExporter.isExportInProgress.set(true)
 
-        periodicEventExporter.onAppBackground()
+        periodicExporter.onAppBackground()
 
-        verify(eventExporter, never()).export(any())
+        verify(exporter, never()).export(any())
     }
 }

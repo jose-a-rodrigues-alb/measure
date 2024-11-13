@@ -47,8 +47,8 @@ private class MeasureNavigationObserver(
         NavController.OnDestinationChangedListener { controller, _, _ ->
             controller.currentDestination?.route?.let { to ->
                 val timeProvider = Measure.getTimeProvider() ?: return@let
-                val eventProcessor = Measure.getEventProcessor() ?: return@let
-                eventProcessor.track(
+                val signalProcessor = Measure.getSignalProcessor() ?: return@let
+                signalProcessor.track(
                     type = EventType.SCREEN_VIEW,
                     timestamp = timeProvider.now(),
                     data = ScreenViewData(name = to),

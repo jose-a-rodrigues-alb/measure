@@ -3,8 +3,8 @@ package sh.measure.android.gestures
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.Window
-import sh.measure.android.events.EventProcessor
 import sh.measure.android.events.EventType
+import sh.measure.android.events.SignalProcessor
 import sh.measure.android.logger.LogLevel
 import sh.measure.android.logger.Logger
 import sh.measure.android.tracing.InternalTrace
@@ -18,7 +18,7 @@ internal interface GestureListener {
 
 internal class GestureCollector(
     private val logger: Logger,
-    private val eventProcessor: EventProcessor,
+    private val signalProcessor: SignalProcessor,
     private val timeProvider: TimeProvider,
 ) {
     private var listener: GestureListener? = null
@@ -60,7 +60,7 @@ internal class GestureCollector(
             is DetectedGesture.Click -> {
                 val data = ClickData.fromDetectedGesture(gesture, target)
                 listener?.onClick(data)
-                eventProcessor.track(
+                signalProcessor.track(
                     timestamp = gesture.timestamp,
                     type = EventType.CLICK,
                     data = data,
@@ -70,7 +70,7 @@ internal class GestureCollector(
             is DetectedGesture.LongClick -> {
                 val data = LongClickData.fromDetectedGesture(gesture, target)
                 listener?.onLongClick(data)
-                eventProcessor.track(
+                signalProcessor.track(
                     timestamp = gesture.timestamp,
                     type = EventType.LONG_CLICK,
                     data = data,
@@ -80,7 +80,7 @@ internal class GestureCollector(
             is DetectedGesture.Scroll -> {
                 val data = ScrollData.fromDetectedGesture(gesture, target)
                 listener?.onScroll(data)
-                eventProcessor.track(
+                signalProcessor.track(
                     timestamp = gesture.timestamp,
                     type = EventType.SCROLL,
                     data = data,

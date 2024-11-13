@@ -2,7 +2,7 @@ package sh.measure.android.tracing
 
 import sh.measure.android.attributes.Attribute
 import sh.measure.android.attributes.AttributeProcessor
-import sh.measure.android.events.EventProcessor
+import sh.measure.android.events.SignalProcessor
 
 internal interface SpanProcessor {
     fun onStart(span: Span)
@@ -11,7 +11,7 @@ internal interface SpanProcessor {
 }
 
 internal class MsrSpanProcessor(
-    private val eventProcessor: EventProcessor,
+    private val signalProcessor: SignalProcessor,
     private val attributeProcessors: List<AttributeProcessor>,
 ) : SpanProcessor {
     override fun onStart(span: Span) {
@@ -27,6 +27,6 @@ internal class MsrSpanProcessor(
 
     override fun onEnded(span: ReadableSpan) {
         val spanData = span.toSpanData()
-        eventProcessor.trackSpan(spanData)
+        signalProcessor.trackSpan(spanData)
     }
 }
