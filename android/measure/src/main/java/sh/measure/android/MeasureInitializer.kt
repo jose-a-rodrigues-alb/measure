@@ -11,6 +11,7 @@ import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.attributes.DeviceAttributeProcessor
 import sh.measure.android.attributes.InstallationIdAttributeProcessor
 import sh.measure.android.attributes.NetworkStateAttributeProcessor
+import sh.measure.android.attributes.SpanDeviceAttributeProcessor
 import sh.measure.android.attributes.UserAttributeProcessor
 import sh.measure.android.attributes.UserDefinedAttribute
 import sh.measure.android.attributes.UserDefinedAttributeImpl
@@ -375,12 +376,15 @@ internal class MeasureInitializerImpl(
         timeProvider = timeProvider,
         internalTracer = internalTracer,
     ),
+    private val spanDeviceAttributeProcessor: SpanDeviceAttributeProcessor = SpanDeviceAttributeProcessor(
+        localeProvider = localeProvider,
+    ),
     private val spanProcessor: SpanProcessor = MsrSpanProcessor(
         eventProcessor,
         spanBuffer,
         attributeProcessors = listOf(
             userAttributeProcessor,
-            deviceAttributeProcessor,
+            spanDeviceAttributeProcessor,
             appAttributeProcessor,
             installationIdAttributeProcessor,
         ),
