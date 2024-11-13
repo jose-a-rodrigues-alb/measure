@@ -1,5 +1,22 @@
 # Feature - Performance Tracing
 
+* [Introduction](#introduction)
+* [API Reference](#api-reference)
+  * [Start a span](#start-a-span)
+  * [End a span](#end-a-span)
+  * [Set span parent](#set-parent-span)
+  * [Set no parent](#set-no-parent)
+  * [Add checkpoint](#add-checkpoint)
+  * [Using scopes](#using-scopes)
+  * [Set current span](#set-current-span)
+  * [Get current span](#get-current-span)
+  * [Using span builder](#using-span-builder)
+* [Distributed Tracing](#distributed-tracing)
+  * [OkHttp example](#example-with-okhttp)
+  * [OkHttp interceptor example](#example-with-okhttp-interceptor)
+
+## Introduction
+
 Tracing helps understand how long certain operations take to complete, from the moment they begin until they finish,
 including all the intermediate steps, dependencies, and parallel activities that occur during execution.
 
@@ -56,7 +73,15 @@ val parentSpan: Span = Measure.startSpan("parent-span")
 val childSpan: Span = Measure.startSpan("child-span").setParent(parentSpan)
 ```
 
-### Add checkpoint to a span
+### Set no parent
+
+To explicitly opt out of setting a parent to a span, start the span with `setNoParent` flag.
+
+```kotlin
+val span: Span = Measure.startSpan("span-name", setNoParent = true)
+```
+
+### Add checkpoint
 
 ```kotlin
 val span: Span = Measure.startSpan("span-name").setCheckpoint("checkpoint-name")
@@ -78,12 +103,22 @@ Measure.withScope(spanA) {
 spanA.end()
 ```
 
-### Set no parent
+### Set current span
 
-To explicitly opt out of setting a parent to a span, start the span with `setNoParent` flag.
+Spans are stored in thread local storage for easy access across the codebase, without having to pass instances of spans
+across different layers.
 
 ```kotlin
-val span: Span = Measure.startSpan("span-name", setNoParent = true)
+val spanScope: Scope = Measure.startSpan("span-name").makeCurrent()
+```
+
+### Get current span
+
+To get access to the current span use the `getSpan` function. Note that `getSpan` will return the current span in scope
+set previously by a `span.makeCurrent` call. Each thread has its own current span.
+
+```kotlin
+val span: Span? = Measure.getSpan()
 ```
 
 ### Using span builder
@@ -108,6 +143,7 @@ val spanBuilder: SpanBuilder = Measure.createSpan("span-name")
     .setParent(parentSpan)
 val span: Span = spanBuilder.startSpan()
 ```
+
 
 ## Distributed Tracing
 
@@ -138,7 +174,7 @@ val key = Measure.getTraceParentHeaderKey()
 val value = Measure.getTraceParentHeaderValue(span)
 ```
 
-**Example usage with OkHttp:**
+#### Example with OkHttp
 
 ```kotlin
 val httpSpan = Measure.startSpan("http")
@@ -164,7 +200,7 @@ try {
 }
 ```
 
-**Example using an OkHttp interceptor**
+#### Example with OkHttp interceptor
 
 ```kotlin
 // First, create a Retrofit interceptor to handle tracing

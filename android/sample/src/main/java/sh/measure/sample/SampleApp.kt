@@ -8,6 +8,7 @@ import sh.measure.android.config.ScreenshotMaskLevel
 class SampleApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        val startTime = Measure.getTimestamp()
         Measure.init(
             this, MeasureConfig(
                 enableLogging = true,
@@ -24,5 +25,10 @@ class SampleApp : Application() {
                 sessionSamplingRate = 0.5f,
             )
         )
+        val appOnCreateSpan = Measure.startSpan("SampleApp.onCreate", timestamp = startTime)
+        appOnCreateSpan.withScope {
+            Measure.startSpan("Measure.init", timestamp = startTime).end()
+        }
+        appOnCreateSpan.end()
     }
 }
