@@ -17,10 +17,8 @@ internal class MsrSpanProcessor(
 ) : SpanProcessor {
     override fun onStart(span: Span) {
         spanBuffer.onSpanStart(span)
-        if (span.parentId == null) {
-            attributeProcessors.forEach {
-                it.appendAttributes(span.attributes)
-            }
+        attributeProcessors.forEach {
+            it.appendAttributes(span.attributes)
         }
     }
 
