@@ -4,6 +4,7 @@ import android.os.Build
 import sh.measure.android.applaunch.ColdLaunchListener
 import sh.measure.android.lifecycle.ApplicationLifecycleStateListener
 import sh.measure.android.logger.LogLevel
+import sh.measure.android.tracing.Span
 
 /**
  * Initializes the Measure SDK and hides the internal dependencies from public API.
@@ -156,5 +157,13 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     fun clear() {
         userAttributeProcessor.clearUserId()
         userDefinedAttribute.clear()
+    }
+
+    fun getTraceParentHeaderValue(span: Span): String {
+        return tracer.getTraceParentHeaderValue(span)
+    }
+
+    fun getTraceParentHeaderKey(): String {
+        return tracer.getTraceParentHeaderKey()
     }
 }

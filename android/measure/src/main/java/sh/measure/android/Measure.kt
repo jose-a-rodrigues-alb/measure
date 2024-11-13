@@ -263,6 +263,14 @@ object Measure {
         }
     }
 
+    fun getTraceParentHeaderValue(span: Span): String {
+        return measure.getTraceParentHeaderValue(span)
+    }
+
+    fun getTraceParentHeaderKey(): String {
+        return measure.getTraceParentHeaderKey()
+    }
+
     /**
      * Returns the current time since epoch, calculated using a monotonic clock.
      *

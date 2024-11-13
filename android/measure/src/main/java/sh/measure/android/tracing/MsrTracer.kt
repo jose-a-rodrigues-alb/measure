@@ -24,4 +24,13 @@ internal class MsrTracer(
             logger
         )
     }
+
+    override fun getTraceParentHeaderValue(span: Span): String {
+        val sampledFlag = if (span.isSampled) "01" else "00"
+        return "00-${span.traceId}-${span.spanId}-$sampledFlag"
+    }
+
+    override fun getTraceParentHeaderKey(): String {
+        return "traceparent"
+    }
 }

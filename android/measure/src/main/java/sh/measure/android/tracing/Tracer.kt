@@ -5,4 +5,6 @@ package sh.measure.android.tracing
  */
 internal interface Tracer {
     fun spanBuilder(name: String): SpanBuilder
+    fun getTraceParentHeaderValue(span: Span): String
+    fun getTraceParentHeaderKey(): String
 }
