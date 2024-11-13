@@ -1,5 +1,6 @@
 package sh.measure.android.tracing
 
+import sh.measure.android.attributes.Attribute
 import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.events.EventProcessor
 
@@ -14,6 +15,8 @@ internal class MsrSpanProcessor(
     private val attributeProcessors: List<AttributeProcessor>,
 ) : SpanProcessor {
     override fun onStart(span: Span) {
+        val threadName = Thread.currentThread().name
+        span.attributes[Attribute.THREAD_NAME] = threadName
         attributeProcessors.forEach {
             it.appendAttributes(span.attributes)
         }

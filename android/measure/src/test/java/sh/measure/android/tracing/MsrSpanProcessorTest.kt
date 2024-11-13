@@ -4,6 +4,7 @@ import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
+import sh.measure.android.attributes.Attribute
 import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.events.EventProcessorImpl
 import sh.measure.android.fakes.NoopLogger
@@ -32,10 +33,27 @@ class MsrSpanProcessorTest {
         )
         spanProcessor.onStart(span)
 
-        Assert.assertEquals(1, span.toSpanData().attributes.size)
+        // thread name is always added as an attribute, hence size is 2
+        Assert.assertEquals(2, span.toSpanData().attributes.size)
         Assert.assertEquals("value", span.toSpanData().attributes["key"])
     }
-    
+
+    @Test
+    fun `onStart adds thread name to attributes`() {
+        val spanProcessor = MsrSpanProcessor(eventProcessor, emptyList())
+        val span = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor,
+            parentId = null,
+        )
+        spanProcessor.onStart(span)
+
+        val attributes = span.toSpanData().attributes
+        Assert.assertEquals(1, attributes.size)
+        Assert.assertEquals(Thread.currentThread().name, attributes[Attribute.THREAD_NAME])
+    }
+
     @Test
     fun `onEnded delegates to event processor`() {
         val spanProcessor = MsrSpanProcessor(eventProcessor, emptyList())
