@@ -187,39 +187,43 @@ object Measure {
     }
 
     /**
-     * Starts a new span at the specified [startTime]. Use when the operation to be traced has
+     * Starts a new span at the specified [timestamp]. Use when the operation to be traced has
      * already started.
+     *
+     * The timestamp **must** be taken using [getTimestamp] to reduce the effect of clock drifts.
      *
      * The SDK must be initialized before a span is started. Otherwise an invalid span is
      * returned which will be a no-op and will not be exported.
      *
-     * @param startTime The milliseconds since epoch when the span started.
+     * @param timestamp The milliseconds since epoch when the span started.
      */
-    fun startSpan(name: String, startTime: Long): Span {
+    fun startSpan(name: String, timestamp: Long): Span {
         return if (isInitialized.get()) {
-            measure.tracer.spanBuilder(name).startSpan(startTime)
+            measure.tracer.spanBuilder(name).startSpan(timestamp)
         } else {
             Span.invalid()
         }
     }
 
     /**
-     * Start a new span at the specified [startTime] and force it to be a root span by
+     * Start a new span at the specified [timestamp] and force it to be a root span by
      * setting [setNoParent] flag.
+     *
+     * The timestamp **must** be taken using [getTimestamp] to reduce the effect of clock drifts.
      *
      * The SDK must be initialized before a span is started. Otherwise an invalid span is
      * returned which will be a no-op and will not be exported.
      *
-     * @param startTime The milliseconds since epoch when the span started.
+     * @param timestamp The milliseconds since epoch when the span started.
      * @param setNoParent Forces this span to be a root span when true.
      */
-    fun startSpan(name: String, startTime: Long, setNoParent: Boolean): Span {
+    fun startSpan(name: String, timestamp: Long, setNoParent: Boolean): Span {
         if (isInitialized.get()) {
             val spanBuilder = measure.tracer.spanBuilder(name)
             if (setNoParent) {
                 spanBuilder.setNoParent()
             }
-            return spanBuilder.startSpan(startTime)
+            return spanBuilder.startSpan(timestamp)
         } else {
             return Span.invalid()
         }
@@ -244,7 +248,7 @@ object Measure {
             return Span.invalid()
         }
     }
-    
+
     /**
      * Allows creating a span without starting it immediately.
      *
@@ -256,6 +260,19 @@ object Measure {
             measure.tracer.spanBuilder(name)
         } else {
             null
+        }
+    }
+
+    /**
+     * Returns the current time since epoch, calculated using a monotonic clock.
+     *
+     * This timestamp must be used to reduce time jumps within a span due to click skew issues.
+     */
+    fun getTimestamp(): Long {
+        return if (isInitialized.get()) {
+            measure.timeProvider.now()
+        } else {
+            System.currentTimeMillis()
         }
     }
 
