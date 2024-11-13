@@ -121,10 +121,10 @@ class MeasureConfig(
     override val sessionSamplingRate: Float = DefaultConfig.SESSION_SAMPLING_RATE,
 
     /**
-     * Allows setting a sampling rate for traces. Defaults to 0.0001.
+     * Allows setting a sampling rate for traces. Defaults to 0.001.
      *
-     * The sampling rate is a value between 0 and 1. For example, a value of `0.0001` will export
-     * only 0.01% of all traces, a value of `0` will disable exporting of traces.
+     * The sampling rate is a value between 0 and 1. For example, a value of `0.001` will export
+     * only 0.1% of all traces, a value of `0` will disable exporting of traces.
      *
      * Setting a value outside the range will throw an [IllegalArgumentException].
      */
