@@ -21,7 +21,6 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     val httpEventCollector by lazy { measureInitializer.httpEventCollector }
     val processInfoProvider by lazy { measureInitializer.processInfoProvider }
     val tracer by lazy { measureInitializer.tracer }
-    private val lifecycleTracker by lazy { measureInitializer.lifecycleTracker }
     private val userTriggeredEventCollector by lazy { measureInitializer.userTriggeredEventCollector }
     private val resumedActivityProvider by lazy { measureInitializer.resumedActivityProvider }
     private val networkClient by lazy { measureInitializer.networkClient }
@@ -73,7 +72,6 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     private fun registerCallbacks() {
         lifecycleCollector.setApplicationLifecycleStateListener(this)
         appLaunchCollector.setColdLaunchListener(this)
-        gestureCollector.setGestureListener(lifecycleTracker)
     }
 
     private fun registerCollectors() {
@@ -87,7 +85,6 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
         gestureCollector.register()
         appLaunchCollector.register()
         networkChangesCollector.register()
-        lifecycleTracker.register()
     }
 
     override fun onAppForeground() {

@@ -13,30 +13,6 @@ internal class InvalidSpan : Span {
 
     override val checkpoints: MutableList<Checkpoint> = mutableListOf()
 
-    override fun setAttribute(key: String, value: Int): Span {
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Long): Span {
-        return this
-    }
-
-    override fun setAttribute(key: String, value: String): Span {
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Boolean): Span {
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Double): Span {
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Float): Span {
-        return this
-    }
-
     override val attributes: MutableMap<String, Any?> = mutableMapOf()
 
     override fun getStatus(): SpanStatus {
@@ -69,10 +45,6 @@ internal class InvalidSpan : Span {
 
     override fun getDuration(): Long {
         return 0
-    }
-
-    override fun makeCurrent(): Scope {
-        return NoopScope()
     }
 
     override fun <T> withScope(block: () -> T): T {

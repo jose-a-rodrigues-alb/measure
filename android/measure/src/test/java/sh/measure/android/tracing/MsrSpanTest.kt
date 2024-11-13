@@ -222,54 +222,6 @@ class MsrSpanTest {
     }
 
     @Test
-    fun `setAttribute adds attribute to span`() {
-        val span = MsrSpan.startSpan(
-            "span-name",
-            logger = logger,
-            timeProvider = timeProvider,
-            spanProcessor = spanProcessor,
-            sessionManager = sessionManager,
-            idProvider = idProvider,
-            parentSpan = null,
-        )
-        span.setAttribute("string", "value")
-        span.setAttribute("int", 100)
-        span.setAttribute("float", 100F)
-        span.setAttribute("long", 100L)
-        span.setAttribute("double", 100.0)
-        span.setAttribute("boolean", true)
-
-        Assert.assertEquals(6, span.attributes.size)
-        Assert.assertEquals("value", span.attributes["string"])
-        Assert.assertEquals(100, span.attributes["int"])
-        Assert.assertEquals(100F, span.attributes["float"])
-        Assert.assertEquals(100L, span.attributes["long"])
-        Assert.assertEquals(100.0, span.attributes["double"])
-        Assert.assertEquals(true, span.attributes["boolean"])
-    }
-
-    @Test
-    fun `setAttribute on ended span is a no-op`() {
-        val span = MsrSpan.startSpan(
-            "span-name",
-            logger = logger,
-            timeProvider = timeProvider,
-            spanProcessor = spanProcessor,
-            sessionManager = sessionManager,
-            idProvider = idProvider,
-            parentSpan = null,
-        ).end()
-        span.setAttribute("string", "value")
-        span.setAttribute("int", 100)
-        span.setAttribute("float", 100F)
-        span.setAttribute("long", 100L)
-        span.setAttribute("double", 100.0)
-        span.setAttribute("boolean", true)
-
-        Assert.assertEquals(0, span.attributes.size)
-    }
-
-    @Test
     fun `duration is 0 for active span`() {
         val span = MsrSpan.startSpan(
             "span-name",

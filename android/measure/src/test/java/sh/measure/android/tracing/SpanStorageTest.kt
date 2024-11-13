@@ -33,7 +33,7 @@ class SpanStorageTest {
             sessionManager,
             logger,
         ).startSpan()
-        val scope = span.makeCurrent()
+        val scope = SpanStorage.instance.makeCurrent(span)
         Assert.assertEquals(span, SpanStorage.instance.current())
         scope.close()
     }
@@ -56,8 +56,8 @@ class SpanStorageTest {
             sessionManager,
             logger,
         ).startSpan()
-        val spanAScope = spanA.makeCurrent()
-        val spanBScope = spanB.makeCurrent()
+        val spanAScope = SpanStorage.instance.makeCurrent(spanA)
+        val spanBScope = SpanStorage.instance.makeCurrent(spanB)
         Assert.assertEquals(spanB, SpanStorage.instance.current())
         spanBScope.close()
         Assert.assertEquals(spanA, SpanStorage.instance.current())
@@ -92,9 +92,9 @@ class SpanStorageTest {
             logger,
         ).startSpan()
 
-        val scopeA = spanA.makeCurrent()
-        val scopeB = spanB.makeCurrent()
-        val scopeC = spanC.makeCurrent()
+        val scopeA = SpanStorage.instance.makeCurrent(spanA)
+        val scopeB = SpanStorage.instance.makeCurrent(spanB)
+        val scopeC = SpanStorage.instance.makeCurrent(spanC)
 
         Assert.assertEquals(spanC, SpanStorage.instance.current())
 
@@ -117,9 +117,16 @@ class SpanStorageTest {
 
     @Test
     fun `making same span current multiple times creates new scopes`() {
-        val span = MsrSpanBuilder("span-name", idProvider, timeProvider, spanProcessor, sessionManager, logger).startSpan()
-        val scope1 = span.makeCurrent()
-        val scope2 = span.makeCurrent()
+        val span = MsrSpanBuilder(
+            "span-name",
+            idProvider,
+            timeProvider,
+            spanProcessor,
+            sessionManager,
+            logger
+        ).startSpan()
+        val scope1 = SpanStorage.instance.makeCurrent(span)
+        val scope2 = SpanStorage.instance.makeCurrent(span)
 
         Assert.assertEquals(span, SpanStorage.instance.current())
         scope2.close()

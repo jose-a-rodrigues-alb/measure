@@ -43,7 +43,6 @@ import sh.measure.android.exporter.PeriodicEventExporter
 import sh.measure.android.exporter.PeriodicEventExporterImpl
 import sh.measure.android.gestures.GestureCollector
 import sh.measure.android.lifecycle.LifecycleCollector
-import sh.measure.android.lifecycle.LifecycleTracker
 import sh.measure.android.logger.AndroidLogger
 import sh.measure.android.logger.Logger
 import sh.measure.android.networkchange.InitialNetworkStateProvider
@@ -70,12 +69,8 @@ import sh.measure.android.storage.FileStorage
 import sh.measure.android.storage.FileStorageImpl
 import sh.measure.android.storage.PrefsStorage
 import sh.measure.android.storage.PrefsStorageImpl
-import sh.measure.android.tracing.InternalTracer
-import sh.measure.android.tracing.InternalTracerImpl
 import sh.measure.android.tracing.MsrSpanProcessor
 import sh.measure.android.tracing.MsrTracer
-import sh.measure.android.tracing.SpanBuffer
-import sh.measure.android.tracing.SpanBufferImpl
 import sh.measure.android.tracing.SpanProcessor
 import sh.measure.android.tracing.Tracer
 import sh.measure.android.utils.AndroidSystemClock
@@ -254,7 +249,6 @@ internal class MeasureInitializerImpl(
         exportExecutor = executorServiceRegistry.eventExportExecutor(),
         eventExporter = eventExporter,
     ),
-    private val spanBuffer: SpanBuffer = SpanBufferImpl(),
     override val eventProcessor: EventProcessor = EventProcessorImpl(
         logger = logger,
         ioExecutor = executorServiceRegistry.ioExecutor(),
@@ -370,18 +364,11 @@ internal class MeasureInitializerImpl(
         sessionManager = sessionManager,
         configProvider = configProvider,
     ),
-    private val internalTracer: InternalTracer = InternalTracerImpl(),
-    override val lifecycleTracker: LifecycleTracker = LifecycleTracker(
-        application = application,
-        timeProvider = timeProvider,
-        internalTracer = internalTracer,
-    ),
     private val spanDeviceAttributeProcessor: SpanDeviceAttributeProcessor = SpanDeviceAttributeProcessor(
         localeProvider = localeProvider,
     ),
     private val spanProcessor: SpanProcessor = MsrSpanProcessor(
         eventProcessor,
-        spanBuffer,
         attributeProcessors = listOf(
             userAttributeProcessor,
             spanDeviceAttributeProcessor,
@@ -427,5 +414,4 @@ internal interface MeasureInitializer {
     val dataCleanupService: DataCleanupService
     val processInfoProvider: ProcessInfoProvider
     val tracer: Tracer
-    val lifecycleTracker: LifecycleTracker
 }

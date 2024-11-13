@@ -66,36 +66,6 @@ interface Span {
     fun setCheckpoint(name: String): Span
 
     /**
-     * Adds an integer attribute to the span.
-     */
-    fun setAttribute(key: String, value: Int): Span
-
-    /**
-     * Adds a long attribute to the span.
-     */
-    fun setAttribute(key: String, value: Long): Span
-
-    /**
-     * Adds a string attribute to the span.
-     */
-    fun setAttribute(key: String, value: String): Span
-
-    /**
-     * Adds a boolean attribute to the span.
-     */
-    fun setAttribute(key: String, value: Boolean): Span
-
-    /**
-     * Adds an double attribute to the span.
-     */
-    fun setAttribute(key: String, value: Double): Span
-
-    /**
-     * Adds an float attribute to the span.
-     */
-    fun setAttribute(key: String, value: Float): Span
-
-    /**
      * Ends the span.
      *
      * A span can only be ended once. Attempt to end an already ended span is no-op.
@@ -116,12 +86,6 @@ interface Span {
      * Returns whether the span has ended or not.
      */
     fun hasEnded(): Boolean
-
-    /**
-     * Puts this span in scope. Putting in scope means putting the span in thread local. Any spans
-     * created on this thread will now have this span set as it's parent automatically.
-     */
-    fun makeCurrent(): Scope
 
     /**
      * Runs the [block] of code in this span's scope. Any spans

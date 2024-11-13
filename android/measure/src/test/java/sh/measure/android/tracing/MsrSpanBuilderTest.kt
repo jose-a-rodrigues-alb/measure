@@ -50,7 +50,7 @@ class MsrSpanBuilderTest {
             sessionManager,
             logger,
         ).startSpan()
-        parentSpan.makeCurrent().use {
+        SpanStorage.instance.makeCurrent(parentSpan).use {
             val span = MsrSpanBuilder(
                 "span-name",
                 idProvider,
@@ -73,7 +73,7 @@ class MsrSpanBuilderTest {
             sessionManager,
             logger,
         ).startSpan()
-        parentSpan.makeCurrent().use {
+        SpanStorage.instance.makeCurrent(parentSpan).use {
             val span = MsrSpanBuilder(
                 "span-name",
                 idProvider,

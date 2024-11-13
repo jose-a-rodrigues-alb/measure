@@ -24,7 +24,6 @@ import sh.measure.android.fakes.TestData.toEvent
 import sh.measure.android.lifecycle.ActivityLifecycleData
 import sh.measure.android.screenshot.Screenshot
 import sh.measure.android.screenshot.ScreenshotCollector
-import sh.measure.android.tracing.SpanBuffer
 import sh.measure.android.utils.iso8601Timestamp
 
 internal class EventProcessorTest {
@@ -34,7 +33,6 @@ internal class EventProcessorTest {
     private val eventStore = FakeEventStore()
     private val exceptionExporter = mock<ExceptionExporter>()
     private val screenshotCollector = mock<ScreenshotCollector>()
-    private val spanBuffer = mock<SpanBuffer>()
     private val configProvider = FakeConfigProvider()
     private val eventTransformer = object : EventTransformer {
         override fun <T> transform(event: Event<T>): Event<T> = event

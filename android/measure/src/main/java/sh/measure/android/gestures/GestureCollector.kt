@@ -23,10 +23,6 @@ internal class GestureCollector(
 ) {
     private var listener: GestureListener? = null
 
-    fun setGestureListener(listener: GestureListener) {
-        this.listener = listener
-    }
-
     fun register() {
         logger.log(LogLevel.Debug, "Registering gesture collector")
         WindowInterceptor().apply {

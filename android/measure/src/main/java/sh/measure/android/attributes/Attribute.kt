@@ -23,21 +23,3 @@ internal object Attribute {
     const val INSTALLATION_ID_KEY = "installation_id"
     const val USER_ID_KEY = "user_id"
 }
-
-internal object SpanConstant {
-    const val APP_STARTUP: String = "app_startup"
-    const val GESTURE_TYPE = "gesture_type"
-    const val GESTURE_TARGET_ID = "gesture_target_id"
-    const val GESTURE_TARGET_NAME = "gesture_target_name"
-    const val LAUNCH_TYPE = "launch_type"
-    const val COLD_LAUNCH_TTID = "cold_launch_ttid"
-    const val WARM_LAUNCH_TTID = "warm_launch_ttid"
-    const val HOT_LAUNCH_TTID = "hot_launch_ttid"
-    const val COLD_LAUNCH_TTFI = "cold_launch_ttfi"
-    const val WARM_LAUNCH_TTFI = "warm_launch_ttfi"
-    const val HOT_LAUNCH_TTFI = "hot_launch_ttfi"
-    const val CURRENT_ACTIVITY = "current_activity"
-    const val ACTIVITY_TRANSITION = "activity_transition"
-    const val CURRENT_SCREEN_NAME = "current_screen"
-    const val PREVIOUS_SCREEN_NAME = "previous_screen"
-}

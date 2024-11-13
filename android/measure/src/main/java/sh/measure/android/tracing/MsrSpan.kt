@@ -96,72 +96,6 @@ internal class MsrSpan(
         return this
     }
 
-    override fun setAttribute(key: String, value: Boolean): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
-                return this
-            }
-            this.attributes.put(key, value)
-        }
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Double): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
-                return this
-            }
-            this.attributes.put(key, value)
-        }
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Float): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
-                return this
-            }
-            this.attributes.put(key, value)
-        }
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Int): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
-                return this
-            }
-            this.attributes.put(key, value)
-        }
-        return this
-    }
-
-    override fun setAttribute(key: String, value: Long): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
-                return this
-            }
-            this.attributes.put(key, value)
-        }
-        return this
-    }
-
-    override fun setAttribute(key: String, value: String): Span {
-        synchronized(lock) {
-            if (hasEnded != EndState.NotEnded) {
-                logger.log(LogLevel.Warning, "Attempt to set attribute after span ended")
-                return this
-            }
-            this.attributes.put(key, value)
-        }
-        return this
-    }
-
     override fun end(): Span {
         endSpanInternal(timeProvider.now())
         return this
@@ -194,12 +128,8 @@ internal class MsrSpan(
         spanProcessor.onEnded(this)
     }
 
-    override fun makeCurrent(): Scope {
-        return SpanStorage.instance.makeCurrent(this)
-    }
-
     override fun <T> withScope(block: () -> T): T {
-        return makeCurrent().use { block() }
+        return SpanStorage.instance.makeCurrent(this).use { block() }
     }
 
     override fun getDuration(): Long {
