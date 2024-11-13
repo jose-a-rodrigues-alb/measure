@@ -244,20 +244,7 @@ object Measure {
             return Span.invalid()
         }
     }
-
-    /**
-     * Returns the current span from thread local, if any.
-     *
-     * The SDK must be initialized, otherwise this will always return null.
-     */
-    fun getCurrentSpan(): Span? {
-        return if (isInitialized.get()) {
-            Span.current()
-        } else {
-            null
-        }
-    }
-
+    
     /**
      * Allows creating a span without starting it immediately.
      *

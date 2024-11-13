@@ -66,30 +66,6 @@ val childSpan: Span = Measure.startSpan("child-span").setParent(parentSpan)
 val span: Span = Measure.startSpan("span-name").setCheckpoint("checkpoint-name")
 ```
 
-### Add attribute to a span
-
-```kotlin
-val span: Span = Measure.startSpan("span-name").setAttribute("attr-key", value)
-```
-
-### Set current span
-
-Spans are stored in thread local storage for easy access across the codebase, without having to pass instances of spans
-across different layers.
-
-```kotlin
-val spanScope: Scope = Measure.startSpan("span-name").makeCurrent()
-```
-
-### Get current span
-
-To get access to the current span use the `getSpan` function. Note that `getSpan` will return the current span in scope
-set previously by a `span.makeCurrent` call. Each thread has its own current span.
-
-```kotlin
-val span: Span? = Measure.getSpan()
-```
-
 ### Using scopes
 
 A span can be put in *scope*. Putting in scope means putting the span in thread local. When a span is in
@@ -136,58 +112,3 @@ val spanBuilder: SpanBuilder = Measure.createSpan("span-name")
     .setParent(parentSpan)
 val span: Span = spanBuilder.startSpan()
 ```
-
-## Automatically collected spans
-
-### **`msr.app_startup`**
-
-App startup span starts when the process starts and ends on the first interaction with the app.
-
-Get the app startup span using `getAppStartupSpan`. This returns the span or null if the span has already ended.
-
-This span can contain the following child spans:
-
-#### ** `msr.cold_launch.ttid` **
-
-Measures the cold launch TTID (Time to Initial Display). This span starts when the process starts and ends when the
-first frame for the activity is drawn.
-
-#### ** `msr.cold_launch.ttfi` **
-
-Measures the cold launch TTFI (Time to First Interaction). This span starts when the process starts and ends when the
-user interacts with the app for the fist time, i.e. when user clicks, long clicks or scrolls a view.
-
-```kotlin
-Measure.getAppStartupSpan()?.let {
-    it.setAttribute("key", "value")
-}
-```
-
-### ** `msr.current_activity` **
-
-A span which tracks the visible activity. This span starts when `onActivityStarted` for an activity is called and ends
-when `onActivityPaused` is called.
-
-Get the current activity span using `getCurrentActivitySpan`. This returns the span or null if the span has already
-ended.
-
-```kotlin
-Measure.getCurrentActivitySpan()?.let {
-    it.setAttribute("key", "value")
-}
-```
-
-### ** `msr.activity_transition` **
-
-A span which tracks duration of activity transitions. This span starts when `onActivityPaused` is called and ends when
-first frame of the next activity is drawn.
-
-### ** `msr.hot_launch.ttid` **
-
-A span which measures the duration of a hot launch. This span starts when app `onActivityStarted` is called and ends
-when first frame of the activity is drawn.
-
-### ** `msr.warm_launch.ttid` **
-
-A span which measures the duration of a warm launch. This span starts when app `onActivityCreated`
-or `onActivityStarted` is called and ends when first frame of the activity is drawn.
