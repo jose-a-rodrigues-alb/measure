@@ -387,6 +387,7 @@ internal class MeasureInitializerImpl(
             spanDeviceAttributeProcessor,
             appAttributeProcessor,
             installationIdAttributeProcessor,
+            networkStateAttributeProcessor,
         ),
     ),
     override val tracer: Tracer = MsrTracer(
