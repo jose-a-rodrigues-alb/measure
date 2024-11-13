@@ -15,11 +15,16 @@ internal class MsrSpanProcessor(
     private val attributeProcessors: List<AttributeProcessor>,
 ) : SpanProcessor {
     override fun onStart(span: Span) {
-        val threadName = Thread.currentThread().name
-        span.attributes[Attribute.THREAD_NAME] = threadName
-        attributeProcessors.forEach {
-            it.appendAttributes(span.attributes)
-        }
+        InternalTrace.trace(
+            { "msr-spanProcessor-onStart" },
+            {
+                val threadName = Thread.currentThread().name
+                span.attributes[Attribute.THREAD_NAME] = threadName
+                attributeProcessors.forEach {
+                    it.appendAttributes(span.attributes)
+                }
+            }
+        )
     }
 
     override fun onEnding(span: ReadableSpan) {
@@ -27,6 +32,7 @@ internal class MsrSpanProcessor(
 
     override fun onEnded(span: ReadableSpan) {
         val spanData = span.toSpanData()
+        // Log.d("MsrSpan", spanData.toString())
         signalProcessor.trackSpan(spanData)
     }
 }
