@@ -123,7 +123,7 @@ class SpanStorageTest {
             timeProvider,
             spanProcessor,
             sessionManager,
-            logger
+            logger,
         ).startSpan()
         val scope1 = SpanStorage.instance.makeCurrent(span)
         val scope2 = SpanStorage.instance.makeCurrent(span)
