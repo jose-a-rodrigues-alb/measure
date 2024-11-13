@@ -11,6 +11,7 @@ public final class sh/measure/android/Measure {
 	public static final field INSTANCE Lsh/measure/android/Measure;
 	public static final fun clearUserId ()V
 	public final fun createSpan (Ljava/lang/String;)Lsh/measure/android/tracing/SpanBuilder;
+	public final fun getCurrentSpan ()Lsh/measure/android/tracing/Span;
 	public final fun getTimestamp ()J
 	public final fun getTraceParentHeaderKey ()Ljava/lang/String;
 	public final fun getTraceParentHeaderValue (Lsh/measure/android/tracing/Span;)Ljava/lang/String;
@@ -101,6 +102,7 @@ public abstract interface class sh/measure/android/tracing/Span {
 	public abstract fun getTraceId ()Ljava/lang/String;
 	public abstract fun hasEnded ()Z
 	public abstract fun isSampled ()Z
+	public abstract fun makeCurrent ()Lsh/measure/android/tracing/Scope;
 	public abstract fun setCheckpoint (Ljava/lang/String;)Lsh/measure/android/tracing/Span;
 	public abstract fun setParent (Lsh/measure/android/tracing/Span;)Lsh/measure/android/tracing/Span;
 	public abstract fun setStatus (Lsh/measure/android/tracing/SpanStatus;)Lsh/measure/android/tracing/Span;

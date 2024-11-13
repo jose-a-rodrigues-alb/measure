@@ -2,18 +2,18 @@
 
 * [Introduction](#introduction)
 * [API Reference](#api-reference)
-  * [Start a span](#start-a-span)
-  * [End a span](#end-a-span)
-  * [Set span parent](#set-parent-span)
-  * [Set no parent](#set-no-parent)
-  * [Add checkpoint](#add-checkpoint)
-  * [Using scopes](#using-scopes)
-  * [Set current span](#set-current-span)
-  * [Get current span](#get-current-span)
-  * [Using span builder](#using-span-builder)
+    * [Start a span](#start-a-span)
+    * [End a span](#end-a-span)
+    * [Set span parent](#set-parent-span)
+    * [Set no parent](#set-no-parent)
+    * [Add checkpoint](#add-checkpoint)
+    * [Using scopes](#using-scopes)
+    * [Set current span](#set-current-span)
+    * [Get current span](#get-current-span)
+    * [Using span builder](#using-span-builder)
 * [Distributed Tracing](#distributed-tracing)
-  * [OkHttp example](#example-with-okhttp)
-  * [OkHttp interceptor example](#example-with-okhttp-interceptor)
+    * [OkHttp example](#example-with-okhttp)
+    * [OkHttp interceptor example](#example-with-okhttp-interceptor)
 
 ## Introduction
 
@@ -89,14 +89,13 @@ val span: Span = Measure.startSpan("span-name").setCheckpoint("checkpoint-name")
 
 ### Using scopes
 
-A span can be put in *scope*. Putting in scope means putting the span in thread local. When a span is in
-scope it is automatically added as a parent span for all spans created within it's scope. In the following example the
-child span will automatically have *spanA* set as it's parent, without having to call
-`setParent` explicitly.
+A span can be put in *scope*. Putting in scope means storing the span as a thread local. When a span is in
+scope it is automatically added as a parent span for all spans created within its scope. In the following example the
+child span will automatically have *spanA* set as it's parent, without having to call `setParent` explicitly.
 
 ```kotlin
 val spanA: Span = Measure.startSpan("spanA")
-Measure.withScope(spanA) {
+spanA.withScope {
     val childSpan = Measure.startSpan("child-span")
     childSpan.end()
 }
@@ -111,6 +110,19 @@ across different layers.
 ```kotlin
 val spanScope: Scope = Measure.startSpan("span-name").makeCurrent()
 ```
+
+> [!IMPORTANT]
+>
+> Manually managing scopes is not recommended and should only be used when no other option is available. Manually
+> closing the scope can be challenging when the code being executed is asynchronous or can throw exceptions.
+>
+> It's always easier and safer to set the parent span using `setParent` method explicitly. The other safe way is to
+> use `span.withScope` which will make sure the scope is closed correctly, even if the app crashes while running the
+> code being tracked.
+
+When `makeCurrent` is called, the span is stored as a thread local on the current thread. Calling `getSpan` on another 
+thread would not work. This is a standard practice to avoid using synchronization when starting/ending a span. But comes
+with considerable manual management of scopes.
 
 ### Get current span
 
@@ -143,7 +155,6 @@ val spanBuilder: SpanBuilder = Measure.createSpan("span-name")
     .setParent(parentSpan)
 val span: Span = spanBuilder.startSpan()
 ```
-
 
 ## Distributed Tracing
 

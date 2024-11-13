@@ -121,6 +121,10 @@ internal class MsrSpan(
         }
     }
 
+    override fun makeCurrent(): Scope {
+        return SpanStorage.instance.makeCurrent(this)
+    }
+
     private fun endSpanInternal(timestamp: Long) {
         synchronized(lock) {
             if (hasEnded != EndState.NotEnded) {

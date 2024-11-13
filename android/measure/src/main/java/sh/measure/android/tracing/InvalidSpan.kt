@@ -45,6 +45,10 @@ internal class InvalidSpan : Span {
         return false
     }
 
+    override fun makeCurrent(): Scope {
+        return NoopScope()
+    }
+
     override fun getDuration(): Long {
         return 0
     }

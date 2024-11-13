@@ -94,6 +94,12 @@ interface Span {
     fun hasEnded(): Boolean
 
     /**
+     * Puts this span in scope. Putting in scope means putting the span in thread local. Any spans
+     * created on this thread will now have this span set as it's parent automatically.
+     */
+    fun makeCurrent(): Scope
+
+    /**
      * Runs the [block] of code in this span's scope. Any spans
      * created within this block on the same thread will have this span set as it's parent
      * automatically.
