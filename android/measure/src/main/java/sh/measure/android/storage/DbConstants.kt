@@ -206,7 +206,8 @@ internal object Sql {
             ${SpansTable.COL_SERIALIZED_ATTRS} TEXT,
             ${SpansTable.COL_SERIALIZED_SPAN_EVENTS} TEXT,
             ${SpansTable.COL_SAMPLED} INTEGER DEFAULT 0,
-            ${SpansTable.COL_HAS_ENDED} INTEGER
+            ${SpansTable.COL_HAS_ENDED} INTEGER,
+            FOREIGN KEY (${SpansTable.COL_SESSION_ID}) REFERENCES ${SessionsTable.TABLE_NAME}(${SessionsTable.COL_SESSION_ID}) ON DELETE CASCADE
         )
     """
 
