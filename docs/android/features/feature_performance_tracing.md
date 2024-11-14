@@ -53,8 +53,12 @@ val span: Span = Measure.startSpan("span-name")
 A span can also be started by providing the start time, this is useful in cases where a certain operation has already
 started but there wasn't any way to access the Measure APIs in that part of the code.
 
+> [!IMPORTANT]
+> To set the start time use `Measure.getTimestamp`, which returns epoch time calculated using a monotonic clock.
+> Passing in `System.currentTimeInMillis` can lead to issues with corrupted span timings due to clock skew issues.
+
 ```kotlin
-val span: Span = Measure.startSpan("span-name", timestamp = System.currentTimeMillis())
+val span: Span = Measure.startSpan("span-name", timestamp = Measure.getTimestamp())
 ```
 
 ### End a span
@@ -69,9 +73,13 @@ span.end(Status.Ok)
 A span can also be ended by providing the end time, this is useful in cases where a certain operation has already ended
 but there wasn't any way to access the Measure APIs in that part of the code.
 
+> [!IMPORTANT]
+> To set the start time use `Measure.getTimestamp`, which returns epoch time calculated using a monotonic clock.
+> Passing in `System.currentTimeInMillis` can lead to issues with corrupted span timings due to clock skew issues.
+
 ```kotlin
 val span: Span = Measure.startSpan("span-name")
-span.end(Status.Ok, timestamp = System.currentTimeMillis())
+span.end(Status.Ok, timestamp = Measure.getTimestamp())
 ```
 
 ### Set parent span
