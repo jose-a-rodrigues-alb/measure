@@ -122,7 +122,7 @@ class MultipartDataFactoryTest {
         val endTime: Long = 5000
         val checkpoint = TestData.getCheckpoint()
         fun expectedSerializedValue(): String {
-            return "{\"name\":\"span-name\",\"trace_id\":\"trace-id\",\"span_id\":\"span-id\",\"parent_id\":\"parent-id\",\"session_id\":\"session-id\",\"start_time\":\"${startTime.iso8601Timestamp()}\",\"end_time\":\"${endTime.iso8601Timestamp()}\",\"duration\":4000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"checkpoints\":[{\"name\":\"${checkpoint.name}\",\"timestamp\":\"${checkpoint.timestamp.iso8601Timestamp()}\"}],\"has_ended\":true}"
+            return "{\"name\":\"span-name\",\"trace_id\":\"trace-id\",\"span_id\":\"span-id\",\"parent_id\":\"parent-id\",\"session_id\":\"session-id\",\"start_time\":\"${startTime.iso8601Timestamp()}\",\"end_time\":\"${endTime.iso8601Timestamp()}\",\"duration\":4000,\"status\":\"0\",\"attributes\":{\"key\":\"value\"},\"checkpoints\":[{\"name\":\"${checkpoint.name}\",\"timestamp\":\"${checkpoint.timestamp.iso8601Timestamp()}\"}]}"
         }
 
         // Given

@@ -487,7 +487,6 @@ internal class DatabaseImpl(
                 val endTime = it.getLong(endTimeIndex)
                 val duration = it.getLong(durationIndex)
                 val status = it.getInt(statusIndex)
-                val hasEnded = it.getInt(hasEndedIndex) == 0
                 val serializedAttrs = it.getString(serializedAttrsIndex)
                 val serializedCheckpoints = it.getString(serializedCheckpointsIndex)
 
@@ -504,7 +503,6 @@ internal class DatabaseImpl(
                         status = status,
                         serializedAttributes = serializedAttrs,
                         serializedCheckpoints = serializedCheckpoints,
-                        hasEnded = hasEnded,
                     ),
                 )
             }

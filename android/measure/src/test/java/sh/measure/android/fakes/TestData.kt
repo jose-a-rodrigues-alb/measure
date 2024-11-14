@@ -549,7 +549,6 @@ internal object TestData {
             status = spanEntity.status.ordinal,
             serializedAttributes = spanEntity.serializedAttributes,
             serializedCheckpoints = spanEntity.serializedCheckpoints,
-            hasEnded = spanEntity.hasEnded,
         )
     }
 
