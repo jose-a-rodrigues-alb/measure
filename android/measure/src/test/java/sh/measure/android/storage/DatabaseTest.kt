@@ -489,7 +489,7 @@ class DatabaseTest {
         val span4 = TestData.getSpanEntity(spanId = "span-id-4", sessionId = "session-id-2")
         val span5 = TestData.getSpanEntity(spanId = "span-id-5", sessionId = "session-id-2")
         database.insertSession(TestData.getSessionEntity(id = "session-id-1"))
-        database.insertSession(TestData.getSessionEntity(id = "session-id-2"));
+        database.insertSession(TestData.getSessionEntity(id = "session-id-2"))
         database.insertSpan(span1)
         database.insertSpan(span2)
         database.insertSpan(span3)

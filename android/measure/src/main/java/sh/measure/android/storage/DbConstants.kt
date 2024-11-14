@@ -303,7 +303,7 @@ internal object Sql {
             AND sp.${SpansTable.COL_SAMPLED} = 1
             ORDER BY sp.${SpansTable.COL_END_TIME} ${if (ascending) "ASC" else "DESC"}
             LIMIT $spanCount
-            """.trimIndent()
+        """.trimIndent()
     }
 
     fun getBatches(maxCount: Int): String {

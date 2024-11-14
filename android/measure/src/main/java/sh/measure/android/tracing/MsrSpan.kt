@@ -184,6 +184,8 @@ internal class MsrSpan(
     }
 
     private enum class EndState {
-        NotEnded, Ending, Ended,
+        NotEnded,
+        Ending,
+        Ended,
     }
 }

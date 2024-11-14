@@ -21,7 +21,7 @@ internal class MsrTracer(
             spanProcessor,
             sessionManager,
             traceSampler,
-            logger
+            logger,
         )
     }
 

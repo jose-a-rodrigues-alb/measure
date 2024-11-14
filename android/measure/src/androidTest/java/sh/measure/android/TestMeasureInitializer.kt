@@ -68,6 +68,8 @@ import sh.measure.android.storage.SignalStoreImpl
 import sh.measure.android.tracing.MsrSpanProcessor
 import sh.measure.android.tracing.MsrTracer
 import sh.measure.android.tracing.SpanProcessor
+import sh.measure.android.tracing.TraceSampler
+import sh.measure.android.tracing.TraceSamplerImpl
 import sh.measure.android.tracing.Tracer
 import sh.measure.android.utils.AndroidSystemClock
 import sh.measure.android.utils.AndroidTimeProvider
@@ -352,11 +354,16 @@ internal class TestMeasureInitializer(
         signalProcessor = signalProcessor,
         attributeProcessors = emptyList(),
     ),
+    private val traceSampler: TraceSampler = TraceSamplerImpl(
+        randomizer = randomizer,
+        configProvider = configProvider,
+    ),
     override val tracer: Tracer = MsrTracer(
         logger = logger,
         sessionManager = sessionManager,
         spanProcessor = spanProcessor,
         idProvider = idProvider,
         timeProvider = timeProvider,
+        traceSampler = traceSampler,
     ),
 ) : MeasureInitializer

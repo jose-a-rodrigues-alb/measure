@@ -23,7 +23,7 @@ internal class MsrSpanProcessor(
                 attributeProcessors.forEach {
                     it.appendAttributes(span.attributes)
                 }
-            }
+            },
         )
     }
 

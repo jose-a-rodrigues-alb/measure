@@ -283,7 +283,6 @@ class MsrSpanTest {
         Assert.assertFalse(span2.isSampled)
     }
 
-
     @Test
     fun `startSpan samples child span if parent span is sampled`() {
         traceSampler.setSampled(true)
