@@ -6,18 +6,21 @@ options can be set in the `MeasureConfig` object which is passed to the `Measure
 ```kotlin
 Measure.init(
     context, MeasureConfig(
-      enableLogging = true,
-      trackScreenshotOnCrash = true,
-      screenshotMaskLevel = if (BuildConfig.DEBUG) {
-        ScreenshotMaskLevel.SensitiveFieldsOnly
-      } else {
-        ScreenshotMaskLevel.AllTextAndMedia
-      },
-      trackHttpHeaders = true,
-      trackHttpBody = true,
-      trackActivityIntentData = true,
-      httpUrlBlocklist = listOf("http://localhost:8080"),
-      sessionSamplingRate = 0.5f,
+        enableLogging = true,
+        trackScreenshotOnCrash = true,
+        screenshotMaskLevel = if (BuildConfig.DEBUG) {
+            ScreenshotMaskLevel.SensitiveFieldsOnly
+        } else {
+            ScreenshotMaskLevel.AllTextAndMedia
+        },
+        trackHttpHeaders = true,
+        trackHttpBody = true,
+        trackActivityIntentData = true,
+        httpHeadersBlocklist = listOf("X-USER-EMAIL"),
+        httpUrlBlocklist = listOf("http://localhost:8080"),
+        httpUrlAllowlist = listOf("http://example.com"),
+        sessionSamplingRate = 0.5f,
+        traceSamplingRate = 0.001f,
     )
 )
 ```
@@ -34,6 +37,7 @@ Measure.init(
 * [**trackActivityIntentData**](#trackActivityIntentData)
 * [**sessionSamplingRate**](#sessionSamplingRate)
 * [**enableLogging**](#enableLogging)
+* [**traceSamplingRate**](#traceSamplingRate)
 
 ## `trackScreenshotOnCrash`
 
@@ -123,7 +127,6 @@ leaking:
 * WWW-Authenticate
 * X-Api-Key
 
-
 ## `trackHttpBody`
 
 Allows enabling/disabling capturing of HTTP request and response body. Disabled by default.
@@ -167,17 +170,24 @@ Disabled by default.
 
 ## `sessionSamplingRate`
 
-Measure SDK by default collects events for every session. This is useful to get a complete picture of
-the app's behavior and performance. However, in case you want to reduce the amount of data
-collected, you can set a sampling rate for _non-crashed_ sessions using `sessionSamplingRate.
+Measure SDK by default collects events for crashed sessions only. However, in case you want to collect
+events at a sampled rate for non-crashed sessions, use `sessionSamplingRate.
 
-Defaults to 1.0, meaning all sessions are exported by default.
+Defaults to 0.0, meaning no events for non-crashed sessions are exported by default.
 
 The sampling rate is a value between 0 and 1. For example, a value of `0.1` will export only 10%
 of the non-crashed sessions, a value of `0` will disable exporting of non-crashed sessions.
 
-Note that crashed sessions are always exported. And certain events like `cold_launch`, `warm_launch`,
-`hot_launch` are always exported regardless of the sampling rate.
+Note that events for crashed sessions are always exported. And certain events like `cold_launch`, `warm_launch`,
+`hot_launch`, `lifecycle_activity`, `lifecycle_fragment` are always exported regardless of the sampling rate.
+
+## `traceSamplingRate`
+
+Measure SDK collects traces at a sampled rate of 0.1%. Meaning 0.1% of all traces will be sent to the server. To modify
+this rate use `traceSamplingRate`.
+
+The sampling rate is a value between 0 and 1. For example, a value of `0.1` will export only 10%
+of the traces, a value of `0` will disable exporting of traces completely.
 
 ## `enableLogging`
 

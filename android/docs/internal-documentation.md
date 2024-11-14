@@ -24,14 +24,14 @@ Sqlite database is configured with the following settings:
 * [foreign_keys](https://sqlite.org/pragma.html#pragma_foreign_keys): ON
 
 Events are written to the database & file storage (if needed) as soon as they are received by
-the `Event Processor`. This can be improved in future by adding a queue which batches the inserts.
+the `Signal Processor`. This can be improved in future by adding a queue which batches the inserts.
 
 # Batching & export
 
 Measure exports events to the server in batches. All events for sessions that contain a crash are
-exported. All non-crashed sessions are exported by default, a sampling rate can be applied to
-non-crashed sessions to reduce the number of sessions exported. See [README](../README.md) for 
-more details about configuring sampling rate.
+exported. Events for non-crashed sessions are not exported by default, a sampling rate can be
+applied to non-crashed sessions to reduce the number of sessions exported.
+See [README](../README.md) for more details about configuring sampling rate.
 
 * [Periodic batching and export](#periodic-batching-and-export)
 * [Exceptions and ANRs export](#exceptions-and-anrs-export)
@@ -100,15 +100,16 @@ tasks. This makes it easy to manage the lifecycle of executors and also to provi
 tune the number of threads used for various tasks.
 
 The following executors are used:
-1. IO Executor: Used for all long running operations like writing to the database, reading from the database,
+
+1. IO Executor: Used for all long running operations like writing to the database, reading from the
+   database,
    writing to the file system, etc.
 2. Export Executor: Used for exporting events to the server over the network.
-3. Default Executor: Used for short running tasks that need to be run in background like processing 
-events, etc.
+3. Default Executor: Used for short running tasks that need to be run in background like processing
+   events, etc.
 
-All executors are configured to be single-threaded and internally use a scheduled executor service 
+All executors are configured to be single-threaded and internally use a scheduled executor service
 with unbounded queue, which can be tuned in the future.
-
 
 # Configuration
 
@@ -119,7 +120,7 @@ sensitive information from being sent or modifying the behavior of the SDK.
 Any configuration change made to `MeasureConfig` is a public API change and must also result in
 updating the documentation.
 
-See [README](../../docs/android/configuration-options.md) for more details about the 
+See [README](../../docs/android/configuration-options.md) for more details about the
 available configurations.
 
 ## Applying configs
@@ -135,30 +136,35 @@ itself.
 
 # Testing
 
-The SDK is tested using both unit tests and integration tests. Certain unit tests which require 
+The SDK is tested using both unit tests and integration tests. Certain unit tests which require
 Android framework classes are run using Robolectric. The integration tests are run using Espresso
 and UI Automator.
 
 To run unit tests, use the following command:
+
 ```shell
 ./gradlew :measure:test
 ```
 
 To run integration tests (requires a device), use the following command:
+
 ```shell
 ./gradlew :measure:connectedAndroidTest
 ```
 
 The _Measure gradle plugin_ also contains both unit tests and functional tests. The functional tests
-are run using the [testkit by autonomous apps](https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit) 
+are run using
+the [testkit by autonomous apps](https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit)
 and use JUnit5 for testing as it provides an easy way to run parameterized tests.
 
 TO run the unit tests, use the following command:
+
 ```shell
 ./gradlew :measure-gradle-plugin:test
 ```
 
 To run the functional tests, use the following command:
+
 ```shell
 ./gradlew :measure-gradle-plugin:functionalTest
 ```

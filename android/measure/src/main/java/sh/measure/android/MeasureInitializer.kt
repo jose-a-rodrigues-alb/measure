@@ -1,6 +1,7 @@
 package sh.measure.android
 
 import android.app.Application
+import androidx.core.os.trace
 import sh.measure.android.anr.AnrCollector
 import sh.measure.android.appexit.AppExitCollector
 import sh.measure.android.appexit.AppExitProvider
@@ -117,6 +118,7 @@ internal class MeasureInitializerImpl(
             httpUrlAllowlist = inputConfig.httpUrlAllowlist,
             trackActivityIntentData = inputConfig.trackActivityIntentData,
             sessionSamplingRate = inputConfig.sessionSamplingRate,
+            traceSamplingRate = inputConfig.traceSamplingRate,
         ),
         configLoader = ConfigLoaderImpl(),
     ),
