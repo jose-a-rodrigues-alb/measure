@@ -1,32 +1,46 @@
 package sh.measure.android.tracing
 
+import sh.measure.android.Measure
+
 /**
- * Used to construct a [Span].
+ * Interface for configuring and creating a new [Span].
  */
 interface SpanBuilder {
     /**
-     * Sets the parent span. If not set, the current span in scope will be automatically set
-     * as parent. If no span is available in scope, this span will be a root span.
+     * Sets the parent span for the span being built.
+     *
+     * @param span The span to set as parent
+     *
+     * Note: If no parent is explicitly set, the currently active span (if any) will be used
+     * as the parent. If no span is active, a root span will be created.
      */
     fun setParent(span: Span): SpanBuilder
 
     /**
-     * Force this span to be a root span, regardless of the current span in scope.
+     * Removes any parent context, ensuring the created span will be a root span.
+     *
+     * Note: This overrides both explicit parent setting and any current span in scope.
      */
     fun setNoParent(): SpanBuilder
 
     /**
-     * Starts a new span.
+     * Creates and starts a new span with the current time.
      *
-     * Once the span is started, any other function in the span builder will be ignored.
+     * @return A new [Span] instance
+     *
+     * Note: After calling this method, any further builder configurations will be ignored.
+     * The start time is automatically set using [Measure.getTimestamp].
      */
     fun startSpan(): Span
 
     /**
-     * Starts a new span at the specified [timeMs]. Use when the operation to be traced has already
-     * started.
+     * Creates and starts a new span with the specified start time.
      *
-     * @param timeMs The milliseconds since epoch when the span started.
+     * @param timeMs The start time in milliseconds since epoch, obtained via [Measure.getTimestamp]
+     * @return A new [Span] instance
+     *
+     * Note: After calling this method, any further builder configurations will be ignored.
+     * Use this method when you need to trace an operation that has already started.
      */
     fun startSpan(timeMs: Long): Span
 }

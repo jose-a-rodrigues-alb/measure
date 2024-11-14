@@ -173,10 +173,12 @@ object Measure {
     }
 
     /**
-     * Starts a new span with the given [name].
+     * Starts a new performance tracing span with the specified [name].
      *
-     * The SDK must be initialized before a span is started. Otherwise an invalid span is
-     * returned which will be a no-op and will not be exported.
+     * @param name The name to identify this span. Follow the [naming convention guide](https://github.com/measure-sh/measure/blob/main/docs/android/features/feature_performance_tracing.md#span-names)
+     * for consistent naming practices.
+     *
+     * @return [Span] A new span instance if the SDK is initialized, or an invalid no-op span if not initialized
      */
     fun startSpan(name: String): Span {
         return if (isInitialized.get()) {
@@ -187,15 +189,17 @@ object Measure {
     }
 
     /**
-     * Starts a new span at the specified [timestamp]. Use when the operation to be traced has
-     * already started.
+     * Starts a new performance tracing span with the specified [name] and start [timestamp].
      *
-     * The timestamp **must** be taken using [getTimestamp] to reduce the effect of clock drifts.
+     * @param name The name to identify this span. Follow the [naming convention guide](https://github.com/measure-sh/measure/blob/main/docs/android/features/feature_performance_tracing.md#span-names)
+     * for consistent naming practices.
+     * @param timestamp The milliseconds since epoch when the span started. Must be obtained using [getTimestamp]
+     * to minimize clock drift effects.
      *
-     * The SDK must be initialized before a span is started. Otherwise an invalid span is
-     * returned which will be a no-op and will not be exported.
+     * @return [Span] A new span instance if the SDK is initialized, or an invalid no-op span if not initialized
      *
-     * @param timestamp The milliseconds since epoch when the span started.
+     * Note: Use this method when you need to trace an operation that has already started and you have
+     * captured its start time using [getTimestamp].
      */
     fun startSpan(name: String, timestamp: Long): Span {
         return if (isInitialized.get()) {
@@ -206,16 +210,19 @@ object Measure {
     }
 
     /**
-     * Start a new span at the specified [timestamp] and force it to be a root span by
-     * setting [setNoParent] flag.
+     * Starts a new performance tracing **root** span with the specified [name], start [timestamp].
      *
-     * The timestamp **must** be taken using [getTimestamp] to reduce the effect of clock drifts.
+     * @param name The name to identify this span. Follow the [naming convention guide](https://github.com/measure-sh/measure/blob/main/docs/android/features/feature_performance_tracing.md#span-names)
+     * for consistent naming practices.
+     * @param timestamp The milliseconds since epoch when the span started. Must be obtained using [getTimestamp]
+     * to minimize clock drift effects.
+     * @param setNoParent When true, forces this span to be a root span. When false, inherits the
+     * current span if one exists.
      *
-     * The SDK must be initialized before a span is started. Otherwise an invalid span is
-     * returned which will be a no-op and will not be exported.
+     * @return [Span] A new span instance if the SDK is initialized, or an invalid no-op span if not initialized
      *
-     * @param timestamp The milliseconds since epoch when the span started.
-     * @param setNoParent Forces this span to be a root span when true.
+     * Note: Use this method when you need to trace an operation that has already started and you have
+     * captured its start time using [getTimestamp], with explicit control over span hierarchy using [setNoParent].
      */
     fun startSpan(name: String, timestamp: Long, setNoParent: Boolean): Span {
         if (isInitialized.get()) {
@@ -230,12 +237,16 @@ object Measure {
     }
 
     /**
-     * Start a new span by forcing it to be a root span by setting [setNoParent] flag.
+     * Starts a new performance tracing **root** span with the specified [name].
      *
-     * The SDK must be initialized before a span is started. Otherwise an invalid span is
-     * returned which will be a no-op and will not be exported.
+     * @param name The name to identify this span. Follow the [naming convention guide](https://github.com/measure-sh/measure/blob/main/docs/android/features/feature_performance_tracing.md#span-names)
+     * for consistent naming practices.
+     * @param setNoParent When true, forces this span to be a root span. When false, inherits the
+     * current span if one exists.
      *
-     * @param setNoParent Forces this span to be a root span when true.
+     * @return [Span] A new span instance if the SDK is initialized, or an invalid no-op span if not initialized
+     *
+     * Note: Use this method when you need explicit control over span hierarchy using [setNoParent].
      */
     fun startSpan(name: String, setNoParent: Boolean): Span {
         if (isInitialized.get()) {
@@ -250,9 +261,12 @@ object Measure {
     }
 
     /**
-     * Returns the current span from thread local, if any.
+     * Retrieves the currently active span from the thread local storage, if any.
      *
-     * The SDK must be initialized, otherwise this will always return null.
+     * @return [Span] The current active span if one exists and the SDK is initialized, or null if either
+     * no span is active or the SDK is not initialized.
+     *
+     * @see [Span.makeCurrent] for details of how to set a span as current.
      */
     fun getCurrentSpan(): Span? {
         return if (isInitialized.get()) {
@@ -263,10 +277,15 @@ object Measure {
     }
 
     /**
-     * Allows creating a span without starting it immediately.
+     * Creates a configurable span builder for deferred span creation.
      *
-     * @return A [SpanBuilder] to be used to configure the span before starting it. Null, if the
-     * SDK has not been initialized yet.
+     * @param name The name to identify this span. Follow the [naming convention guide](https://github.com/measure-sh/measure/blob/main/docs/android/features/feature_performance_tracing.md#span-names)
+     * for consistent naming practices.
+     *
+     * @return [SpanBuilder] A builder instance to configure the span if the SDK is initialized,
+     * or null if the SDK is not initialized
+     *
+     * Note: Use this method when you need to create a span without immediately starting it.
      */
     fun createSpan(name: String): SpanBuilder? {
         return if (isInitialized.get()) {
@@ -276,18 +295,45 @@ object Measure {
         }
     }
 
+    /**
+     * Returns the W3C traceparent header value for the given span.
+     *
+     * @param span The span to extract the traceparent header value from
+     * @return A W3C trace context compliant header value in the format:
+     * `{version}-{traceId}-{spanId}-{traceFlags}`
+     *
+     * Example: `00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01`
+     *
+     * @see getTraceParentHeaderKey
+     * @see <a href="https://www.w3.org/TR/trace-context/#header-name">W3C Trace Context specification</a>
+     *
+     * Note: Use this value in the `traceparent` HTTP header when making API calls to enable
+     * distributed tracing between your mobile app and backend services.
+     */
     fun getTraceParentHeaderValue(span: Span): String {
         return measure.getTraceParentHeaderValue(span)
     }
 
+    /**
+     * Returns the W3C traceparent header key/name.
+     *
+     * @return The standardized header key 'traceparent' that should be used when adding
+     * distributed tracing context to HTTP requests
+     *
+     * @see getTraceParentHeaderValue
+     * @see <a href="https://www.w3.org/TR/trace-context/#header-name">W3C Trace Context specification</a>
+     */
     fun getTraceParentHeaderKey(): String {
         return measure.getTraceParentHeaderKey()
     }
 
     /**
-     * Returns the current time since epoch, calculated using a monotonic clock.
+     * Returns the current time in milliseconds since epoch using a monotonic clock source.
      *
-     * This timestamp must be used to reduce time jumps within a span due to click skew issues.
+     * @return The current timestamp in milliseconds since epoch.
+     *
+     * Note: Use this method to obtain timestamps when creating spans to ensure consistent time
+     * measurements and avoid clock drift issues within traces.
      */
     fun getTimestamp(): Long {
         return if (isInitialized.get()) {
