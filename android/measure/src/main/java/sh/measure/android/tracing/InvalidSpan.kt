@@ -3,23 +3,8 @@ package sh.measure.android.tracing
 internal class InvalidSpan : Span {
     override val traceId: String = "invalid-trace-id"
     override val spanId: String = "invalid-span-id"
-    override val name: String = "invalid"
-
-    override val parentId: String? = null
-
-    override val sessionId: String = ""
-
-    override val startTime: Long = 0
-
-    override val checkpoints: MutableList<Checkpoint> = mutableListOf()
-
-    override val attributes: MutableMap<String, Any?> = mutableMapOf()
-
     override val isSampled: Boolean = false
-
-    override fun getStatus(): SpanStatus {
-        return SpanStatus.Unset
-    }
+    override val parentId: String? = null
 
     override fun setStatus(status: SpanStatus): Span {
         return this

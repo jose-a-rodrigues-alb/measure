@@ -90,15 +90,9 @@ public abstract interface class sh/measure/android/tracing/Span {
 	public static final field Companion Lsh/measure/android/tracing/Span$Companion;
 	public abstract fun end ()Lsh/measure/android/tracing/Span;
 	public abstract fun end (J)Lsh/measure/android/tracing/Span;
-	public abstract fun getAttributes ()Ljava/util/Map;
-	public abstract fun getCheckpoints ()Ljava/util/List;
 	public abstract fun getDuration ()J
-	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getParentId ()Ljava/lang/String;
-	public abstract fun getSessionId ()Ljava/lang/String;
 	public abstract fun getSpanId ()Ljava/lang/String;
-	public abstract fun getStartTime ()J
-	public abstract fun getStatus ()Lsh/measure/android/tracing/SpanStatus;
 	public abstract fun getTraceId ()Ljava/lang/String;
 	public abstract fun hasEnded ()Z
 	public abstract fun isSampled ()Z

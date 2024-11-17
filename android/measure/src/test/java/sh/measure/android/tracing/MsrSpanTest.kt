@@ -66,7 +66,7 @@ class MsrSpanTest {
             idProvider = idProvider,
             parentSpan = null,
             timestamp = null,
-        )
+        ) as MsrSpan
         Assert.assertEquals(epochTime, span.startTime)
     }
 
@@ -83,7 +83,7 @@ class MsrSpanTest {
             idProvider = idProvider,
             parentSpan = null,
             timestamp = timestamp,
-        )
+        ) as MsrSpan
         Assert.assertEquals(timestamp, span.startTime)
     }
 
@@ -98,9 +98,9 @@ class MsrSpanTest {
             traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
-        )
+        ) as MsrSpan
 
-        verify(spanProcessor, times(1)).onStart(span as MsrSpan)
+        verify(spanProcessor, times(1)).onStart(span)
     }
 
     @Test
@@ -114,7 +114,7 @@ class MsrSpanTest {
             traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
-        )
+        ) as MsrSpan
         Assert.assertEquals(SpanStatus.Unset, span.getStatus())
     }
 
@@ -129,7 +129,7 @@ class MsrSpanTest {
             traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
-        ).setStatus(SpanStatus.Ok)
+        ).setStatus(SpanStatus.Ok) as MsrSpan
         Assert.assertEquals(SpanStatus.Ok, span.getStatus())
     }
 
@@ -230,7 +230,7 @@ class MsrSpanTest {
             traceSampler = traceSampler,
             idProvider = idProvider,
             parentSpan = null,
-        ).end()
+        ).end() as MsrSpan
         span.setCheckpoint("event-id")
 
         Assert.assertEquals(0, span.checkpoints.size)

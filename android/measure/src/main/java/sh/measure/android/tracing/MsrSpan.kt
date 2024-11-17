@@ -20,7 +20,7 @@ internal class MsrSpan(
     override var parentId: String?,
     override val sessionId: String,
     override val startTime: Long,
-) : Span, ReadableSpan {
+) : ReadWriteSpan {
     private val lock = Any()
     private var status = SpanStatus.Unset
     private var endTime = 0L
@@ -68,7 +68,9 @@ internal class MsrSpan(
     }
 
     override fun getStatus(): SpanStatus {
-        return this.status
+        synchronized(lock) {
+            return this.status
+        }
     }
 
     override fun setStatus(status: SpanStatus): Span {
@@ -150,12 +152,31 @@ internal class MsrSpan(
             if (hasEnded != EndState.Ended) {
                 logger.log(
                     LogLevel.Warning,
-                    "Attempt to duration of a span($name) that has not ended",
+                    "Attempt to get duration of a span($name) that has not ended",
                 )
                 return 0
             } else {
                 return calculateDuration()
             }
+        }
+    }
+
+    override fun setAttribute(attribute: Pair<String, Any?>) {
+        synchronized(lock) {
+            if (hasEnded != EndState.Ended) {
+                attributes[attribute.first] = attribute.second
+            } else {
+                logger.log(
+                    LogLevel.Warning,
+                    "Attempt to set attribute to a span($name) has ended",
+                )
+            }
+        }
+    }
+
+    override fun getAttributesMap(): MutableMap<String, Any?> {
+        synchronized(lock) {
+            return attributes
         }
     }
 
@@ -184,8 +205,6 @@ internal class MsrSpan(
     }
 
     private enum class EndState {
-        NotEnded,
-        Ending,
-        Ended,
+        NotEnded, Ending, Ended,
     }
 }
