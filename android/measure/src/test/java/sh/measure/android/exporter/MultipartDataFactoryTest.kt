@@ -129,7 +129,7 @@ class MultipartDataFactoryTest {
         val attributes = mapOf("key" to "value")
         val spanEntity = TestData.getSpanEntity(
             spanId = "span-id",
-            checkpoints = listOf(checkpoint),
+            checkpoints = mutableListOf(checkpoint),
             startTime = startTime,
             endTime = endTime,
             duration = endTime - startTime,

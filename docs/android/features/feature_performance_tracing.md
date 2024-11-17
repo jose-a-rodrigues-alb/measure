@@ -40,6 +40,17 @@ To achieve this, spans in a trace are organized as a Directed Acyclic Graph (DAG
 span and each span can have multiple children. This is done by adding a **parent_id** to each span, whose value is
 the `span_id` of its parent.
 
+## Limits
+
+The following limits apply to spans. Spans violating the limits will be either be discarded or have
+their data truncated.
+
+|                            | Limit |
+|----------------------------|-------|
+| Max span name length       | 64    |
+| Max checkpoint name length | 64    |
+| Max checkpoints per span   | 32    |
+
 ## API Reference
 
 ### Start a span
@@ -286,39 +297,51 @@ or the name of a subtask or stage within a larger computation.
 Here are some common conventions you can use when naming spans:
 
 #### Function Calls
+
 `{CLASS_NAME}.{METHOD_NAME}`
+
 - UserRepository.getUser
 - OrderService.processOrder
 - CartManager.updateCache
 - AuthService._refreshToken
 
 #### User Journey
+
 `journey.{FLOW_NAME}.{STEP}`
+
 - journey.checkout.add_to_cart
 - journey.subscription.select_plan
 - journey.onboarding.setup_profile
 
 #### HTTP
+
 `HTTP {METHOD} {ROUTE}`
+
 - HTTP GET /users
 - HTTP POST /orders/{orderId}
 - HTTP PUT /products/{productId}
 
 #### Screen
+
 `screen.{TYPE} {NAME}`
+
 - screen.activity HomeActivity
 - screen.fragment ProfileFragment
 - screen.composable settings/notifications
 
 #### Database
+
 `db.{OPERATION} {TABLE_NAME}`
+
 - db.select users
 - db.insert orders
 - db.update products
 - db.delete sessions
 
 #### Launch
+
 `launch.{TYPE}.{METRIC}`
+
 - launch.cold.ttid
 - launch.cold.ttfd
 - launch.warm.ttid

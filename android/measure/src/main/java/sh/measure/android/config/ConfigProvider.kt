@@ -96,6 +96,12 @@ internal class ConfigProviderImpl(
         get() = getMergedConfig { maxUserDefinedAttributeValueLength }
     override val userDefinedAttributeKeyWithSpaces: Boolean
         get() = getMergedConfig { userDefinedAttributeKeyWithSpaces }
+    override val maxSpanNameLength: Int
+        get() = getMergedConfig { maxSpanNameLength }
+    override val maxCheckpointNameLength: Int
+        get() = getMergedConfig { maxCheckpointNameLength }
+    override val maxCheckpointsPerSpan: Int
+        get() = getMergedConfig { maxCheckpointsPerSpan }
 
     override fun shouldTrackHttpBody(url: String, contentType: String?): Boolean {
         if (!trackHttpBody) {
@@ -141,7 +147,7 @@ internal class ConfigProviderImpl(
         if (networkConfig != null) {
             networkConfigLock.read {
                 return networkConfig?.selector() ?: cachedConfig?.selector()
-                    ?: defaultConfig.selector()
+                ?: defaultConfig.selector()
             }
         }
         return cachedConfig?.selector() ?: defaultConfig.selector()

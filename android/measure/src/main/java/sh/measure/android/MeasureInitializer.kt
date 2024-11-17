@@ -370,6 +370,7 @@ internal class MeasureInitializerImpl(
         localeProvider = localeProvider,
     ),
     private val spanProcessor: SpanProcessor = MsrSpanProcessor(
+        logger,
         signalProcessor,
         attributeProcessors = listOf(
             userAttributeProcessor,
@@ -378,6 +379,7 @@ internal class MeasureInitializerImpl(
             installationIdAttributeProcessor,
             networkStateAttributeProcessor,
         ),
+        configProvider,
     ),
     override val tracer: Tracer = MsrTracer(
         logger = logger,

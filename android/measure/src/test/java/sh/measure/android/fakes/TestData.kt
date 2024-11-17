@@ -460,7 +460,7 @@ internal object TestData {
         status: SpanStatus = SpanStatus.Ok,
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
-        checkpoints: List<Checkpoint> = listOf(),
+        checkpoints: MutableList<Checkpoint> = mutableListOf(),
         isSampled: Boolean = true,
     ): SpanData {
         return SpanData(
@@ -518,7 +518,7 @@ internal object TestData {
         status: SpanStatus = SpanStatus.Ok,
         hasEnded: Boolean = true,
         attributes: Map<String, Any?> = emptyMap(),
-        checkpoints: List<Checkpoint> = listOf(),
+        checkpoints: MutableList<Checkpoint> = mutableListOf(),
     ): SpanEntity {
         return getSpanData(
             name = name,

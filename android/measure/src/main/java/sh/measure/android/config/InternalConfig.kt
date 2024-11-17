@@ -81,4 +81,19 @@ internal interface InternalConfig {
      * cleanup is triggered until the total number of events is below this limit.
      */
     val maxSignalsInDatabase: Int
+
+    /**
+     * Max length of a span name. Defaults to 64.
+     */
+    val maxSpanNameLength: Int
+
+    /**
+     * Max length of a checkpoint name. Defaults to 64.
+     */
+    val maxCheckpointNameLength: Int
+
+    /**
+     * Max checkpoints per span. Defaults to 32.
+     */
+    val maxCheckpointsPerSpan: Int
 }

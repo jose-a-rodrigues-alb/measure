@@ -43,4 +43,7 @@ internal data class Config(
         EventType.SCREEN_VIEW,
     )
     override val maxSignalsInDatabase: Int = 50_000
+    override val maxSpanNameLength: Int = 64
+    override val maxCheckpointNameLength: Int = 64
+    override val maxCheckpointsPerSpan: Int = 32
 }

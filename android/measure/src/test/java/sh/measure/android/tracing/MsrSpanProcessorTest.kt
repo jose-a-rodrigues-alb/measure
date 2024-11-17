@@ -3,10 +3,13 @@ package sh.measure.android.tracing
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import sh.measure.android.attributes.Attribute
 import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.events.SignalProcessorImpl
+import sh.measure.android.fakes.FakeConfigProvider
 import sh.measure.android.fakes.NoopLogger
 import sh.measure.android.fakes.TestData
 import sh.measure.android.utils.AndroidTimeProvider
@@ -16,6 +19,7 @@ class MsrSpanProcessorTest {
     private val signalProcessor = mock<SignalProcessorImpl>()
     private val logger = NoopLogger()
     private val timeProvider = AndroidTimeProvider(TestClock.create())
+    private val configProvider = FakeConfigProvider()
 
     @Test
     fun `onStart appends attributes to spans`() {
@@ -24,7 +28,8 @@ class MsrSpanProcessorTest {
                 attributes["key"] = "value"
             }
         }
-        val spanProcessor = MsrSpanProcessor(signalProcessor, listOf(attributeProcessor))
+        val spanProcessor =
+            MsrSpanProcessor(logger, signalProcessor, listOf(attributeProcessor), configProvider)
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,
@@ -40,7 +45,7 @@ class MsrSpanProcessorTest {
 
     @Test
     fun `onStart adds thread name to attributes`() {
-        val spanProcessor = MsrSpanProcessor(signalProcessor, emptyList())
+        val spanProcessor = MsrSpanProcessor(logger, signalProcessor, emptyList(), configProvider)
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,
@@ -56,7 +61,7 @@ class MsrSpanProcessorTest {
 
     @Test
     fun `onEnded delegates to event processor`() {
-        val spanProcessor = MsrSpanProcessor(signalProcessor, emptyList())
+        val spanProcessor = MsrSpanProcessor(logger, signalProcessor, emptyList(), configProvider)
         val span = TestData.getSpan(
             logger = logger,
             timeProvider = timeProvider,
@@ -65,5 +70,49 @@ class MsrSpanProcessorTest {
         spanProcessor.onEnded(span)
 
         verify(signalProcessor).trackSpan(span.toSpanData())
+    }
+
+    @Test
+    fun `discards span if it exceeds max length`() {
+        val spanProcessor = MsrSpanProcessor(logger, signalProcessor, emptyList(), configProvider)
+        val span = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+            name = "s".repeat(configProvider.maxSpanNameLength + 1),
+        )
+        spanProcessor.onEnded(span)
+
+        verify(signalProcessor, never()).trackSpan(any())
+    }
+
+    @Test
+    fun `discards checkpoint if checkpoint name exceeds max length`() {
+        val spanProcessor = MsrSpanProcessor(logger, signalProcessor, emptyList(), configProvider)
+        val span = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+        )
+        span.setCheckpoint(name = "s".repeat(configProvider.maxCheckpointNameLength + 1))
+        spanProcessor.onEnded(span)
+
+        Assert.assertEquals(0, span.checkpoints.size)
+    }
+
+    @Test
+    fun `discards checkpoints to keep them within max checkpoints per span limit`() {
+        val spanProcessor = MsrSpanProcessor(logger, signalProcessor, emptyList(), configProvider)
+        val span = TestData.getSpan(
+            logger = logger,
+            timeProvider = timeProvider,
+            spanProcessor = spanProcessor,
+        )
+        for (i in 0..configProvider.maxCheckpointsPerSpan) {
+            span.setCheckpoint(name = "checkpoint")
+        }
+        spanProcessor.onEnded(span)
+
+        Assert.assertEquals(configProvider.maxCheckpointsPerSpan, span.checkpoints.size)
     }
 }
