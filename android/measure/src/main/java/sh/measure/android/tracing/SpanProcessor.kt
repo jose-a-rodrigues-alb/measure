@@ -43,7 +43,6 @@ internal class MsrSpanProcessor(
         }
         // Log.d("MsrSpan", spanData.toString())
         signalProcessor.trackSpan(spanData)
-
     }
 
     private fun SpanData.sanitize(): Boolean {
@@ -51,7 +50,7 @@ internal class MsrSpanProcessor(
         if (name.length > configProvider.maxSpanNameLength) {
             logger.log(
                 LogLevel.Warning,
-                "Span name length (${name.length} exceeded max allowed, span will be dropped."
+                "Span name length (${name.length} exceeded max allowed, span will be dropped.",
             )
             return false
         }
@@ -60,7 +59,7 @@ internal class MsrSpanProcessor(
         if (checkpoints.size > configProvider.maxCheckpointsPerSpan) {
             logger.log(
                 LogLevel.Warning,
-                "Max checkpoints exceeded ${checkpoints.size}, some checkpoints will be dropped."
+                "Max checkpoints exceeded ${checkpoints.size}, some checkpoints will be dropped.",
             )
         }
 
@@ -78,4 +77,3 @@ internal class MsrSpanProcessor(
         return true
     }
 }
-

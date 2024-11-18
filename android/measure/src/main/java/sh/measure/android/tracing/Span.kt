@@ -13,10 +13,15 @@ import sh.measure.android.config.MeasureConfig
  *
  * Example:
  * ```
- * Measure.startSpan("load_data").use { span ->
- *     span.setAttribute("user_id", "123")
- *     // Perform work
- *     span.setStatus(SpanStatus.OK)
+ * val span = Measure.startSpan("load_data")
+ * try {
+ *      // perform work
+ *      span.setCheckpoint("checkpoint)
+ *      span.setStatus(Status.Ok)
+ * } catch(e: Exception) {
+ *      span.setStatus(Status.Error)
+ * } finally {
+ *      span.end()
  * }
  * ```
  */

@@ -353,6 +353,8 @@ internal class TestMeasureInitializer(
     private val spanProcessor: SpanProcessor = MsrSpanProcessor(
         signalProcessor = signalProcessor,
         attributeProcessors = emptyList(),
+        logger = logger,
+        configProvider = configProvider,
     ),
     private val traceSampler: TraceSampler = TraceSamplerImpl(
         randomizer = randomizer,

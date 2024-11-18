@@ -147,7 +147,7 @@ internal class ConfigProviderImpl(
         if (networkConfig != null) {
             networkConfigLock.read {
                 return networkConfig?.selector() ?: cachedConfig?.selector()
-                ?: defaultConfig.selector()
+                    ?: defaultConfig.selector()
             }
         }
         return cachedConfig?.selector() ?: defaultConfig.selector()
