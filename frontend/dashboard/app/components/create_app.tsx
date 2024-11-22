@@ -60,7 +60,7 @@ const CreateApp: React.FC<CreateAppProps> = ({ teamId, existingAppName = null, e
   return (
     <div>
       {/* UI before app creation */}
-      {1 === 0 && createAppStatus === CreateAppStatus.PreCreation &&
+      {1 == 0 && createAppStatus === CreateAppStatus.PreCreation &&
         <div className="flex flex-col w-5/6">
           <form onSubmit={createApp} className="flex flex-col">
             <p className="font-display font-regular text-2xl">Add new app</p>
