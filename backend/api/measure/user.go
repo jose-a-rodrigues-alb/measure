@@ -285,9 +285,7 @@ func ValidateUserEmailDomain(ctx context.Context, email string) (bool, error) {
 
 	defer stmt.Close()
 
-	var validEmail bool
-
-	if err := server.Server.PgPool.QueryRow(ctx, stmt.String(), stmt.Args()...).Scan(&validEmail); err != nil {
+	if err := server.Server.PgPool.QueryRow(ctx, stmt.String(), stmt.Args()...); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
 		}

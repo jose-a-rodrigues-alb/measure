@@ -1,7 +1,7 @@
 -- migrate:up
 create table if not exists public.allowed_email_domains (
     id uuid primary key not null default gen_random_uuid(),
-    domain varchar(256) not null
+    domain varchar(256) not null unique
 );
 
 comment on column public.allowed_email_domains.id IS 'unique id for each domain';
