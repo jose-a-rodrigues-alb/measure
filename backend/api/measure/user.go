@@ -276,7 +276,7 @@ func ValidateUserEmailDomain(ctx context.Context, email string) (bool, error) {
 		return false, fmt.Errorf("invalid email address: %s", email)
 	}
 
-	emailDomain = parts[1]
+	emailDomain := parts[1]
 
 	stmt := sqlf.PostgreSQL.
 		From("public.allowed_email_domains").

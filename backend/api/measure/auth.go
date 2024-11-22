@@ -322,7 +322,7 @@ func SigninGitHub(c *gin.Context) {
 			return
 		}
 
-		validDomain, err = ValidateUserEmailDomain(ctx, ghUser.Email)
+		validDomain, err := ValidateUserEmailDomain(ctx, ghUser.Email)
 		if err != nil {
 			msg := "invalid user email domain"
 			fmt.Println(msg, err)
