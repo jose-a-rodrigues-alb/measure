@@ -1,6 +1,6 @@
 -- migrate:up
 create table if not exists public.allowed_email_domains (
-    id uuid primary key not null,
+    id uuid primary key not null default gen_random_uuid(),
     domain varchar(256) not null
 );
 
