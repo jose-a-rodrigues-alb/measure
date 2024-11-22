@@ -537,7 +537,7 @@ func SigninGoogle(c *gin.Context) {
 		return
 	}
 
-	validDomain, err := ValidateUserEmailDomain(ctx, ghUser.Email)
+	validDomain, err := ValidateUserEmailDomain(ctx, googUser.Email)
 	if err != nil {
 		msg := "invalid user email domain"
 		fmt.Println(msg, err)
