@@ -312,16 +312,6 @@ func SigninGitHub(c *gin.Context) {
 			return
 		}
 
-		msrUser, err := FindUserByEmail(ctx, ghUser.Email)
-		if err != nil {
-			fmt.Println(msg, err)
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error":   msg,
-				"details": err.Error(),
-			})
-			return
-		}
-
 		validDomain, err := ValidateUserEmailDomain(ctx, ghUser.Email)
 		if err != nil {
 			msg := "invalid user email domain"
@@ -338,6 +328,16 @@ func SigninGitHub(c *gin.Context) {
 			fmt.Println(msg, err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   msg,
+			})
+			return
+		}
+
+		msrUser, err := FindUserByEmail(ctx, ghUser.Email)
+		if err != nil {
+			fmt.Println(msg, err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error":   msg,
+				"details": err.Error(),
 			})
 			return
 		}
@@ -533,6 +533,26 @@ func SigninGoogle(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": msg,
+		})
+		return
+	}
+
+	validDomain, err := ValidateUserEmailDomain(ctx, ghUser.Email)
+	if err != nil {
+		msg := "invalid user email domain"
+		fmt.Println(msg, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   msg,
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if !validDomain {
+		msg := "invalid user email domain"
+		fmt.Println(msg, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   msg,
 		})
 		return
 	}
