@@ -1060,7 +1060,7 @@ COMMENT ON COLUMN public.users.updated_at IS 'utc timestmap at the time of user 
 
 CREATE TABLE public.allowed_email_domains (
     id uuid NOT NULL,
-    domain character varying(256),
+    domain character varying(256) NOT NULL
 );
 
 
