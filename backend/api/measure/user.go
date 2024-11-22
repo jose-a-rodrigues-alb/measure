@@ -279,13 +279,13 @@ func ValidateUserEmailDomain(ctx context.Context, email string) (bool, error) {
 	emailDomain := parts[1]
 
 	stmt := sqlf.PostgreSQL.
-		From("public.allowed_email_domains").
-		Select("id").
-		Where("domain = ?", emailDomain)
+    	From("public.allowed_email_domains").
+    	Select("EXISTS (SELECT 1 FROM public.allowed_email_domains WHERE domain = ?)", emailDomain)
 
 	defer stmt.Close()
 
-	if err := server.Server.PgPool.QueryRow(ctx, stmt.String(), stmt.Args()...); err != nil {
+	var exists bool
+	if err := server.Server.PgPool.QueryRow(ctx, stmt.String(), stmt.Args()...).Scan(&exists); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
 		}
@@ -293,7 +293,7 @@ func ValidateUserEmailDomain(ctx context.Context, email string) (bool, error) {
 		return false, err
 	}
 
-	return true, nil
+	return exists, nil
 }
 
 // NewUser creates a new user from name
