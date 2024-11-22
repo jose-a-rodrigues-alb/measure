@@ -333,6 +333,15 @@ func SigninGitHub(c *gin.Context) {
 			return
 		}
 
+		if !validDomain {
+			msg := "invalid user email domain"
+			fmt.Println(msg, err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error":   msg,
+			})
+			return
+		}
+
 		if msrUser == nil {
 			msrUser = NewUser(ghUser.Name, ghUser.Email)
 			if err := msrUser.save(ctx, nil); err != nil {
