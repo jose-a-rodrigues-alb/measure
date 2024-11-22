@@ -1,6 +1,7 @@
 package sh.measure.android
 
 import sh.measure.android.config.ConfigProvider
+import sh.measure.android.config.EventTrackingLevel
 import sh.measure.android.config.ScreenshotMaskLevel
 
 class FakeConfigProvider : ConfigProvider {
@@ -48,4 +49,5 @@ class FakeConfigProvider : ConfigProvider {
     override var screenshotCompressionQuality: Int = 100
     override var eventTypeExportAllowList: List<String> = emptyList()
     override var maxEventsInDatabase: Int = 50000
+    override val eventTrackingLevel: EventTrackingLevel = EventTrackingLevel.Full
 }

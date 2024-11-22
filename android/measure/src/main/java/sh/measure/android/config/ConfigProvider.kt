@@ -92,6 +92,9 @@ internal class ConfigProviderImpl(
         get() = getMergedConfig { maxUserDefinedAttributeKeyLength }
     override val maxUserDefinedAttributeValueLength: Int
         get() = getMergedConfig { maxUserDefinedAttributeValueLength }
+    override val eventTrackingLevel: EventTrackingLevel
+        get() = getMergedConfig { eventTrackingLevel }
+
     override val userDefinedAttributeKeyWithSpaces: Boolean
         get() = getMergedConfig { userDefinedAttributeKeyWithSpaces }
 

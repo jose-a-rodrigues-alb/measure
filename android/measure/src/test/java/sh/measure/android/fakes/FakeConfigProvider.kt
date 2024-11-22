@@ -1,6 +1,7 @@
 package sh.measure.android.fakes
 
 import sh.measure.android.config.ConfigProvider
+import sh.measure.android.config.EventTrackingLevel
 import sh.measure.android.config.ScreenshotMaskLevel
 
 internal class FakeConfigProvider : ConfigProvider {
@@ -32,18 +33,20 @@ internal class FakeConfigProvider : ConfigProvider {
     override var maxUserDefinedAttributeKeyLength: Int = 64
     override var maxUserDefinedAttributeValueLength: Int = 256
     override var userDefinedAttributeKeyWithSpaces: Boolean = false
+    override val eventTrackingLevel: EventTrackingLevel = EventTrackingLevel.Full
 
     var shouldTrackHttpBody = false
+
     override fun shouldTrackHttpBody(url: String, contentType: String?): Boolean {
         return shouldTrackHttpBody
     }
-
     var shouldTrackHttpUrl = false
+
     override fun shouldTrackHttpUrl(url: String): Boolean {
         return shouldTrackHttpUrl
     }
-
     var headerKeysToBlock = emptyList<String>()
+
     override fun shouldTrackHttpHeader(key: String): Boolean {
         return !headerKeysToBlock.any { key.contains(it, ignoreCase = true) }
     }

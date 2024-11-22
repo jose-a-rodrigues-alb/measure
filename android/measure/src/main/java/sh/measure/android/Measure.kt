@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import org.jetbrains.annotations.TestOnly
 import sh.measure.android.applaunch.LaunchState
+import sh.measure.android.config.EventTrackingLevel
 import sh.measure.android.config.MeasureConfig
 import sh.measure.android.events.Attachment
 import sh.measure.android.events.EventProcessor
@@ -57,6 +58,20 @@ object Measure {
                     measure.init()
                 },
             )
+        }
+    }
+
+    fun setTrackingLevel(eventTrackingLevel: EventTrackingLevel) {
+        if (isInitialized.get()) {
+            measure.setEventTrackingLevel(eventTrackingLevel)
+        }
+    }
+
+    fun getTrackingLevel(): EventTrackingLevel? {
+        return if (isInitialized.get()) {
+            measure.getEventTrackingLevel()
+        } else {
+            null
         }
     }
 
@@ -354,8 +369,7 @@ object Measure {
 
     private fun storeProcessImportanceState() {
         try {
-            LaunchState.processImportanceOnInit =
-                measure.processInfoProvider.getProcessImportance()
+            LaunchState.processImportanceOnInit = measure.processInfoProvider.getProcessImportance()
         } catch (e: Throwable) {
             measure.logger.log(
                 LogLevel.Error,

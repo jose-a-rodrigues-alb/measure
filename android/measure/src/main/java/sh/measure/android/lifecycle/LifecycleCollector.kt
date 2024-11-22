@@ -36,6 +36,10 @@ internal class LifecycleCollector(
         application.registerActivityLifecycleCallbacks(this)
     }
 
+    fun unregister() {
+        application.unregisterActivityLifecycleCallbacks(this)
+    }
+
     fun setApplicationLifecycleStateListener(listener: ApplicationLifecycleStateListener) {
         applicationLifecycleStateListener = listener
     }

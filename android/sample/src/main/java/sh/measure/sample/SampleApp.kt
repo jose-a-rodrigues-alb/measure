@@ -2,6 +2,7 @@ package sh.measure.sample
 
 import android.app.Application
 import sh.measure.android.Measure
+import sh.measure.android.config.EventTrackingLevel
 import sh.measure.android.config.MeasureConfig
 import sh.measure.android.config.ScreenshotMaskLevel
 
@@ -22,6 +23,7 @@ class SampleApp : Application() {
                 trackActivityIntentData = true,
                 httpUrlBlocklist = listOf("http://localhost:8080"),
                 sessionSamplingRate = 0.5f,
+                eventTrackingLevel = EventTrackingLevel.Full,
             )
         )
         Measure.setUserId("sample-user-sd")

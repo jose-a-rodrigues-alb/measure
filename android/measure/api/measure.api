@@ -10,9 +10,11 @@ public final class sh/measure/android/Measure {
 	public static final field $stable I
 	public static final field INSTANCE Lsh/measure/android/Measure;
 	public static final fun clearUserId ()V
+	public final fun getTrackingLevel ()Lsh/measure/android/config/EventTrackingLevel;
 	public static final fun init (Landroid/content/Context;)V
 	public static final fun init (Landroid/content/Context;Lsh/measure/android/config/MeasureConfig;)V
 	public static synthetic fun init$default (Landroid/content/Context;Lsh/measure/android/config/MeasureConfig;ILjava/lang/Object;)V
+	public final fun setTrackingLevel (Lsh/measure/android/config/EventTrackingLevel;)V
 	public static final fun setUserId (Ljava/lang/String;)V
 	public static final fun trackHandledException (Ljava/lang/Throwable;)V
 	public static final fun trackNavigation (Ljava/lang/String;)V
@@ -21,12 +23,32 @@ public final class sh/measure/android/Measure {
 	public static final fun trackScreenView (Ljava/lang/String;)V
 }
 
+public abstract interface class sh/measure/android/config/EventTrackingLevel {
+}
+
+public final class sh/measure/android/config/EventTrackingLevel$Basic : sh/measure/android/config/EventTrackingLevel {
+	public static final field $stable I
+	public static final field INSTANCE Lsh/measure/android/config/EventTrackingLevel$Basic;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class sh/measure/android/config/EventTrackingLevel$Full : sh/measure/android/config/EventTrackingLevel {
+	public static final field $stable I
+	public static final field INSTANCE Lsh/measure/android/config/EventTrackingLevel$Full;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class sh/measure/android/config/MeasureConfig : sh/measure/android/config/IMeasureConfig {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun <init> (ZZLsh/measure/android/config/ScreenshotMaskLevel;ZZLjava/util/List;Ljava/util/List;Ljava/util/List;ZF)V
-	public synthetic fun <init> (ZZLsh/measure/android/config/ScreenshotMaskLevel;ZZLjava/util/List;Ljava/util/List;Ljava/util/List;ZFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZLsh/measure/android/config/ScreenshotMaskLevel;ZZLjava/util/List;Ljava/util/List;Ljava/util/List;ZFLsh/measure/android/config/EventTrackingLevel;)V
+	public synthetic fun <init> (ZZLsh/measure/android/config/ScreenshotMaskLevel;ZZLjava/util/List;Ljava/util/List;Ljava/util/List;ZFLsh/measure/android/config/EventTrackingLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getEnableLogging ()Z
+	public fun getEventTrackingLevel ()Lsh/measure/android/config/EventTrackingLevel;
 	public fun getHttpHeadersBlocklist ()Ljava/util/List;
 	public fun getHttpUrlAllowlist ()Ljava/util/List;
 	public fun getHttpUrlBlocklist ()Ljava/util/List;

@@ -6,6 +6,7 @@ import sh.measure.android.appexit.AppExitCollector
 import sh.measure.android.appexit.AppExitProvider
 import sh.measure.android.appexit.AppExitProviderImpl
 import sh.measure.android.applaunch.AppLaunchCollector
+import sh.measure.android.applaunch.LaunchTracker
 import sh.measure.android.attributes.AppAttributeProcessor
 import sh.measure.android.attributes.AttributeProcessor
 import sh.measure.android.attributes.DeviceAttributeProcessor
@@ -343,11 +344,13 @@ internal class MeasureInitializerImpl(
         eventProcessor = eventProcessor,
         timeProvider = timeProvider,
     ),
+    private val launchTracker: LaunchTracker = LaunchTracker(logger),
     override val appLaunchCollector: AppLaunchCollector = AppLaunchCollector(
         logger = logger,
         application = application,
         eventProcessor = eventProcessor,
         timeProvider = timeProvider,
+        launchTracker = launchTracker,
     ),
     override val networkChangesCollector: NetworkChangesCollector = NetworkChangesCollector(
         logger = logger,

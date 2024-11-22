@@ -1,9 +1,14 @@
 package sh.measure.android.config
 
+import sh.measure.android.Measure
+import sh.measure.android.config.EventTrackingLevel.Basic
+import sh.measure.android.config.EventTrackingLevel.Full
+
 /**
  * Configuration for the Measure SDK. See [MeasureConfig] for details.
  */
 internal interface IMeasureConfig {
+    val eventTrackingLevel: EventTrackingLevel
     val enableLogging: Boolean
     val trackScreenshotOnCrash: Boolean
     val screenshotMaskLevel: ScreenshotMaskLevel
@@ -25,12 +30,12 @@ class MeasureConfig(
      * Enable or disable internal SDK logs. Defaults to `false`.
      */
     override val enableLogging: Boolean = DefaultConfig.ENABLE_LOGGING,
+
     /**
      * Whether to capture a screenshot of the app when it crashes due to an unhandled exception or
      * ANR. Defaults to `true`.
      */
     override val trackScreenshotOnCrash: Boolean = DefaultConfig.TRACK_SCREENSHOT_ON_CRASH,
-
     /**
      * Allows changing the masking level of screenshots to prevent sensitive information from leaking.
      * Defaults to [ScreenshotMaskLevel.AllTextAndMedia].
@@ -118,6 +123,26 @@ class MeasureConfig(
      * Setting a value outside the range will throw an [IllegalArgumentException].
      */
     override val sessionSamplingRate: Float = DefaultConfig.SESSION_SAMPLING_RATE,
+
+    /**
+     * Controls the level of event tracking. Defaults to [EventTrackingLevel.Full].
+     *
+     * - [Basic] tracks only important events like app crashes and launch metrics.
+     * - [Full] enables all events to be tracked including custom events. Required for
+     *  session replay to work.
+     *
+     * The SDK can dynamically switch between tracking levels using [Measure.setTrackingLevel].
+     *
+     * This API provides fine-grained control over event collection, which is particularly useful in:
+     * - Large, multi-feature apps where session replay might be needed only in specific
+     *   sections or features.
+     * - Scenarios requiring targeted tracking based on a remote configuration based on user segments,
+     * device types, app versions, etc.
+     *
+     * @see [MeasureConfig.sessionSamplingRate] for sampling sessions instead of losing session replay
+     * capabilities.
+     */
+    override val eventTrackingLevel: EventTrackingLevel = DefaultConfig.TRACKING_MODE,
 ) : IMeasureConfig {
     init {
         require(sessionSamplingRate in 0.0..1.0) {

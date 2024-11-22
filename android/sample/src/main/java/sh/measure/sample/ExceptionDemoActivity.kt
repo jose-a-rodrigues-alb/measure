@@ -7,6 +7,9 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.switchmaterial.SwitchMaterial
+import sh.measure.android.Measure
+import sh.measure.android.config.EventTrackingLevel
 import sh.measure.sample.fragments.AndroidXFragmentNavigationActivity
 import sh.measure.sample.fragments.FragmentNavigationActivity
 import sh.measure.sample.fragments.NestedFragmentActivity
@@ -67,6 +70,19 @@ class ExceptionDemoActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btn_fragment_androidx_navigation).setOnClickListener {
             startActivity(Intent(this, AndroidXFragmentNavigationActivity::class.java))
+        }
+        val switch = findViewById<SwitchMaterial>(R.id.btn_sdk_switch)
+        switch.isChecked = Measure.getTrackingLevel() is EventTrackingLevel.Full
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            when (isChecked) {
+                true -> {
+                    Measure.setTrackingLevel(EventTrackingLevel.Full)
+                }
+
+                false -> {
+                    Measure.setTrackingLevel(EventTrackingLevel.Basic)
+                }
+            }
         }
     }
 

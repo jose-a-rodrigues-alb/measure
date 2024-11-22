@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.atMostOnce
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.robolectric.Robolectric.buildActivity
 import org.robolectric.RuntimeEnvironment
@@ -256,8 +257,7 @@ class LifecycleCollectorTest {
             timeProvider,
         ).apply {
             register()
-            setApplicationLifecycleStateListener(object :
-                ApplicationLifecycleStateListener {
+            setApplicationLifecycleStateListener(object : ApplicationLifecycleStateListener {
                 override fun onAppForeground() {}
                 override fun onAppBackground() {
                     background = true
@@ -266,6 +266,21 @@ class LifecycleCollectorTest {
         }
         controller.setup().stop()
         Assert.assertTrue(background)
+    }
+
+    @Test
+    fun `unregister clears callbacks and stops tracking`() {
+        controller.setup()
+        verify(eventProcessor, never()).track(
+            timestamp = any(),
+            type = any(),
+            data = any<ActivityLifecycleData>(),
+        )
+        verify(eventProcessor, never()).track(
+            timestamp = any(),
+            type = any(),
+            data = any<FragmentLifecycleData>(),
+        )
     }
 }
 

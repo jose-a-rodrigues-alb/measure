@@ -3,6 +3,7 @@ package sh.measure.android.config
 import sh.measure.android.events.EventType
 
 internal data class Config(
+    override val eventTrackingLevel: EventTrackingLevel = DefaultConfig.TRACKING_MODE,
     override val enableLogging: Boolean = DefaultConfig.ENABLE_LOGGING,
     override val trackScreenshotOnCrash: Boolean = DefaultConfig.TRACK_SCREENSHOT_ON_CRASH,
     override val screenshotMaskLevel: ScreenshotMaskLevel = DefaultConfig.SCREENSHOT_MASK_LEVEL,

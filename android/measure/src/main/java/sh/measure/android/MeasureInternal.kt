@@ -1,7 +1,8 @@
 package sh.measure.android
 
 import android.os.Build
-import sh.measure.android.applaunch.ColdLaunchListener
+import sh.measure.android.config.DefaultConfig
+import sh.measure.android.config.EventTrackingLevel
 import sh.measure.android.lifecycle.ApplicationLifecycleStateListener
 import sh.measure.android.logger.LogLevel
 
@@ -13,13 +14,13 @@ import sh.measure.android.logger.LogLevel
  * for more details.
  */
 internal class MeasureInternal(measureInitializer: MeasureInitializer) :
-    ApplicationLifecycleStateListener, ColdLaunchListener {
+    ApplicationLifecycleStateListener {
     val logger by lazy { measureInitializer.logger }
     val eventProcessor by lazy { measureInitializer.eventProcessor }
-    val sessionManager by lazy { measureInitializer.sessionManager }
     val timeProvider by lazy { measureInitializer.timeProvider }
     val httpEventCollector by lazy { measureInitializer.httpEventCollector }
     val processInfoProvider by lazy { measureInitializer.processInfoProvider }
+    private val sessionManager by lazy { measureInitializer.sessionManager }
     private val userTriggeredEventCollector by lazy { measureInitializer.userTriggeredEventCollector }
     private val resumedActivityProvider by lazy { measureInitializer.resumedActivityProvider }
     private val networkClient by lazy { measureInitializer.networkClient }
@@ -40,6 +41,8 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     private val configProvider by lazy { measureInitializer.configProvider }
     private val dataCleanupService by lazy { measureInitializer.dataCleanupService }
     private val powerStateProvider by lazy { measureInitializer.powerStateProvider }
+    private var eventTrackingLevel: EventTrackingLevel = DefaultConfig.TRACKING_MODE
+    private var trackingLevelLock = Any()
 
     fun init() {
         logger.log(LogLevel.Debug, "Starting Measure SDK")
@@ -64,27 +67,53 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
             configProvider.setMeasureUrl(it.url)
             networkClient.init(baseUrl = it.url, apiKey = it.apiKey)
         }
+        this.eventTrackingLevel = configProvider.eventTrackingLevel
         sessionManager.init()
-        registerCollectors()
         registerCallbacks()
+        registerAlwaysOnCollectors()
+        if (configProvider.eventTrackingLevel is EventTrackingLevel.Full) {
+            registerCollectors()
+        }
+    }
+
+    fun setEventTrackingLevel(eventTrackingLevel: EventTrackingLevel) {
+        synchronized(trackingLevelLock) {
+            if (this.eventTrackingLevel != eventTrackingLevel) {
+                when (eventTrackingLevel) {
+                    EventTrackingLevel.Basic -> unregisterCollectors()
+                    EventTrackingLevel.Full -> registerCollectors()
+                }
+                this.eventTrackingLevel = eventTrackingLevel
+            }
+        }
+    }
+
+    fun getEventTrackingLevel(): EventTrackingLevel {
+        synchronized(trackingLevelLock) {
+            return eventTrackingLevel
+        }
+    }
+
+    private fun registerAlwaysOnCollectors() {
+        unhandledExceptionCollector.register()
+        anrCollector.register()
+        resumedActivityProvider.register()
+        appLaunchCollector.register()
     }
 
     private fun registerCallbacks() {
         lifecycleCollector.setApplicationLifecycleStateListener(this)
-        appLaunchCollector.setColdLaunchListener(this)
     }
 
     private fun registerCollectors() {
-        resumedActivityProvider.register()
-        unhandledExceptionCollector.register()
-        anrCollector.register()
+        userTriggeredEventCollector.register()
         lifecycleCollector.register()
         cpuUsageCollector.register()
         memoryUsageCollector.register()
         componentCallbacksCollector.register()
         gestureCollector.register()
-        appLaunchCollector.register()
         networkChangesCollector.register()
+        httpEventCollector.register()
     }
 
     override fun onAppForeground() {
@@ -104,13 +133,8 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
         periodicEventExporter.onAppBackground()
         dataCleanupService.clearStaleData()
         powerStateProvider.unregister()
-    }
-
-    override fun onColdLaunch() {
-        networkChangesCollector.register()
-        periodicEventExporter.onColdLaunch()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            appExitCollector.onColdLaunch()
+            appExitCollector.collect()
         }
     }
 
@@ -158,5 +182,17 @@ internal class MeasureInternal(measureInitializer: MeasureInitializer) :
     fun clear() {
         userAttributeProcessor.clearUserId()
         userDefinedAttribute.clear()
+    }
+
+    private fun unregisterCollectors() {
+        lifecycleCollector.unregister()
+        cpuUsageCollector.pause()
+        memoryUsageCollector.pause()
+        componentCallbacksCollector.unregister()
+        gestureCollector.unregister()
+        networkChangesCollector.unregister()
+        periodicEventExporter.unregister()
+        userTriggeredEventCollector.unregister()
+        httpEventCollector.unregister()
     }
 }
