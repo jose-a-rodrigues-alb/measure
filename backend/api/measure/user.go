@@ -267,6 +267,37 @@ func FindUserByEmail(ctx context.Context, email string) (*User, error) {
 	return &user, nil
 }
 
+// ValidateUserEmailDomain validates a user email domain.
+func ValidateUserEmailDomain(ctx context.Context, email string) (bool, error) {
+
+	parts := strings.Split(email, "@")
+
+	if len(parts) != 2 {
+		return false, fmt.Errorf("invalid email address: %s", email)
+	}
+
+	emailDomain = parts[1]
+
+	stmt := sqlf.PostgreSQL.
+		From("public.allowed_email_domains").
+		Select("id").
+		Where("domain = ?", emailDomain)
+
+	defer stmt.Close()
+
+	var validEmail bool
+
+	if err := server.Server.PgPool.QueryRow(ctx, stmt.String(), stmt.Args()...).Scan(&validEmail); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
 // NewUser creates a new user from name
 // and email pair.
 func NewUser(name, email string) (user *User) {

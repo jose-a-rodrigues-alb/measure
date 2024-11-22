@@ -322,6 +322,17 @@ func SigninGitHub(c *gin.Context) {
 			return
 		}
 
+		validDomain, err = ValidateUserEmailDomain(ctx, ghUser.Email)
+		if err != nil {
+			msg := "invalid user email domain"
+			fmt.Println(msg, err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error":   msg,
+				"details": err.Error(),
+			})
+			return
+		}
+
 		if msrUser == nil {
 			msrUser = NewUser(ghUser.Name, ghUser.Email)
 			if err := msrUser.save(ctx, nil); err != nil {
@@ -367,7 +378,7 @@ func SigninGitHub(c *gin.Context) {
 			}
 
 			// Once new user creation is done, track email
-			trackEmail(ghUser.Email)
+			//trackEmail(ghUser.Email)
 		} else {
 			// update user's last sign in at value
 			if err := msrUser.touchLastSignInAt(ctx); err != nil {

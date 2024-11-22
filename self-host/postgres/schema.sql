@@ -1054,6 +1054,28 @@ COMMENT ON COLUMN public.users.created_at IS 'utc timestamp at the time of user 
 
 COMMENT ON COLUMN public.users.updated_at IS 'utc timestmap at the time of user update';
 
+--
+-- Name: allowed_email_domains; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.allowed_email_domains (
+    id uuid NOT NULL,
+    domain character varying(256),
+);
+
+
+--
+-- Name: COLUMN allowed_email_domains.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.allowed_email_domains.id IS 'unique id for each domain';
+
+
+--
+-- Name: COLUMN allowed_email_domains.domain; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.allowed_email_domains.domain IS 'email fqd';
 
 --
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: dbmate; Owner: -
@@ -1189,6 +1211,14 @@ ALTER TABLE ONLY public.unhandled_exception_groups
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: allowed_email_domains allowed_email_domains_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.allowed_email_domains
+    ADD CONSTRAINT allowed_email_domains_pkey PRIMARY KEY (id);
 
 
 --
